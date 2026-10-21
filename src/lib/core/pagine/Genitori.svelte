@@ -71,7 +71,7 @@
 	{#if promemoria}
 		<Avviso tono="info">
 			<p>{m.genitori_promemoria()}</p>
-			<p><a href="#backup">{m.genitori_backup()}</a></p>
+			<p><a class="vai" href="#backup">{m.genitori_backup()}</a></p>
 		</Avviso>
 	{/if}
 
@@ -228,6 +228,13 @@
 		flex-wrap: wrap;
 		gap: var(--spazio-2) var(--spazio-4);
 		align-items: center;
+	}
+
+	/* link nel testo, ma con l'area di tocco piena */
+	.vai {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--target);
 	}
 
 	.consigli {
