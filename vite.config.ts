@@ -12,7 +12,33 @@ export default defineConfig({
 				runes: ({ filename }) =>
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
-			adapter: adapter()
+			adapter: adapter({
+				pages: 'build',
+				assets: 'build',
+				// pagina servita da Caddy per i 404 (shell SPA che mostra +error.svelte)
+				fallback: '404.html',
+				precompress: true,
+				strict: true
+			}),
+			csp: {
+				mode: 'hash',
+				directives: {
+					'default-src': ['self'],
+					'script-src': ['self'],
+					'style-src': ['self'],
+					// solo gli attributi style (es. l'annuncio delle pagine di SvelteKit per i lettori di schermo); i <style> restano vietati. Vedi docs/adr/0002
+					'style-src-attr': ['unsafe-inline'],
+					'img-src': ['self', 'data:', 'blob:'],
+					'media-src': ['self', 'blob:'],
+					'font-src': ['self'],
+					'connect-src': ['self'],
+					'worker-src': ['self'],
+					'manifest-src': ['self'],
+					'object-src': ['none'],
+					'base-uri': ['self'],
+					'form-action': ['self']
+				}
+			}
 		}),
 
 		paraglideVitePlugin({
