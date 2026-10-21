@@ -14,7 +14,7 @@
 
 <script lang="ts">
 	// Suona una nota o una sequenza e la mostra sempre sullo Staff, evidenziando la nota che suona.
-	// Nessun esito: "Avanti" compare dopo il primo ascolto.
+	// Nessun esito: "Avanti" compare dopo il primo ascolto completo (non se lo si ferma prima).
 	import { m } from '#lib/paraglide/messages.js';
 	import type { Riproduzione } from '../audio/synth.ts';
 	import type { WidgetProps } from '../motore/widget.ts';
@@ -29,8 +29,14 @@
 	let suona = $state<number | null>(null);
 	let ascoltata = $state(false);
 
+	let fermata = false;
+
 	function ascolta() {
-		if (riproduzione) return riproduzione.ferma();
+		if (riproduzione) {
+			fermata = true;
+			return riproduzione.ferma();
+		}
+		fermata = false;
 		const r = suonaSeguendo(
 			p.note.note.map((n) => n.altezza),
 			p.durata,
@@ -38,8 +44,9 @@
 		);
 		riproduzione = r;
 		void r.fine.then(() => {
-			if (riproduzione === r) riproduzione = undefined;
-			ascoltata = true;
+			if (riproduzione !== r) return;
+			riproduzione = undefined;
+			if (!fermata) ascoltata = true;
 		});
 	}
 

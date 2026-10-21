@@ -125,6 +125,22 @@ test('staff-tocca da tastiera: feedback che aiuta, esito al primo tentativo', as
 	]);
 });
 
+test('ascolta: fermato subito non vale come ascolto; «Avanti» arriva dopo un ascolto completo', async ({
+	page
+}) => {
+	await apriVetrina(page);
+	const w = widget(page, 'ascolta');
+	await w.getByRole('button', { name: 'Ascolta', exact: true }).click();
+	await w.getByRole('button', { name: 'Ferma' }).click();
+	await expect(w.getByRole('button', { name: 'Ascolta', exact: true })).toBeVisible();
+	await page.waitForTimeout(500);
+	await expect(w.getByRole('button', { name: 'Avanti' })).toHaveCount(0);
+
+	await w.getByRole('button', { name: 'Ascolta', exact: true }).click();
+	await expect(w.getByRole('button', { name: 'Avanti' })).toBeVisible({ timeout: 10_000 });
+	await expect(w.getByRole('button', { name: 'Ascolta di nuovo' })).toBeVisible();
+});
+
 test('canta-nota: con la scheda nascosta o la pagina lasciata il microfono si spegne, e si ricomincia', async ({
 	page
 }) => {
