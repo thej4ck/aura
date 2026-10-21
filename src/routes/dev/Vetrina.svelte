@@ -15,6 +15,7 @@
 	import ProgressRing from '#lib/core/ui/ProgressRing.svelte';
 	import Stelle from '#lib/core/ui/Stelle.svelte';
 	import Notazione from './sezioni/Notazione.svelte';
+	import SezioneAudio from './sezioni/Audio.svelte';
 
 	const attivita = catalogoEsempio.attivita('esempio.linee.cinque-linee')!;
 
@@ -192,6 +193,7 @@
 	</section>
 
 	<Notazione />
+	<SezioneAudio />
 
 	<section aria-labelledby="sez-attivita" class="sezione-attivita">
 		<h2 id="sez-attivita">{m.dev_attivita()}</h2>
