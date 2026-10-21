@@ -200,6 +200,8 @@
 	"genitori_tolleranza_facile": "Facile",
 	"genitori_tolleranza_medio": "Media",
 	"genitori_tolleranza_preciso": "Precisa",
+	"genitori_latenza": "Ritardo dell'audio, in millisecondi",
+	"genitori_latenza_aiuto": "Compensa il ritardo tra suono e microfono di questo dispositivo, per esempio con le cuffie Bluetooth. Di solito va bene 0.",
 	"genitori_impostazione_salvata": "Impostazione salvata.",
 
 	"genitori_voce": "La salute della voce",

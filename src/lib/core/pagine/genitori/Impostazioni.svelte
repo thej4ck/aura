@@ -74,6 +74,18 @@
 		);
 	}
 
+	/** manopola di latenza (ms): il ritardo di audio e microfono di questo dispositivo, tolto dai frame */
+	const LATENZA_MAX = 500;
+	function latenza(e: Evento) {
+		const el = e.currentTarget;
+		const prima = progressi.doc!.preferenze.latenzaAudioMs;
+		const ripristina = () => (el.value = String(prima));
+		if (Number.isNaN(el.valueAsNumber)) return ripristina();
+		const valore = Math.min(LATENZA_MAX, Math.max(0, Math.round(el.valueAsNumber)));
+		el.value = String(valore);
+		cambia(() => ({ latenzaAudioMs: valore }), ripristina);
+	}
+
 	// letta al momento di applicare: gli oggetti annidati vanno passati interi
 	const accessibilita = (chiave: keyof Accessibilita, valore: boolean): Patch => ({
 		accessibilita: { ...progressi.doc!.preferenze.accessibilita, [chiave]: valore }
@@ -150,6 +162,22 @@
 				{/each}
 			</div>
 		</fieldset>
+
+		<div class="campo">
+			<label for="{id}-latenza">{m.genitori_latenza()}</label>
+			<input
+				id="{id}-latenza"
+				type="number"
+				inputmode="numeric"
+				min="0"
+				max={LATENZA_MAX}
+				step="10"
+				value={p.latenzaAudioMs}
+				aria-describedby="{id}-latenza-aiuto"
+				onchange={latenza}
+			/>
+			<p id="{id}-latenza-aiuto" class="aiuto">{m.genitori_latenza_aiuto()}</p>
+		</div>
 	</form>
 	<Avviso tono="successo" testo={salvata} />
 {/if}
@@ -203,6 +231,23 @@
 		height: 1.25rem;
 		margin: 0;
 		accent-color: var(--colore-accento);
+	}
+	.campo {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spazio-2);
+		align-items: flex-start;
+	}
+	.campo label {
+		font-weight: var(--peso-forte);
+	}
+	.campo input {
+		width: 8rem;
+		min-height: var(--target);
+		padding: var(--spazio-2) var(--spazio-3);
+		border: 2px solid var(--colore-bordo-forte);
+		border-radius: var(--raggio-s);
+		background: var(--colore-superficie);
 	}
 	.aiuto {
 		max-width: var(--larghezza-testo);
