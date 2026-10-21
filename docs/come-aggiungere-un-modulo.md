@@ -100,7 +100,7 @@ Un'attività è un elenco di **schede**. Ogni scheda ha una **fase** e usa un **
 ```
 
 - **Fasi**: `scopri` (si mostra), `insieme` (si prova con aiuto), `prova` (si prova da soli). Il motore mostra la fase e l'avanzamento, e **conta per la verifica solo la fase `prova`**.
-- **Verifica**: superata se almeno l'80% delle risposte della fase `prova` è giusto (`SOGLIA_SUPERATA` in `motore/logica.ts`). Un'attività senza schede `prova` è superata arrivando in fondo. Si può ripetere senza limiti; le stelle non si perdono mai.
+- **Verifica**: superata se almeno l'80% delle risposte della fase `prova` è giusto (`SOGLIA_SUPERATA` in `motore/logica.ts`). Conta la prima risposta di ogni scheda: tornare indietro e rifarla non cancella un errore, e un'attività interrotta riprende al massimo dalla prima scheda `prova`. Un'attività senza risposte da valutare (nessuna scheda `prova`, o schede che non emettono esiti) si completa arrivando in fondo, con al massimo una stella e senza toccare la padronanza: per allenare una competenza servono schede `prova` con widget che valutano. Si può ripetere senza limiti; le stelle non si perdono mai.
 - **Una scheda, un concetto, un'azione.** Frasi brevi, tono calmo. Il feedback dice cosa fare, mai "sbagliato".
 - `titolo` e `testo` della scheda li mostra il motore (con il pulsante 🔊 se c'è una voce locale e la lettura ad alta voce è attiva). Senza `titolo`, il titolo della scheda è il nome della fase.
 - `audio`: una voce registrata (URL di un file servito dal sito, es. `import voce from './voce/linee.mp3'`). Se c'è, il pulsante 🔊 la usa al posto della sintesi vocale.
