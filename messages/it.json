@@ -124,5 +124,18 @@
 	"audio_pitch_ascolta": "Adesso ascolta.",
 	"audio_pitch_nota": "Nota da cantare: {nome}",
 	"audio_pitch_etichetta": "Misuratore della voce per la nota {nome}. La linea al centro è la nota, la fascia intorno è la zona giusta.",
-	"audio_pitch_etichetta_generica": "Misuratore della voce. La linea al centro è la nota da cantare, la fascia intorno è la zona giusta."
+	"audio_pitch_etichetta_generica": "Misuratore della voce. La linea al centro è la nota da cantare, la fascia intorno è la zona giusta.",
+	"audio_errore_permesso_negato": "Il microfono non ha il permesso. Un adulto può darlo dalle impostazioni del browser.",
+	"audio_errore_nessun_microfono": "Non trovo un microfono libero. Un adulto può controllare che sia collegato.",
+	"audio_errore_contesto_non_sicuro": "Il microfono funziona solo su una pagina sicura (https).",
+	"audio_errore_non_supportato": "Questo browser non permette di usare il microfono qui.",
+	"audio_dev_titolo": "Audio",
+	"audio_dev_scala": "Suona una scala",
+	"audio_dev_ferma": "Ferma",
+	"audio_dev_microfono": "Prova il microfono",
+	"audio_dev_chiudi_microfono": "Chiudi il microfono",
+	"audio_dev_frequenza": "Frequenza rilevata:",
+	"audio_dev_nessuna": "nessuna",
+	"audio_dev_in_pausa": "in pausa mentre suona il sito",
+	"audio_dev_la4": "La4"
 }
