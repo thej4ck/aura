@@ -23,8 +23,8 @@
 	import {
 		avanzamentoSchede,
 		gruppiFase,
-		limitaIndice,
 		primaSchedaProva,
+		puntoDiRipresa,
 		suggerisci,
 		valutaVerifica,
 		type EsitoRegistrato
@@ -68,7 +68,7 @@
 	const stato = $derived(avanzamentoSchede(attivita.schede, indice));
 	const scheda = $derived(attivita.schede[stato.indice]);
 	const gruppi = $derived(gruppiFase(attivita.schede));
-	const ripresa = $derived(limitaIndice(record?.scheda ?? 0, attivita.schede.length));
+	const ripresa = $derived(puntoDiRipresa(attivita.schede, record?.scheda ?? 0));
 	const mancanti = $derived(
 		progressi.doc
 			? prerequisitiMancanti(attivita, progressi.doc).flatMap((p) => catalogo.attivita(p) ?? [])
@@ -105,9 +105,12 @@
 		});
 	}
 
+	/** la scheda mostrata ha già i suoi esiti in questo giro: ci si è tornati con Indietro */
+	let rivista = false;
+
 	function vaiA(i: number) {
-		// rifare una scheda ne sostituisce gli esiti
-		esiti = esiti.filter((e) => e.scheda !== i);
+		// conta la prima risposta: rifare una scheda "prova" sapendo già la soluzione non cancella gli errori
+		rivista = esiti.some((e) => e.scheda === i);
 		salvaScheda(i);
 		void mostra('schede', i);
 	}
@@ -121,7 +124,7 @@
 	}
 
 	function registra(e: EsitoWidget) {
-		esiti.push({ scheda: stato.indice, corretto: e.corretto, item: e.item });
+		if (!rivista) esiti.push({ scheda: stato.indice, corretto: e.corretto, item: e.item });
 	}
 
 	function avanti() {
@@ -146,6 +149,11 @@
 		void mostra('riepilogo');
 	}
 </script>
+
+<!-- nel riepilogo c'è sempre una via d'uscita, anche quando non c'è un prossimo passo -->
+{#snippet home()}
+	<Button variante="quieta" href={resolve('/')}>{m.riepilogo_home()}</Button>
+{/snippet}
 
 {#snippet nonCaricata()}
 	<Avviso tono="attenzione" testo={m.attivita_widget_errore()} />
@@ -307,6 +315,7 @@
 					<Button variante="secondaria" icona="ricomincia" onclick={() => inizia(0)}>
 						{m.attivita_ripeti()}
 					</Button>
+					{@render home()}
 				</div>
 			{:else}
 				<h2 id="{id}-riepilogo" tabindex="-1" bind:this={titolo}>{m.riepilogo_quasi()}</h2>
@@ -318,6 +327,7 @@
 					<Button dimensione="l" variante="secondaria" onclick={() => inizia(0)}>
 						{m.attivita_ricomincia()}
 					</Button>
+					{@render home()}
 				</div>
 			{/if}
 		</section>

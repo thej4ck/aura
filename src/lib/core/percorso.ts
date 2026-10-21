@@ -5,12 +5,13 @@ import type {
 	ModuloCatalogo
 } from './contenuti/registry';
 import { giorno } from './giorno';
+import { puntoDiRipresa } from './motore/logica';
 import type { Documento, StatoAvanzamento } from './store/schema-progressi';
 
 export const MAX_RIPASSI = 3;
 
 export type ProssimoPasso = {
-	/** attività in corso aggiornata più di recente, con la scheda da cui riprendere */
+	/** attività in corso aggiornata più di recente, con la scheda da cui riprendere (mai oltre la prima "prova") */
 	riprendi?: { attivita: AttivitaCatalogo; scheda: number };
 	/** prima attività non completata e non in corso dei percorsi di area (aree in ordine) */
 	prossimo?: AttivitaCatalogo;
@@ -40,7 +41,7 @@ export function prossimoPasso(catalogo: Catalogo, doc: Documento, oggi: Date): P
 		.sort((x, y) => quando(y) - quando(x));
 	const riprendi = inCorso && {
 		attivita: inCorso,
-		scheda: Math.min(doc.attivita[inCorso.id].scheda, inCorso.schede.length - 1)
+		scheda: puntoDiRipresa(inCorso.schede, doc.attivita[inCorso.id].scheda)
 	};
 
 	const prossimo = catalogo

@@ -285,6 +285,14 @@ describe('attività e competenze', () => {
 		expect((await salvati())[0].attivita[a].tentativi).toBe(2);
 	});
 
+	it('senza risposte da valutare: completata con ★, competenze non toccate', async () => {
+		const p = await avvia();
+		const vuoto = { superata: true, errori: 0, risposte: 0 };
+		const r = p.registraVerifica('musica.canto.note', ['musica.canto.do'], vuoto, T0);
+		expect(r).toMatchObject({ stato: 'completata', stelle: 1, tentativi: 1 });
+		expect(p.doc?.competenze).toEqual({});
+	});
+
 	it("una verifica non superata su un'attività nuova la lascia in corso", async () => {
 		const p = await avvia();
 		const r = p.registraVerifica('musica.canto.eco', [], { superata: false, errori: 2 }, T0);

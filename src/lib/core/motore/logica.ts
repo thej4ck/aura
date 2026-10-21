@@ -59,7 +59,8 @@ export function conteggioProva(
 
 /**
  * Esito della verifica, a fine attività: superata se corretti/totali ≥ SOGLIA_SUPERATA nella fase "prova".
- * Senza esiti di prova (nessuna scheda prova, o schede che non valutano) è superata arrivando in fondo.
+ * Senza esiti di prova (nessuna scheda prova, o schede che non valutano) è superata arrivando in fondo,
+ * con `risposte: 0`: non c'è niente da misurare, quindi niente padronanza e al massimo una stella.
  */
 export function valutaVerifica(
 	schede: readonly ConFase[],
@@ -68,7 +69,8 @@ export function valutaVerifica(
 	const { corretti, totali } = conteggioProva(schede, esiti);
 	return {
 		superata: totali === 0 || corretti / totali >= SOGLIA_SUPERATA,
-		errori: totali - corretti
+		errori: totali - corretti,
+		risposte: totali
 	};
 }
 
@@ -78,6 +80,16 @@ export const primaSchedaProva = (schede: readonly ConFase[]): number =>
 		0,
 		schede.findIndex((s) => s.fase === FASE_VERIFICA)
 	);
+
+/**
+ * Da dove riprendere un'attività interrotta: la scheda salvata, ma mai oltre la prima scheda "prova".
+ * Gli esiti della verifica restano solo in memoria: ripartire a metà prova la farebbe valere con meno risposte.
+ */
+export function puntoDiRipresa(schede: readonly ConFase[], salvata: number): number {
+	const i = limitaIndice(salvata, schede.length);
+	const prova = schede.findIndex((s) => s.fase === FASE_VERIFICA);
+	return prova >= 0 && i > prova ? prova : i;
+}
 
 /** Il suggerimento da mostrare nel riepilogo: riprendi, poi prossimo, poi ripasso; mai l'attività appena fatta. */
 export const suggerisci = (passo: ProssimoPasso, escludi: string): AttivitaCatalogo | undefined =>

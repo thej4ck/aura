@@ -177,6 +177,7 @@ export class Progressi {
 	/**
 	 * Esito di una verifica (fase "prova"): l'attività diventa completata se superata (e lo resta),
 	 * stelle e tentativi si aggiornano, ogni competenza allenata passa da `aggiornaCompetenza`.
+	 * Con `esito.risposte === 0` (niente da valutare) le competenze non cambiano.
 	 */
 	registraVerifica(
 		attivitaId: string,
@@ -202,7 +203,10 @@ export class Progressi {
 		const competenze = v.parse(
 			SchemaMappaCompetenze,
 			Object.fromEntries(
-				competenzeIds.map((id) => [id, aggiornaCompetenza(doc.competenze[id], esito, oggi)])
+				(esito.risposte === 0 ? [] : competenzeIds).map((id) => [
+					id,
+					aggiornaCompetenza(doc.competenze[id], esito, oggi)
+				])
 			)
 		);
 		Object.assign(doc.attivita, attivita);

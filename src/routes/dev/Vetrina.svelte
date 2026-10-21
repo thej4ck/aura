@@ -193,7 +193,10 @@
 	<section aria-labelledby="sez-attivita" class="sezione-attivita">
 		<h2 id="sez-attivita">{m.dev_attivita()}</h2>
 		<div class="cornice">
-			<Attivita {attivita} catalogo={catalogoEsempio} />
+			<!-- come nella route delle attività: un altro profilo fa ripartire il motore -->
+			{#key progressi.doc?.profilo.id}
+				<Attivita {attivita} catalogo={catalogoEsempio} />
+			{/key}
 		</div>
 	</section>
 </div>

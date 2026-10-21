@@ -144,4 +144,11 @@ describe('calcolaStelle', () => {
 		expect(calcolaStelle(completata(3), ko, giornoN(4))).toBe(3);
 		expect(calcolaStelle(completata(2), { superata: true, errori: 4 }, giornoN(0))).toBe(2);
 	});
+
+	it('senza risposte da valutare al massimo ★, anche ripetendo in un altro giorno', () => {
+		const vuoto = { superata: true, errori: 0, risposte: 0 };
+		expect(calcolaStelle(undefined, vuoto, giornoN(0))).toBe(1);
+		expect(calcolaStelle(completata(1), vuoto, giornoN(3))).toBe(1);
+		expect(calcolaStelle(completata(2), vuoto, giornoN(3))).toBe(2);
+	});
 });

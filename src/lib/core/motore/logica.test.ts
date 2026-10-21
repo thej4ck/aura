@@ -8,6 +8,7 @@ import {
 	gruppiFase,
 	limitaIndice,
 	primaSchedaProva,
+	puntoDiRipresa,
 	suggerisci,
 	valutaVerifica,
 	type EsitoRegistrato
@@ -51,6 +52,15 @@ describe('avanzamento', () => {
 		]);
 	});
 
+	it('riprende dalla scheda salvata, ma mai oltre la prima scheda prova', () => {
+		expect(puntoDiRipresa(tipica, 2)).toBe(2);
+		expect(puntoDiRipresa(tipica, 3)).toBe(3);
+		expect(puntoDiRipresa(tipica, 6)).toBe(3); // a metà verifica: la si rifà tutta
+		expect(puntoDiRipresa(tipica, 99)).toBe(3);
+		expect(puntoDiRipresa(schede('scopri', 'insieme', 'scopri'), 9)).toBe(2);
+		expect(puntoDiRipresa(schede('scopri', 'prova', 'scopri', 'prova'), 3)).toBe(1);
+	});
+
 	it('riprova dalla prima scheda prova, o dall’inizio se non ce ne sono', () => {
 		expect(primaSchedaProva(tipica)).toBe(3);
 		expect(primaSchedaProva(schede('scopri', 'insieme'))).toBe(0);
@@ -77,29 +87,33 @@ describe('verifica', () => {
 	it(`è superata con almeno il ${SOGLIA_SUPERATA * 100}% di risposte giuste`, () => {
 		expect(valutaVerifica(tipica, esiti(true, true, true, true, false))).toEqual({
 			superata: true,
-			errori: 1
+			errori: 1,
+			risposte: 5
 		});
 		expect(valutaVerifica(tipica, esiti(true, true, true, false, false))).toEqual({
 			superata: false,
-			errori: 2
+			errori: 2,
+			risposte: 5
 		});
 		expect(valutaVerifica(tipica, esiti(true, true, true, true, true))).toEqual({
 			superata: true,
-			errori: 0
+			errori: 0,
+			risposte: 5
 		});
 	});
 
 	it('gli errori nelle fasi guidate non contano', () => {
 		const guidati: EsitoRegistrato[] = [{ scheda: 2, corretto: false }, ...esiti(true)];
-		expect(valutaVerifica(tipica, guidati)).toEqual({ superata: true, errori: 0 });
+		expect(valutaVerifica(tipica, guidati)).toEqual({ superata: true, errori: 0, risposte: 1 });
 	});
 
-	it('senza schede prova (o senza esiti di prova) è superata arrivando in fondo', () => {
+	it('senza schede prova (o senza esiti di prova) è superata arrivando in fondo, con 0 risposte', () => {
 		expect(valutaVerifica(schede('scopri', 'insieme'), [{ scheda: 1, corretto: false }])).toEqual({
 			superata: true,
-			errori: 0
+			errori: 0,
+			risposte: 0
 		});
-		expect(valutaVerifica(tipica, [])).toEqual({ superata: true, errori: 0 });
+		expect(valutaVerifica(tipica, [])).toEqual({ superata: true, errori: 0, risposte: 0 });
 	});
 });
 
