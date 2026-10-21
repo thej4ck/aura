@@ -26,3 +26,19 @@ export const IDLE_SUSPEND_MS = 30_000;
 
 /** Volume generale del sito (0-1), dopo il compressore: moderato, per le orecchie dei bambini. */
 export const VOLUME = 0.5;
+
+/** Tenuta di una nota da sola (canta-nota, "Tieni la nota"): in zona per 3 s, anche a più riprese. */
+export const TENUTA_MS = 3000;
+
+/** Tenuta minima di ogni nota di una sequenza (canta-sequenza, "Eco"). */
+export const TENUTA_SEQUENZA_MS = 600;
+
+/** Fuori zona o in silenzio il progresso della tenuta cala a questa frazione della velocità con cui cresce. */
+export const CALO_TENUTA = 0.5;
+
+/** Tempo di ascolto (senza i momenti in cui suona il sito) prima di proporre di riascoltare. */
+export const ASCOLTO_MAX_MS = 20_000;
+
+/** "Nota comoda": mediana della voce negli ultimi FINESTRA ms, quando ne è piena almeno COPERTURA. */
+export const FINESTRA_NOTA_COMODA_MS = 2000;
+export const COPERTURA_NOTA_COMODA = 0.75;
