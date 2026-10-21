@@ -26,3 +26,8 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Note locali e segreti
+CLAUDE.local.md
+key
+*.key

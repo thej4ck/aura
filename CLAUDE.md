@@ -1,0 +1,38 @@
+# Kindergarden — istruzioni per Claude
+
+Piattaforma didattica gratuita per bambini, a moduli (oggi area Musica: Pentagramma e Canto). Sito statico SvelteKit servito da Caddy su Railway. Decisioni architetturali in `docs/adr/`, guida ai moduli in `docs/come-aggiungere-un-modulo.md`.
+
+## Principi non negoziabili
+- **Zero dati personali**: nessun cookie, analytics, telemetria, account o richiesta di rete verso terzi a runtime. La CSP (`svelte.config.js`) e gli header (`Caddyfile`) devono continuare a garantirlo.
+- **Browser-first**: quello che può girare nel browser gira lì. Lavoro lato server solo dopo una valutazione esplicita (va scritta in un ADR).
+- **Niente dark pattern**: niente streak, vite, timer di pressione, notifiche, classifiche, ricompense casuali. Il feedback è formativo e orientato alla crescita, mai "sbagliato".
+- **Contenuti come dati**: un'attività è un elenco di schede che usano widget. Un nuovo modulo aggiunge cartelle in `src/lib/moduli/<area>/<modulo>/` e non tocca il core.
+- **Id stabili**: id di aree, moduli, attività e competenze non si rinominano mai; se serve, si scrive una migrazione.
+- **Stringhe UI via Paraglide** (`messages/it.json`), niente testo hardcoded nei componenti.
+- **Accessibilità WCAG 2.2 AA**: target ≥48px, focus visibile, il colore non è mai l'unico segnale, rispetto di `prefers-reduced-motion`.
+
+## Comandi
+- `npm run dev` · `npm run build` · `npm run preview`
+- `npm run lint` · `npm run check` · `npm run test` (Vitest) · `npm run test:e2e` (Playwright)
+- Container (in locale c'è podman, non docker): `podman build -t kindergarden .` → `podman run --rm -e PORT=8080 -p 8080:8080 kindergarden`
+- Prima di ogni commit: lint, check, test e build verdi.
+
+## Git
+- Branch `main`, Conventional Commits in inglese, commit piccoli e logici.
+- Mai push, mai creare remote/repo e mai azioni su Railway senza conferma esplicita dell'utente.
+
+## Immagini e animazioni
+- **Prima scelta: SVG vettoriali** (illustrazioni e glifi), coerenti con i token di `src/lib/core/tokens.css`.
+- **Spiegazioni animate ("video vettoriali")**: componenti Svelte con SVG animati via CSS o Web Animations API. Sono segmentati in passi (principio di segmentazione), con controlli play/pausa/passo, testo o narrazione sincronizzati, e diventano fotogrammi statici con `prefers-reduced-motion`. Niente librerie pesanti (Lottie e simili) senza un ADR.
+- **Immagini raster generate con AI**: solo quando aggiungono valore didattico rispetto a un SVG.
+  - Si generano solo durante lo sviluppo con OpenRouter, tramite uno script in `scripts/` che legge la chiave da `OPENROUTER_API_KEY` o dal file indicato in `OPENROUTER_KEY_FILE` (percorso locale in `CLAUDE.local.md`).
+  - Il modello si sceglie interrogando `https://openrouter.ai/api/v1/models` e filtrando quelli con output di tipo immagine.
+  - **La chiave non entra mai nel repo, nel bundle o nell'output dei comandi**; nessuna chiamata AI a runtime nel sito.
+  - Le immagini si salvano ottimizzate (WebP o AVIF, dimensione massima ragionevole) accanto al modulo. Un file sidecar `<nome>.json` registra prompt, modello, data e condizioni d'uso.
+  - Stile coerente: piatto, pulito, palette dei token, niente testo dentro l'immagine, inclusivo, niente persone fotorealistiche.
+
+## Lavorare con gli agenti (ultracode)
+Lo sviluppo sostanziale si fa con Workflow multi-agente: implementazione → revisione indipendente → correzioni. Modello in base al compito:
+- `fable`: ragionamento difficile e correttezza critica (contratti dei dati, unione dei salvataggi, audio/pitch, logica dei giochi), revisioni scettiche;
+- `opus`: design, UI, motore, contenuti didattici, correzioni;
+- `sonnet`: lavoro meccanico (tooling, configurazione, pagine semplici, commit).
