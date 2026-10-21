@@ -116,6 +116,18 @@ describe('apriMicrofono', () => {
 		]);
 	});
 
+	it('anche durante la lettura ad alta voce i frame sono silenziati', async () => {
+		const frame: FrameMic[] = [];
+		await mic.apriMicrofono({ onframe: (f) => frame.push(f) });
+		const fine = audio.segnaVoce();
+		giro(0);
+		fine();
+		fine(); // idempotente
+		giro(40);
+		expect(frame.map((f) => f.silenziato)).toEqual([true, false]);
+		expect(audio.riproduzioneAttiva()).toBe(false);
+	});
+
 	it('scheda nascosta o pagina lasciata: il microfono si chiude da solo e lo dice', async () => {
 		const onchiuso = vi.fn();
 		await mic.apriMicrofono({ onframe: () => {}, onchiuso });

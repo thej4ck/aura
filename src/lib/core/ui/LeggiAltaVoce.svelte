@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '#lib/paraglide/messages.js';
+	import { segnaVoce } from '../audio/contesto.ts';
 	import { ferma, parla, ttsDisponibile } from '../tts';
 	import Button from './Button.svelte';
 
@@ -17,6 +18,7 @@
 	let disponibile = $state(false);
 	let parlando = $state(false);
 	let lettore: HTMLAudioElement | undefined;
+	let rilascia: (() => void) | undefined;
 
 	// solo voci locali: se non ce ne sono il pulsante non compare (tts.ts non usa mai voci di rete)
 	$effect(() => {
@@ -37,6 +39,8 @@
 		lettore = undefined;
 		ferma();
 		parlando = false;
+		rilascia?.();
+		rilascia = undefined;
 	}
 
 	// cambio scheda o pagina: la lettura si ferma
@@ -45,6 +49,8 @@
 	async function leggi() {
 		if (parlando) return smetti();
 		parlando = true;
+		// con un microfono aperto (schede di canto) la lettura non va sentita come canto
+		const r = (rilascia = segnaVoce());
 		try {
 			if (audio) {
 				lettore = new Audio(audio);
@@ -56,7 +62,11 @@
 				await parla(testo, lingua);
 			}
 		} finally {
-			parlando = false;
+			r();
+			if (rilascia === r) {
+				rilascia = undefined;
+				parlando = false;
+			}
 		}
 	}
 </script>

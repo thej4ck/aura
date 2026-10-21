@@ -6,6 +6,7 @@ let ctx: AudioContext | undefined;
 let ingresso: AudioNode | undefined;
 let riproduzioni = 0;
 let microfoni = 0;
+let voci = 0;
 let timerSospensione: ReturnType<typeof setTimeout> | undefined;
 
 /**
@@ -56,8 +57,25 @@ export function sblocca(): Promise<void> {
 /** Tempo del clock audio in secondi (0 se l'audio non è mai partito). */
 export const ora = (): number => ctx?.currentTime ?? 0;
 
-/** Vero mentre il sito suona (più una breve coda): nei turni ascolta/canta il microfono non ascolta. */
-export const riproduzioneAttiva = (): boolean => riproduzioni > 0;
+/**
+ * Vero mentre il sito suona o legge ad alta voce (più una breve coda): nei turni ascolta/canta il
+ * microfono non ascolta.
+ */
+export const riproduzioneAttiva = (): boolean => riproduzioni + voci > 0;
+
+/**
+ * Segna una lettura ad alta voce (sintesi o voce registrata): non passa da Web Audio, quindi non
+ * sveglia il contesto, ma il microfono non deve sentirla come canto. Restituisce rilascia, idempotente.
+ */
+export function segnaVoce(): () => void {
+	voci++;
+	let rilasciata = false;
+	return () => {
+		if (rilasciata) return;
+		rilasciata = true;
+		voci--;
+	};
+}
 
 /**
  * Segna una sorgente in uso: finché non la rilasci l'AudioContext resta sveglio. Senza sorgenti per
