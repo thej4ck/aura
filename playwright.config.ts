@@ -5,6 +5,8 @@ const porta = 4319;
 
 export default defineConfig({
 	testDir: 'tests',
+	// i *.test.ts in tests/ sono di Vitest
+	testMatch: '**/*.spec.ts',
 	forbidOnly: !!process.env.CI,
 	reporter: process.env.CI ? 'github' : 'list',
 	use: { baseURL: `http://localhost:${porta}` },
