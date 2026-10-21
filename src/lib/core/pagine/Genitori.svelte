@@ -21,20 +21,15 @@
 
 	// un solo controllo per tutta la pagina: chi lo chiede passa l'azione da fare quando l'adulto lo supera
 	let gateAperto = $state(false);
-	let dopoGate: { fatto: () => void; annullato?: () => void } | undefined;
-	function conGate(fatto: () => void, annullato?: () => void) {
-		dopoGate = { fatto, annullato };
+	let dopoGate: (() => void) | undefined;
+	function conGate(azione: () => void) {
+		dopoGate = azione;
 		gateAperto = true;
 	}
 	function superato() {
-		const d = dopoGate;
+		const azione = dopoGate;
 		dopoGate = undefined;
-		d?.fatto(); // subito, nello stesso gesto: serve ai picker dei file e alle finestre nuove
-	}
-	function annullato() {
-		const d = dopoGate;
-		dopoGate = undefined;
-		d?.annullato?.();
+		azione?.(); // subito, nello stesso gesto: serve ai picker dei file e alle finestre nuove
 	}
 
 	const SEZIONI: [string, () => string][] = [
@@ -147,7 +142,11 @@
 	</section>
 </div>
 
-<GateAdulti bind:aperto={gateAperto} onsuperato={superato} onannulla={annullato} />
+<GateAdulti
+	bind:aperto={gateAperto}
+	onsuperato={superato}
+	onannulla={() => (dopoGate = undefined)}
+/>
 
 <style>
 	.genitori {

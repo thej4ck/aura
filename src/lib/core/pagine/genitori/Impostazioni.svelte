@@ -8,7 +8,7 @@
 	import { ttsDisponibile } from '../../tts';
 	import Avviso from '../../ui/Avviso.svelte';
 
-	let { conGate }: { conGate: (fatto: () => void, annullato?: () => void) => void } = $props();
+	let { conGate }: { conGate: (azione: () => void) => void } = $props();
 
 	const id = $props.id();
 	let sbloccato = $state(false);

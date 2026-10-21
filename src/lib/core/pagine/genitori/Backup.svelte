@@ -10,7 +10,7 @@
 	import Avviso from '../../ui/Avviso.svelte';
 	import Button from '../../ui/Button.svelte';
 
-	let { conGate }: { conGate: (fatto: () => void, annullato?: () => void) => void } = $props();
+	let { conGate }: { conGate: (azione: () => void) => void } = $props();
 
 	const id = $props.id();
 	type Esito = { tono: 'successo' | 'attenzione'; testo: string };
