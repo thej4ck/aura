@@ -114,7 +114,24 @@ Un'attività è un elenco di **schede**. Ogni scheda ha una **fase** e usa un **
 | `scelta`      | `domanda`, `opzioni` (≥ 2), `corretta` (indice), `suggerimento?`, `spiegazione?`, `item?`         | giusto al primo tentativo; poi si riprova |
 | `animazione`  | `componente` (disegno SVG del modulo), `passi: [{ testo, durataMs? }]`, `etichetta?`              | nessuno                                   |
 
-In arrivo (fase 2): `ascolta`, `staff-tocca`, `canta-nota`, `canta-sequenza`.
+#### Widget musicali
+
+Le note si scrivono come altezze in notazione scientifica (`'C4'` è il Do centrale, `'F#4'`, `'Bb3'`). Dove si legge `note`, vale sia un elenco di altezze (in chiave di violino) sia un `Rigo` (`{ chiave, armatura?, note: [{ altezza }] }`), sempre con almeno una nota. `etichette` mostra i nomi sotto le note, `colori` colora le teste con i colori delle note; i nomi seguono la preferenza del profilo (solfeggio o lettere).
+
+| widget           | props                                                                                                                                                                             | esito                                                                                       |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `ascolta`        | `note`, `durata?` (secondi per nota, 0,8), `etichette?`, `colori?`                                                                                                                | nessuno; "Avanti" compare dopo il primo ascolto                                             |
+| `staff-tocca`    | `nota` (da trovare: conta la posizione, non l'alterazione), `domanda?` (di default "Tocca il Sol"), `chiave?`, `armatura?`, `suggerimento?`, `selezionabili?: [min, max]` (passi) | al primo tentativo, `item` = `nota`; poi si riprova con aiuti che crescono                  |
+| `canta-nota`     | `nota`, `tenutaMs?` (3000), `equivalenzaOttava?` (`true`), `etichette?`, `colori?`                                                                                                | giusto quando la nota è tenuta abbastanza, `item` = `nota`; conta il primo tentativo        |
+| `canta-sequenza` | `note` (si cantano in ordine), `tenutaMs?` (600 per nota), `equivalenzaOttava?` (`true`), `item?`, `etichette?`, `colori?`                                                        | alla fine: giusto se le note sono tutte cantate in ordine; `dettagli: { riuscite, totale }` |
+
+- **Sempre sullo Staff**: ogni nota che suona o che si canta è anche scritta, ed è evidenziata mentre suona o mentre tocca cantarla.
+- `staff-tocca`: ogni tocco suona la nota toccata. Il feedback dice dove si è toccato e che nota c'è lì, verso dove andare e, dal secondo tentativo, dove sta la nota. `selezionabili` sono i passi toccabili (0 = prima linea, 8 = quinta, −2 = primo taglio in basso): il default va dal Do sotto al La sopra in chiave di violino, e la `nota` deve starci dentro (per il Si sopra il rigo serve `[-2, 12]`).
+- `canta-nota` e `canta-sequenza` lavorano **a turni**: prima suona il sito (intanto il microfono non ascolta), poi canta il bambino, con il misuratore della voce e un anello che si riempie mentre tiene la nota. Fuori zona l'anello cala piano, non si svuota. La **tolleranza** viene dalle preferenze (facile ±50 cent, medio ±30, preciso ±15); `equivalenzaOttava` accetta la stessa nota in un'altra ottava.
+- Prima di aprire il microfono il widget spiega a bambino e adulto a cosa serve ("Niente viene registrato"). Il microfono si chiude a fine prova e sempre quando si lascia la scheda. Se non c'è o non ha il permesso, si ascolta e si canta lo stesso, ma **senza esito**: la scheda non conta né come giusta né come da rivedere.
+- Dopo circa 20 secondi di ascolto senza riuscire (`ASCOLTO_MAX_MS`, senza mai un conto alla rovescia) la prova finisce con un consiglio e un "Riprova". Tempi di tenuta, calo e tempo di ascolto sono costanti da calibrare in `src/lib/core/audio/costanti.ts`.
+
+Per i giochi di canto di un modulo (es. "Tieni la nota", "Eco", l'estensione vocale) le stesse regole stanno in `src/lib/core/musica/intonazione.ts`, puro e provato con frame sintetici: `avanzaTenuta` (una nota tenuta), `avanzaSequenza` (note in ordine con tenuta minima e tempo massimo) e `avanzaNotaComoda` (la mediana della voce su ~2 s). Ognuno riceve lo stato e un frame del microfono e restituisce lo stato nuovo.
 
 ## 6. Widget propri
 
@@ -182,7 +199,7 @@ Prima scelta: SVG (componenti del modulo o file `.svg`). Le immagini raster gene
 
 ## 9. Provare e validare
 
-1. `npm run dev` e apri il modulo: le bozze si vedono solo in sviluppo. `/dev` ha la vetrina dei componenti e un'attività di esempio.
+1. `npm run dev` e apri il modulo: le bozze si vedono solo in sviluppo. `/dev` ha la vetrina dei componenti, i widget musicali da provare uno per uno (con gli esiti che mandano al motore) e due attività di esempio.
 2. `npm test` esegue `tests/contenuti.test.ts` su tutti i contenuti reali, con e senza bozze:
    - schema di aree, moduli, attività e schede;
    - id unici, riferimenti esistenti (competenze, prerequisiti, percorso), grafi dei prerequisiti senza cicli;
