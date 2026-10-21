@@ -220,3 +220,27 @@ for (const colorScheme of ['light', 'dark'] as const) {
 		expect(errori).toEqual([]);
 	});
 }
+
+test('profili: dopo «Usa questo profilo» o un’eliminazione il fuoco va sul profilo in uso', async ({
+	page
+}) => {
+	await apri(page, '/genitori');
+	await page.getByRole('button', { name: 'Crea il profilo' }).click();
+	await expect(page.getByText('Profilo creato: adesso è quello in uso.')).toBeVisible();
+	const lista = page.locator('#profili ul.profili');
+	const inUso = lista.locator('li.attivo');
+
+	await page.getByRole('button', { name: /^Usa questo profilo/ }).focus();
+	await page.keyboard.press('Enter');
+	await expect(inUso).toBeFocused();
+
+	await lista
+		.getByRole('button', { name: /^Elimina il profilo/ })
+		.last()
+		.click();
+	await superaGate(page);
+	await expect(page.getByText('Profilo eliminato.')).toBeVisible();
+	await expect(inUso).toBeFocused();
+	// senza nome: l'avatar una volta sola, accanto a «Senza nome»
+	await expect(inUso.locator('.nome')).toHaveText('Senza nome');
+});

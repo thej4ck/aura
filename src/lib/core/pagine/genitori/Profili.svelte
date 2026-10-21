@@ -1,5 +1,6 @@
 <script lang="ts">
 	// Profili sul dispositivo: scegli, modifica (avatar e nome), crea, elimina (dietro il controllo adulti).
+	import { tick } from 'svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { registraErrore } from '../../errori';
 	import { AVATARI, progressi } from '../../store/progressi.svelte';
@@ -16,6 +17,7 @@
 	type Campi = { avatar: string; alias: string };
 	let modifica: Campi = $state({ avatar: '', alias: '' });
 	let nuovo: Campi = $state({ avatar: AVATARI[1], alias: '' });
+	let lista: HTMLUListElement | undefined = $state();
 
 	// il modulo di modifica segue il profilo in uso (anche quando lo si cambia dal menu in alto)
 	$effect(() => {
@@ -41,6 +43,17 @@
 		}
 	}
 
+	/** il pulsante premuto sparisce (usa, elimina): il fuoco va sul profilo in uso, non sul fondo della pagina */
+	async function fuocoSulProfiloInUso() {
+		await tick();
+		lista?.querySelector<HTMLElement>('li.attivo')?.focus();
+	}
+
+	async function usa(p: Profilo) {
+		await progressi.scegliProfilo(p.id).catch(registraErrore);
+		await fuocoSulProfiloInUso();
+	}
+
 	function salva(e: SubmitEvent) {
 		e.preventDefault();
 		void prova(
@@ -63,7 +76,10 @@
 	}
 
 	function elimina(p: Profilo) {
-		conGate(() => void prova(() => progressi.eliminaProfilo(p.id), m.genitori_profilo_eliminato()));
+		conGate(async () => {
+			await prova(() => progressi.eliminaProfilo(p.id), m.genitori_profilo_eliminato());
+			await fuocoSulProfiloInUso();
+		});
 	}
 </script>
 
@@ -104,18 +120,18 @@
 
 {#if progressi.doc}
 	{@const attivo = progressi.doc.profilo.id}
-	<ul class="profili">
+	<ul class="profili" bind:this={lista}>
 		{#each progressi.profili as p (p.id)}
-			<li class={{ attivo: p.id === attivo }}>
-				<span class="avatar" aria-hidden="true">{p.avatar}</span>
-				<span class="nome">{p.alias ?? m.genitori_profilo_senza_nome({ avatar: p.avatar })}</span>
+			<li class={{ attivo: p.id === attivo }} tabindex="-1">
+				<span class="avatar">{p.avatar}</span>
+				<span class="nome">{p.alias ?? m.genitori_profilo_senza_nome()}</span>
 				<span class="azioni">
 					{#if p.id === attivo}
 						<span class="in-uso"><Icona nome="check" /> {m.genitori_profilo_in_uso()}</span>
 					{:else}
 						<Button
 							variante="secondaria"
-							onclick={() => progressi.scegliProfilo(p.id).catch(registraErrore)}
+							onclick={() => usa(p)}
 							aria-label={m.genitori_profilo_usa_nome({ nome: nome(p) })}
 						>
 							{m.genitori_profilo_usa()}

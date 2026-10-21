@@ -19,8 +19,8 @@
 {#if doc}
 	<p class="lead">{m.genitori_progressi_intro()}</p>
 	<p class="profilo">
-		<span class="avatar" aria-hidden="true">{doc.profilo.avatar}</span>
-		{doc.profilo.alias ?? m.genitori_profilo_senza_nome({ avatar: doc.profilo.avatar })}
+		<span class="avatar">{doc.profilo.avatar}</span>
+		{doc.profilo.alias ?? m.genitori_profilo_senza_nome()}
 	</p>
 
 	{#if voci.length === 0}

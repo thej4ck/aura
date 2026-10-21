@@ -139,7 +139,7 @@
 	"genitori_profilo_usa_nome": "Usa questo profilo: {nome}",
 	"genitori_profilo_elimina": "Elimina",
 	"genitori_profilo_elimina_nome": "Elimina il profilo {nome}",
-	"genitori_profilo_senza_nome": "{avatar} (senza nome)",
+	"genitori_profilo_senza_nome": "Senza nome",
 	"genitori_elimina_avviso": "Eliminare un profilo cancella i suoi progressi da questo dispositivo. Se volete tenerli, prima scaricate un backup.",
 	"genitori_profilo_eliminato": "Profilo eliminato.",
 	"genitori_profilo_modifica": "Il profilo in uso",
