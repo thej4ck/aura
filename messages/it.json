@@ -133,7 +133,7 @@
 	"genitori_livello": "Livello {numero} di 4: {nome}",
 
 	"genitori_profili": "Profili",
-	"genitori_profili_intro": "Ogni bambino può avere il suo profilo, con progressi separati. Il nome resta solo su questo dispositivo.",
+	"genitori_profili_intro": "Ogni bambino può avere il suo profilo, con progressi separati. Il nome resta su questo dispositivo, e nei backup e nel file collegato se li usate: il nome dei file mostra solo l'avatar.",
 	"genitori_profilo_in_uso": "In uso",
 	"genitori_profilo_usa": "Usa questo profilo",
 	"genitori_profilo_usa_nome": "Usa questo profilo: {nome}",
@@ -147,7 +147,7 @@
 	"genitori_avatar": "Avatar",
 	"genitori_avatar_voce": "Avatar {avatar}",
 	"genitori_alias": "Nome (facoltativo)",
-	"genitori_alias_aiuto": "Un nome o un soprannome. Resta solo su questo dispositivo.",
+	"genitori_alias_aiuto": "Un nome o un soprannome. Resta su questo dispositivo, e nei backup e nel file collegato se li usate.",
 	"genitori_salva_profilo": "Salva",
 	"genitori_profilo_salvato": "Profilo aggiornato.",
 	"genitori_crea_profilo": "Crea il profilo",

@@ -7,17 +7,16 @@ export const MAX_COMPRESSO = 2 * 1024 * 1024;
 export const MAX_DECOMPRESSO = 10 * 1024 * 1024;
 const TIPI = [{ description: 'Kindergarden', accept: { 'application/gzip': ['.kgz'] } }];
 
-/** Alias usabile in un nome di file; l'avatar emoji non lo è. */
-function perNomeFile(alias: string | undefined): string {
-	const s = (alias ?? '')
-		.normalize('NFD')
-		.replace(/\p{M}/gu, '')
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-+|-+$/g, '')
-		.slice(0, 30)
-		.replace(/-+$/, '');
-	return s || 'profilo';
+/**
+ * L'avatar nel nome del file, mai il nome del bambino: i nomi dei file finiscono negli elenchi dei
+ * download, negli allegati e nelle cartelle sincronizzate. Restano solo le emoji (un avatar importato
+ * potrebbe contenere altro); senza, "profilo".
+ */
+function perNomeFile(avatar: string): string {
+	return (
+		avatar.match(/[\p{Extended_Pictographic}\p{Join_Control}\p{Variation_Selector}]/gu)?.join('') ||
+		'profilo'
+	);
 }
 
 /** File di salvataggio: JSON gzip `.kgz`, oppure `.json` semplice se CompressionStream manca. */
@@ -25,7 +24,7 @@ export async function esporta(
 	doc: Documento,
 	oggi: Giorno = giorno(new Date())
 ): Promise<{ blob: Blob; nomeFile: string }> {
-	const base = `kindergarden-${perNomeFile(doc.profilo.alias)}-${oggi}`;
+	const base = `kindergarden-${perNomeFile(doc.profilo.avatar)}-${oggi}`;
 	const json = JSON.stringify(doc);
 	if (typeof CompressionStream !== 'function') {
 		return { blob: new Blob([json], { type: 'application/json' }), nomeFile: `${base}.json` };

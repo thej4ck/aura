@@ -404,7 +404,7 @@ describe('backup e sync su file', () => {
 	it('esportaBackup segna ultimoBackup', async () => {
 		const p = await avvia();
 		const { nomeFile } = await p.esportaBackup();
-		expect(nomeFile).toBe('kindergarden-profilo-2026-10-21.kgz');
+		expect(nomeFile).toBe(`kindergarden-${p.doc!.profilo.avatar}-2026-10-21.kgz`);
 		expect(p.doc?.ultimoBackup).toBe(T0.toISOString());
 		await p.flush();
 		expect((await salvati())[0].ultimoBackup).toBe(T0.toISOString());
