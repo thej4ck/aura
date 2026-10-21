@@ -13,7 +13,12 @@ export type EventoNota = {
 	velocita?: number;
 };
 
-export type Riproduzione = { fine: Promise<void>; ferma(): void };
+export type Riproduzione = {
+	/** inizio sul clock audio: l'evento con `inizio` s suona a `t0 + inizio` (per seguire le note) */
+	t0: number;
+	fine: Promise<void>;
+	ferma(): void;
+};
 
 const ATTACCO_S = 0.03;
 const DECADIMENTO_S = 0.25;
@@ -76,6 +81,7 @@ export function suona(eventi: readonly EventoNota[]): Riproduzione {
 	void p.fine.then(() => setTimeout(() => bus.disconnect(), 200));
 
 	return {
+		t0: p.t0,
 		fine: p.fine,
 		ferma() {
 			const ora = c.currentTime;

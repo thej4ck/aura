@@ -154,6 +154,7 @@ describe('synth', () => {
 		c.scorri(0.5);
 		const t0 = c.oscillatori[0].inizio;
 		expect(t0).toBeCloseTo(0.05, 10); // un piccolo margine prima della prima nota
+		expect(r.t0).toBe(t0); // per seguire le note che suonano
 		expect(c.oscillatori.map((o) => Math.round((o.inizio - t0) * 1000) / 1000)).toEqual([
 			0, 0.5, 1
 		]);
