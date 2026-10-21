@@ -257,7 +257,8 @@
 		position: fixed;
 		inset: auto;
 		top: calc(var(--target) + var(--spazio-6));
-		right: var(--spazio-4);
+		/* sotto il pulsante, che sta al bordo destro della testata centrata (anche sugli schermi larghi) */
+		right: max(var(--spazio-4), calc((100vw - var(--larghezza-pagina)) / 2 + var(--spazio-4)));
 		width: min(18rem, calc(100vw - 2 * var(--spazio-4)));
 		margin: 0;
 		padding: var(--spazio-3);
