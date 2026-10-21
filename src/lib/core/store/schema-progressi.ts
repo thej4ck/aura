@@ -91,7 +91,8 @@ export const PREFERENZE_PREDEFINITE: Preferenze = {
 	nomiNote: 'solfeggio',
 	tolleranza: 'facile',
 	filtroModuli: {},
-	letturaAltaVoce: false,
+	// il pulsante compare solo se c'è una voce locale: chi non legge ancora (6 anni) ha la narrazione da subito
+	letturaAltaVoce: true,
 	accessibilita: { testoGrande: false, contrastoAlto: false, riduciMovimento: false },
 	latenzaAudioMs: 0,
 	aggiornato: new Date(0).toISOString()
