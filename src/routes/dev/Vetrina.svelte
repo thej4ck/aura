@@ -14,6 +14,7 @@
 	import PlayerPassi from '#lib/core/ui/PlayerPassi.svelte';
 	import ProgressRing from '#lib/core/ui/ProgressRing.svelte';
 	import Stelle from '#lib/core/ui/Stelle.svelte';
+	import Pagine from './sezioni/Pagine.svelte';
 
 	const attivita = catalogoEsempio.attivita('esempio.linee.cinque-linee')!;
 
@@ -199,6 +200,8 @@
 			{/key}
 		</div>
 	</section>
+
+	<Pagine />
 </div>
 
 <style>
