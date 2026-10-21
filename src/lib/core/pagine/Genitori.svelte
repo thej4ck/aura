@@ -170,9 +170,6 @@
 		color: var(--colore-testo-tenue);
 		font-size: var(--testo-s);
 	}
-	.testo {
-		max-width: var(--larghezza-testo);
-	}
 
 	.indice ul {
 		display: flex;
