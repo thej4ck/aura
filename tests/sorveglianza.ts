@@ -16,7 +16,8 @@ export function sorveglia(page: Page, baseURL: string) {
 		}
 	});
 	page.on('console', (msg) => {
-		if (msg.type() === 'error') errori.push(msg.text());
+		const { url } = msg.location();
+		if (msg.type() === 'error') errori.push(url ? `${msg.text()} @ ${url}` : msg.text());
 	});
 	page.on('pageerror', (e) => errori.push(e.message));
 	return { esterne, errori };
