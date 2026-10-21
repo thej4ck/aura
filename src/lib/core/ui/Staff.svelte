@@ -17,12 +17,12 @@
 	import {
 		QUINTA_LINEA,
 		SELEZIONABILI,
-		alterazioneDaMostrare,
 		altezzaDaPasso,
 		nomePosizione,
 		passiSelezionabili,
 		passo as passoDi,
 		segniArmatura,
+		segniDaMostrare,
 		tagli,
 		type Segno
 	} from '#lib/core/musica/notazione.ts';
@@ -94,20 +94,21 @@
 	const armatura = $derived(rigo.armatura ?? 0);
 	const chiave = $derived(CHIAVI[rigo.chiave]);
 	const segni = $derived(segniArmatura(armatura, rigo.chiave));
-	const note = $derived(
-		rigo.note.map((nota, i) => {
-			const segno = alterazioneDaMostrare(nota.altezza, armatura);
-			return {
-				i,
-				altezza: nota.altezza,
-				passo: passoDi(nota.altezza, rigo.chiave),
-				testa: nota.durata === '1' ? GLIFI.testaSemibreve : GLIFI.testaPiena,
-				segno,
-				colore: COLORI[scomponi(nota.altezza).lettera],
-				evidenziata: evidenzia.some((e) => e === i || e === nota.altezza)
-			};
-		})
-	);
+	const note = $derived.by(() => {
+		const segniNote = segniDaMostrare(
+			rigo.note.map((n) => n.altezza),
+			armatura
+		);
+		return rigo.note.map((nota, i) => ({
+			i,
+			altezza: nota.altezza,
+			passo: passoDi(nota.altezza, rigo.chiave),
+			testa: nota.durata === '1' ? GLIFI.testaSemibreve : GLIFI.testaPiena,
+			segno: segniNote[i],
+			colore: COLORI[scomponi(nota.altezza).lettera],
+			evidenziata: evidenzia.some((e) => e === i || e === nota.altezza)
+		}));
+	});
 
 	// verticale: tutto ciò che si disegna, più le aree di tocco
 	const v = $derived.by(() => {

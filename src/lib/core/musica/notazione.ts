@@ -3,7 +3,7 @@
 // sotto lo 0 e sopra l'8 ci sono i tagli addizionali (-2, 10, …) e gli spazi tra loro.
 import type { Rigo } from '#lib/core/contenuti/schema.ts';
 import { m } from '#lib/paraglide/messages.js';
-import { LETTERE, alterazioniArmatura, componi, scomponi } from './note.ts';
+import { LETTERE, alterazioniArmatura, componi, scomponi, type Alterazione } from './note.ts';
 
 export type Chiave = Rigo['chiave'];
 export type Segno = 'diesis' | 'bemolle' | 'bequadro';
@@ -41,11 +41,26 @@ export function tagli(passo: number): number[] {
 	return t;
 }
 
-/** Alterazione da scrivere accanto alla nota, rispetto all'armatura (ogni nota fa da sé: non ci sono battute). */
-export function alterazioneDaMostrare(altezza: string, armatura = 0): Segno | undefined {
-	const { lettera, alterazione } = scomponi(altezza);
-	if (alterazione === alterazioniArmatura(armatura)[lettera]) return undefined;
-	return alterazione === 1 ? 'diesis' : alterazione === -1 ? 'bemolle' : 'bequadro';
+const SEGNI: Record<Alterazione, Segno> = { 1: 'diesis', [-1]: 'bemolle', 0: 'bequadro' };
+
+/**
+ * Alterazioni da scrivere accanto alle note di un rigo, in ordine. Il rigo non ha stanghette, quindi è
+ * una sola battuta: un'alterazione vale per la stessa nota (lettera e ottava) fino alla fine, e quando
+ * cambia serve il segno, anche il bequadro che la annulla. In più ogni nota fuori dall'armatura ha
+ * sempre il suo segno: il rigo si legge giusto anche da chi guarda le note una alla volta.
+ */
+export function segniDaMostrare(altezze: readonly string[], armatura = 0): (Segno | undefined)[] {
+	const inChiave = alterazioniArmatura(armatura);
+	const inVigore = new Map<string, Alterazione>();
+	return altezze.map((a) => {
+		const { lettera, alterazione, ottava } = scomponi(a);
+		const nota = `${lettera}${ottava}`;
+		const prima = inVigore.get(nota) ?? inChiave[lettera];
+		inVigore.set(nota, alterazione);
+		return alterazione === prima && alterazione === inChiave[lettera]
+			? undefined
+			: SEGNI[alterazione];
+	});
 }
 
 // posizioni classiche dei segni in chiave di violino (Fa Do Sol Re La Mi Si / Si Mi La Re Sol Do Fa)

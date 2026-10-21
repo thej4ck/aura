@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
 	SELEZIONABILI,
-	alterazioneDaMostrare,
 	altezzaDaPasso,
 	nomePosizione,
 	passiSelezionabili,
@@ -9,6 +8,7 @@ import {
 	passoDaY,
 	posizione,
 	segniArmatura,
+	segniDaMostrare,
 	suLinea,
 	tagli,
 	yDaPasso
@@ -71,14 +71,31 @@ describe('tagli addizionali', () => {
 
 describe('alterazioni', () => {
 	it('rispetto all’armatura', () => {
-		expect(alterazioneDaMostrare('C4')).toBeUndefined();
-		expect(alterazioneDaMostrare('F#4')).toBe('diesis');
-		expect(alterazioneDaMostrare('Bb3')).toBe('bemolle');
-		expect(alterazioneDaMostrare('F#4', 2)).toBeUndefined();
-		expect(alterazioneDaMostrare('F4', 2)).toBe('bequadro');
-		expect(alterazioneDaMostrare('Eb4', -3)).toBeUndefined();
-		expect(alterazioneDaMostrare('E4', -3)).toBe('bequadro');
-		expect(alterazioneDaMostrare('Db4', -3)).toBe('bemolle');
+		const segno = (a: string, armatura?: number) => segniDaMostrare([a], armatura)[0];
+		expect(segno('C4')).toBeUndefined();
+		expect(segno('F#4')).toBe('diesis');
+		expect(segno('Bb3')).toBe('bemolle');
+		expect(segno('F#4', 2)).toBeUndefined();
+		expect(segno('F4', 2)).toBe('bequadro');
+		expect(segno('Eb4', -3)).toBeUndefined();
+		expect(segno('E4', -3)).toBe('bequadro');
+		expect(segno('Db4', -3)).toBe('bemolle');
+	});
+
+	it('un rigo è una battuta: l’alterazione resta in vigore e si annulla con il segno', () => {
+		expect(segniDaMostrare(['F#4', 'G4', 'F4'])).toEqual(['diesis', undefined, 'bequadro']);
+		expect(segniDaMostrare(['Bb4', 'A4', 'B4'])).toEqual(['bemolle', undefined, 'bequadro']);
+		// Sol maggiore: il Fa naturale vale fino a che un diesis non lo riporta all'armatura
+		expect(segniDaMostrare(['F4', 'E4', 'F#4'], 1)).toEqual(['bequadro', undefined, 'diesis']);
+		// la stessa nota alterata due volte ha sempre il suo segno; un'altra ottava non c'entra
+		expect(segniDaMostrare(['F#4', 'F#4', 'F5'])).toEqual(['diesis', 'diesis', undefined]);
+		expect(segniDaMostrare(['C4', 'C#4', 'D4', 'D#4', 'E4'])).toEqual([
+			undefined,
+			'diesis',
+			undefined,
+			'diesis',
+			undefined
+		]);
 	});
 
 	it('segni dell’armatura nelle posizioni classiche', () => {
