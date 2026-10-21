@@ -74,7 +74,7 @@
 	<form onsubmit={conferma}>
 		<h2 id="{id}-titolo"><Icona nome="lucchetto" /> {m.gate_titolo()}</h2>
 		<p id="{id}-istruzioni">{m.gate_istruzioni()}</p>
-		<p class="numero">{numeroInLettere(numero)}</p>
+		<p class="numero" id="{id}-numero">{numeroInLettere(numero)}</p>
 		<label for="{id}-campo">{m.gate_etichetta()}</label>
 		<input
 			bind:this={campo}
@@ -85,11 +85,13 @@
 			pattern="[0-9]*"
 			maxlength="3"
 			autocomplete="off"
-			aria-describedby="{id}-istruzioni {id}-errore"
-			aria-invalid={errore}
+			aria-describedby="{id}-istruzioni {id}-numero {id}-errore"
 			required
 		/>
-		<p id="{id}-errore" class="errore" aria-live="polite">{errore ? m.gate_errore() : ''}</p>
+		<!-- il nuovo numero è nel messaggio: ogni tentativo cambia il testo e il lettore di schermo lo annuncia -->
+		<p id="{id}-errore" class="errore" aria-live="polite">
+			{errore ? m.gate_errore({ numero: numeroInLettere(numero) }) : ''}
+		</p>
 		<div class="azioni">
 			<Button type="submit">{m.gate_conferma()}</Button>
 			<Button variante="secondaria" onclick={annulla}>{m.gate_annulla()}</Button>

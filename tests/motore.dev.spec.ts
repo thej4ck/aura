@@ -73,13 +73,23 @@ test('controllo per gli adulti: numero in lettere da scrivere in cifre', async (
 	const dialog = page.getByRole('dialog', { name: 'Questa parte è per gli adulti' });
 	await expect(dialog).toBeVisible();
 
-	await dialog.getByLabel('Il numero in cifre').fill('1');
+	// il numero da scrivere fa parte della descrizione del campo, che ha il focus: il lettore di schermo lo legge
+	const campo = dialog.getByLabel('Il numero in cifre');
+	const leggiNumero = async () => (await dialog.locator('.numero').textContent())!.trim();
+	await expect(campo).toBeFocused();
+	await expect(campo).toHaveAccessibleDescription(new RegExp(await leggiNumero()));
+
+	await campo.fill('1');
 	await dialog.getByRole('button', { name: 'Conferma' }).click();
-	await expect(dialog.getByText('Il numero non corrisponde. Eccone un altro.')).toBeVisible();
+	// il messaggio contiene il nuovo numero: ogni tentativo cambia il testo annunciato
+	await expect(dialog.getByText(/Il numero non corrisponde/)).toBeVisible();
+	const lettere = await leggiNumero();
+	await expect(
+		dialog.getByText(`Il numero non corrisponde. Eccone un altro: ${lettere}.`)
+	).toBeVisible();
 
 	// il numero è scritto in lettere: lo si converte qui con la stessa funzione del sito
 	const { numeroInLettere } = await import('../src/lib/core/numeri');
-	const lettere = (await dialog.locator('.numero').textContent())!.trim();
 	const numero = Array.from({ length: 900 }, (_, i) => i + 100).find(
 		(n) => numeroInLettere(n) === lettere
 	);

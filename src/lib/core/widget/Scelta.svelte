@@ -38,7 +38,10 @@
 		trovata
 			? [m.scelta_giusta(), p.spiegazione].filter(Boolean).join(' ')
 			: provate.length
-				? [m.scelta_riprova(), p.suggerimento].filter(Boolean).join(' ')
+				? // l'opzione appena provata nel testo: ogni tentativo cambia il messaggio e la regione live lo annuncia
+					[m.scelta_riprova({ opzione: p.opzioni[provate.at(-1)!] }), p.suggerimento]
+						.filter(Boolean)
+						.join(' ')
 				: ''
 	);
 

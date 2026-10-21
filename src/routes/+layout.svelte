@@ -79,14 +79,18 @@
 					<p class="menu-titolo">{m.profilo_scegli()}</p>
 					<ul>
 						{#each progressi.profili as p (p.id)}
+							{@const attivo = p.id === progressi.doc.profilo.id}
 							<li>
+								<!-- senza alias il nome accessibile viene dall'avatar; l'attivo ha anche la spunta, non solo il colore -->
 								<button
 									type="button"
-									aria-current={p.id === progressi.doc.profilo.id ? 'true' : undefined}
+									aria-current={attivo ? 'true' : undefined}
+									aria-label={p.alias ? undefined : m.profilo_voce({ avatar: p.avatar })}
 									onclick={() => scegli(p.id)}
 								>
 									<span class="avatar piccolo" aria-hidden="true">{p.avatar}</span>
-									<span>{p.alias ?? p.avatar}</span>
+									{#if p.alias}<span>{p.alias}</span>{/if}
+									{#if attivo}<span class="spunta"><Icona nome="check" /></span>{/if}
 								</button>
 							</li>
 						{/each}
@@ -279,6 +283,11 @@
 		background: var(--colore-accento-tenue);
 		font-weight: var(--peso-medio);
 	}
+	.spunta {
+		display: inline-flex;
+		margin-inline-start: auto;
+		color: var(--colore-accento-forte);
+	}
 
 	.avvisi {
 		display: grid;
@@ -311,6 +320,11 @@
 	}
 	.piede p {
 		max-width: var(--larghezza-testo);
+	}
+	.piede a {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--target);
 	}
 
 	@media (max-width: 30rem) {

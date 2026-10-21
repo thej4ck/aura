@@ -13,6 +13,7 @@
 	"profilo_attivo": "Profilo attivo: {avatar}",
 	"profilo_cambia": "Profilo attivo: {avatar}. Cambia profilo",
 	"profilo_scegli": "Chi impara adesso?",
+	"profilo_voce": "Profilo {avatar}",
 	"avviso_non_persistente": "Su questo browser i progressi restano solo finché la pagina è aperta.",
 	"avviso_errore_salvataggio": "I progressi non si sono salvati. Riprovo da solo tra poco.",
 	"avviso_illeggibili": "Alcuni progressi salvati su questo dispositivo non si aprono con questa versione del sito. Non sono stati cancellati: ricarica la pagina più tardi.",
@@ -70,7 +71,7 @@
 	"leggi_ferma": "Ferma la lettura",
 
 	"scelta_giusta": "Sì, è proprio questa!",
-	"scelta_riprova": "Non è questa. Prova un'altra risposta.",
+	"scelta_riprova": "«{opzione}» non è questa. Prova un'altra risposta.",
 	"scelta_provata": "già provata",
 
 	"player_riproduci": "Riproduci",
@@ -85,7 +86,7 @@
 	"gate_etichetta": "Il numero in cifre",
 	"gate_conferma": "Conferma",
 	"gate_annulla": "Annulla",
-	"gate_errore": "Il numero non corrisponde. Eccone un altro.",
+	"gate_errore": "Il numero non corrisponde. Eccone un altro: {numero}.",
 
 	"pref_testo_grande": "Testo grande",
 	"pref_contrasto_alto": "Contrasto alto",

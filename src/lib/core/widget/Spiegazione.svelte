@@ -58,6 +58,12 @@
 		background: var(--colore-superficie-tenue);
 		color: var(--colore-testo);
 	}
+	/* il disegno del modulo prende la larghezza della figura (centrato in grid si restringerebbe a 300px) */
+	.illustrazione > div {
+		display: grid;
+		place-items: center;
+		width: 100%;
+	}
 	img {
 		max-height: 16rem;
 		height: auto;
