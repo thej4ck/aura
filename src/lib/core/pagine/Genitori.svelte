@@ -7,6 +7,7 @@
 	import Avviso from '../ui/Avviso.svelte';
 	import Button from '../ui/Button.svelte';
 	import GateAdulti from '../ui/GateAdulti.svelte';
+	import InstallaApp from '../ui/InstallaApp.svelte';
 	import { serveBackup } from '../vista/genitori';
 	import Backup from './genitori/Backup.svelte';
 	import Impostazioni from './genitori/Impostazioni.svelte';
@@ -135,11 +136,9 @@
 		</ul>
 	</section>
 
-	<section id="installa" aria-labelledby="titolo-installa">
-		<h2 id="titolo-installa">{m.genitori_installa()}</h2>
-		<p class="testo">{m.genitori_installa_testo()}</p>
-		<!-- integrazione: qui va <InstallaApp /> da '#lib/core/ui/InstallaApp.svelte' (ambito PWA) -->
-	</section>
+	<div id="installa">
+		<InstallaApp />
+	</div>
 </div>
 
 <GateAdulti
