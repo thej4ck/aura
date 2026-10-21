@@ -1,0 +1,14 @@
+.git
+.github
+.vscode
+node_modules
+build
+.svelte-kit
+test-results
+playwright-report
+src/lib/paraglide
+project.inlang/cache
+Dockerfile
+.dockerignore
+*.md
+docs

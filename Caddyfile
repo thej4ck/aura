@@ -1,0 +1,40 @@
+{
+	admin off
+	auto_https off
+	persist_config off
+}
+
+# Intestazioni comuni, usate anche dalla pagina 404
+(intestazioni) {
+	header {
+		Permissions-Policy "microphone=(self), camera=(), geolocation=()"
+		Referrer-Policy no-referrer
+		X-Content-Type-Options nosniff
+		# frame-ancestors non si può dare via <meta>: il resto della CSP è nell'HTML (kit.csp)
+		Content-Security-Policy "frame-ancestors 'none'"
+		-Server
+		# tutto ciò che non ha l'hash nel nome si rivalida sempre (HTML, service worker, manifest)
+		?Cache-Control "no-cache"
+	}
+	header /_app/immutable/* Cache-Control "public, max-age=31536000, immutable"
+}
+
+# Nessuna direttiva `log`: niente access log.
+:{$PORT:8080} {
+	import intestazioni
+	root * /srv
+	try_files {path} {path}.html {path}/index.html
+	# .br/.gz generati in build; encode resta solo come ripiego per i file non precompressi
+	encode zstd gzip
+	file_server {
+		precompressed br gzip
+	}
+
+	handle_errors 404 {
+		import intestazioni
+		rewrite * /404.html
+		file_server {
+			precompressed br gzip
+		}
+	}
+}
