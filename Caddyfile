@@ -10,13 +10,14 @@
 		Permissions-Policy "microphone=(self), camera=(), geolocation=()"
 		Referrer-Policy no-referrer
 		X-Content-Type-Options nosniff
-		# frame-ancestors non si può dare via <meta>: il resto della CSP è nell'HTML (kit.csp).
-		# `?`: solo se non c'è già, così il service worker tiene la sua (sotto)
-		?Content-Security-Policy "frame-ancestors 'none'"
 		-Server
 		# tutto ciò che non ha l'hash nel nome si rivalida sempre (HTML, service worker, manifest)
 		?Cache-Control "no-cache"
 	}
+	# frame-ancestors non si può dare via <meta>: il resto della CSP è nell'HTML (kit.csp).
+	# `?`: solo se non c'è già, così il service worker tiene la sua (sotto). In un blocco a parte:
+	# più `?` nello stesso blocco valgono solo se mancano tutti
+	header ?Content-Security-Policy "frame-ancestors 'none'"
 }
 
 # Nessuna direttiva `log`: niente access log.
