@@ -3,16 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apriDb } from './db';
 import { leggi, permesso, salvaHandle, scrivi } from './file';
 import { AVATARI, Progressi, SALVA_DOPO_MS } from './progressi.svelte';
-import { nuovoDocumento, type Documento } from './schema-progressi';
+import { ErroreProgressi, nuovoDocumento, type Documento } from './schema-progressi';
 
 // picker, permessi e scrittura su file restano finti; esporta, salvaHandle e handleSalvato sono quelli veri
 vi.mock('./file', async (originale) => ({
 	...(await originale<typeof import('./file')>()),
 	permesso: vi.fn(async () => false),
 	scrivi: vi.fn(async () => {}),
-	leggi: vi.fn(async (): Promise<Documento> => {
-		throw new Error('file vuoto');
-	})
+	leggi: vi.fn(async (): Promise<Documento | undefined> => undefined) // file collegato vuoto
 }));
 
 const T0 = new Date(2026, 9, 21, 10); // 21 ottobre 2026, ora locale
@@ -41,7 +39,7 @@ beforeEach(() => {
 	vi.clearAllMocks();
 	vi.mocked(permesso).mockResolvedValue(false);
 	vi.mocked(scrivi).mockResolvedValue(undefined);
-	vi.mocked(leggi).mockRejectedValue(new Error('file vuoto'));
+	vi.mocked(leggi).mockResolvedValue(undefined);
 });
 
 afterEach(() => {
@@ -103,16 +101,22 @@ describe('salvataggio', () => {
 		await p.flush();
 		expect((await salvati())[0].preferenze.nomiNote).toBe('lettere');
 
+		// si aspetta il flush partito dal gestore, senza chiamarne un altro (lo maschererebbe)
+		const flush = vi.spyOn(p, 'flush');
 		p.aggiornaPreferenze({ latenzaAudioMs: 120 });
+		eventi.visibilitychange(); // pagina ancora visibile: niente
+		expect(flush).not.toHaveBeenCalled();
 		vi.stubGlobal('document', { ...document, visibilityState: 'hidden' });
 		eventi.visibilitychange();
-		await p.flush(); // già in corso: aspetta solo che finisca
+		expect(flush).toHaveBeenCalledTimes(1);
+		await flush.mock.results[0].value;
 		expect((await salvati())[0].preferenze.latenzaAudioMs).toBe(120);
 
-		p.aggiornaPreferenze({ letturaAltaVoce: true });
+		p.aggiornaPreferenze({ letturaAltaVoce: false });
 		eventi.pagehide();
-		await p.flush();
-		expect((await salvati())[0].preferenze.letturaAltaVoce).toBe(true);
+		expect(flush).toHaveBeenCalledTimes(2);
+		await flush.mock.results[1].value;
+		expect((await salvati())[0].preferenze.letturaAltaVoce).toBe(false);
 	});
 
 	it('chiede la persistenza al primo salvataggio', async () => {
@@ -141,6 +145,103 @@ describe('salvataggio', () => {
 		await p.flush();
 		expect(p.erroreSalvataggio).toBe(false);
 		expect((await salvati())[0].preferenze.tolleranza).toBe('medio');
+	});
+
+	it('rifiuta i valori fuori schema senza toccare il documento: al riavvio il profilo è lo stesso', async () => {
+		const p = await avvia();
+		const id = p.doc!.profilo.id;
+		p.aggiornaAttivita('musica.canto.eco', { stato: 'completata', stelle: 2 });
+		expect(() => p.aggiornaProfilo({ alias: 'x'.repeat(41) })).toThrow();
+		expect(() => p.aggiornaPreferenze({ latenzaAudioMs: 5000 })).toThrow();
+		expect(() => p.aggiornaAttivita('musica.canto.eco', { stelle: 9 })).toThrow();
+		expect(() => p.aggiornaAttivita('eco', { stato: 'in_corso' })).toThrow(); // id non qualificato
+		expect(() => p.aggiornaDati('canto', { x: 1 })).toThrow();
+		const verifica = { superata: true, errori: 0 };
+		expect(() => p.registraVerifica('musica.canto.eco', ['note'], verifica, T0)).toThrow();
+		expect(p.doc!.attivita['musica.canto.eco']).toMatchObject({ stelle: 2, tentativi: 0 });
+		expect(p.doc!.profilo.alias).toBeUndefined();
+		expect(p.doc!.preferenze.latenzaAudioMs).toBe(0);
+		await expect(p.creaProfilo('')).rejects.toThrow();
+		await p.flush();
+
+		const q = await avvia();
+		expect(q.illeggibili).toBe(0);
+		expect(q.profili.map((x) => x.id)).toEqual([id]);
+		expect(q.doc!.attivita['musica.canto.eco'].stelle).toBe(2);
+		expect(await salvati()).toHaveLength(1);
+	});
+
+	it("un alias vuoto o di soli spazi toglie l'alias", async () => {
+		const p = await avvia();
+		p.aggiornaProfilo({ alias: '  Bea ' });
+		expect(p.doc!.profilo.alias).toBe('Bea');
+		p.aggiornaProfilo({ alias: '   ' });
+		expect(p.doc!.profilo).not.toHaveProperty('alias');
+		expect(p.profili[0]).not.toHaveProperty('alias');
+	});
+
+	it('un documento modificato a mano fuori schema non arriva in IndexedDB', async () => {
+		const p = await avvia();
+		p.doc!.preferenze.latenzaAudioMs = 5000; // senza passare dai mutatori
+		p.aggiornaDati('musica.canto', { x: 1 });
+		await p.flush();
+		expect(p.erroreSalvataggio).toBe(true);
+		expect((await salvati())[0].preferenze.latenzaAudioMs).toBe(0);
+		expect((await avvia()).doc?.profilo.id).toBe(p.doc!.profilo.id);
+	});
+
+	it('due schede aperte sullo stesso profilo: i record di entrambe restano', async () => {
+		const a = await avvia();
+		const b = await avvia();
+		expect(b.doc!.profilo.id).toBe(a.doc!.profilo.id);
+		a.aggiornaAttivita('musica.canto.eco', { stato: 'completata', stelle: 1 });
+		await a.flush();
+		b.aggiornaAttivita('musica.canto.note', { stato: 'completata', stelle: 2 });
+		await b.flush();
+		const [doc] = await salvati();
+		expect(Object.keys(doc.attivita).sort()).toEqual(['musica.canto.eco', 'musica.canto.note']);
+	});
+});
+
+describe('avvio difficile', () => {
+	it('senza crypto.randomUUID (http dalla rete locale) il primo avvio crea comunque il profilo', async () => {
+		const vero = globalThis.crypto;
+		vi.stubGlobal('crypto', { getRandomValues: vero.getRandomValues.bind(vero) });
+		const p = await avvia();
+		expect(p.pronto).toBe(true);
+		expect(p.doc?.profilo.id).toMatch(
+			/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+		);
+	});
+
+	it('IndexedDB che non accetta scritture: si segnala, e senza profili si continua in memoria', async () => {
+		const primo = (await avvia()).doc!.profilo.id;
+		const put = IDBObjectStore.prototype.put;
+		IDBObjectStore.prototype.put = () => {
+			throw new DOMException('pieno', 'QuotaExceededError');
+		};
+		try {
+			// il profilo si legge ma non si salva: resta quello, con l'avviso
+			const p = await avvia();
+			expect(p).toMatchObject({ pronto: true, persistente: true, erroreSalvataggio: true });
+			expect(p.doc?.profilo.id).toBe(primo);
+
+			// nessun profilo da leggere e nessuna scrittura possibile: in memoria
+			vi.stubGlobal('indexedDB', new IDBFactory());
+			const q = await avvia();
+			expect(q).toMatchObject({ pronto: true, persistente: false });
+			expect(q.doc).toBeDefined();
+		} finally {
+			IDBObjectStore.prototype.put = put;
+		}
+	});
+
+	it('un documento che questa versione non sa leggere resta in IndexedDB e si conta', async () => {
+		await (await apriDb(indexedDB)).put('profili', { ...nuovoDocumento('🐙'), schema: 2 });
+		const p = await avvia();
+		expect(p.illeggibili).toBe(1);
+		expect(p.profili).toHaveLength(1); // quello nuovo, per poter usare il sito
+		expect(await salvati()).toHaveLength(2);
 	});
 });
 
@@ -257,6 +358,15 @@ describe('importaEUnisci', () => {
 		expect((await salvati())[0]).toEqual(unito);
 	});
 
+	it("stesso profilo con avatar e alias più recenti: anche l'elenco dei profili li mostra", async () => {
+		const p = await avvia();
+		const file = structuredClone(p.doc!);
+		file.profilo = { ...file.profilo, avatar: '🐢', alias: 'Nuovo' };
+		file.preferenze.aggiornato = '2026-10-21T08:00:00.000Z';
+		await p.importaEUnisci(file);
+		expect(p.profili).toEqual([file.profilo]);
+	});
+
 	it('profilo sconosciuto: aggiunto e scelto; già presente: unito', async () => {
 		const p = await avvia();
 		const primo = p.doc!.profilo.id;
@@ -324,10 +434,12 @@ describe('backup e sync su file', () => {
 		expect(p.doc?.ultimoBackup).toBe(T0.toISOString());
 		expect((await salvati())[0]).toEqual(scritto);
 
-		// da qui ogni salvataggio scrive anche sul file
+		// da qui ogni salvataggio scrive anche sul file: si aspetta quello partito dal timer
+		const flush = vi.spyOn(p, 'flush');
 		p.aggiornaPreferenze({ nomiNote: 'lettere' });
 		await vi.advanceTimersByTimeAsync(SALVA_DOPO_MS);
-		await p.flush();
+		expect(flush).toHaveBeenCalledTimes(1);
+		await flush.mock.results[0].value;
 		expect(scrivi).toHaveBeenCalledTimes(2);
 		expect(vi.mocked(scrivi).mock.calls[1][1].preferenze.nomiNote).toBe('lettere');
 
@@ -349,7 +461,27 @@ describe('backup e sync su file', () => {
 		vi.mocked(leggi).mockResolvedValue(nuovoDocumento('🐙'));
 		const p = await avvia();
 		expect(p.sync).toBe('errore');
+		p.aggiornaPreferenze({ tolleranza: 'medio' });
+		await p.flush();
 		expect(scrivi).not.toHaveBeenCalled();
+	});
+
+	it('un file collegato illeggibile (versione più nuova, modificato a mano) non si sovrascrive', async () => {
+		const p0 = await avvia();
+		await salvaHandle(await apriDb(indexedDB), p0.doc!.profilo.id, handle);
+		vi.mocked(permesso).mockResolvedValue(true);
+		vi.mocked(leggi).mockRejectedValue(new ErroreProgressi('versione-futura', 'schema 2'));
+		const p = await avvia();
+		expect(p.sync).toBe('errore');
+		p.aggiornaPreferenze({ tolleranza: 'medio' });
+		await p.flush();
+		expect(scrivi).not.toHaveBeenCalled();
+
+		// sito aggiornato, il file ora si legge: riprendiSync lo unisce e torna a scriverlo
+		vi.mocked(leggi).mockResolvedValue(structuredClone(p.doc!));
+		await p.riprendiSync();
+		expect(p.sync).toBe('attiva');
+		expect(scrivi).toHaveBeenCalledTimes(1);
 	});
 
 	it("all'avvio con il permesso già concesso la sync riparte da sola", async () => {

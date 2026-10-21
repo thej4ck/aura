@@ -123,8 +123,13 @@ export async function scrivi(handle: FileSystemFileHandle, doc: Documento): Prom
 	await w.close();
 }
 
-export async function leggi(handle: FileSystemFileHandle): Promise<Documento> {
-	return importa(await handle.getFile());
+/**
+ * Il documento nel file collegato; `undefined` se il file è vuoto (l'unico caso in cui lo si può riscrivere
+ * senza perdere niente). Un file che non si legge lancia come `importa`.
+ */
+export async function leggi(handle: FileSystemFileHandle): Promise<Documento | undefined> {
+	const file = await handle.getFile();
+	return file.size ? importa(file) : undefined;
 }
 
 /** Permesso di scrittura sul file. `richiedi` mostra la richiesta al browser: serve un gesto dell'utente. */
@@ -146,10 +151,10 @@ export async function collegaNuovoFile(doc: Documento): Promise<FileSystemFileHa
 	return handle;
 }
 
-/** Fa scegliere un file esistente e lo legge: il documento va poi unito ai progressi. */
+/** Fa scegliere un file esistente e lo legge: il documento (assente se il file è vuoto) va poi unito ai progressi. */
 export async function collegaFileEsistente(): Promise<{
 	handle: FileSystemFileHandle;
-	doc: Documento;
+	doc: Documento | undefined;
 }> {
 	const [handle] = await picker().showOpenFilePicker({ types: TIPI });
 	return { handle, doc: await leggi(handle) };

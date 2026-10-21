@@ -1,6 +1,10 @@
 // Stato reattivo dei progressi (profilo attivo, profili, sync su file).
 // All'import non tocca IndexedDB, window o document: tutto parte da carica(), che nel prerender non fa nulla.
+// Ogni modifica passa dagli schemi Valibot prima di entrare nel documento: un valore fuori schema in IndexedDB
+// farebbe fallire migra() al riavvio e il profilo sparirebbe dall'elenco.
+import * as v from 'valibot';
 import { scegli } from '../casuale';
+import { registraErrore } from '../errori';
 import { giorno } from '../giorno';
 import { aggiornaCompetenza, calcolaStelle, type Esito } from '../padronanza';
 import { apriDb, type Db } from './db';
@@ -16,8 +20,10 @@ import {
 } from './file';
 import { migra } from './migrazioni';
 import {
-	ErroreProgressi,
 	nuovoDocumento,
+	SchemaDocumento,
+	SchemaPreferenze,
+	SchemaProfilo,
 	type Documento,
 	type Preferenze,
 	type Profilo,
@@ -38,7 +44,14 @@ export const AVATARI = ['🦊', '🐻', '🐼', '🐨', '🐸', '🦉', '🐙', 
 export type StatoSync = 'nessuna' | 'attiva' | 'in-pausa' | 'errore';
 
 const CHIAVE_ATTIVO = 'profiloAttivo';
-const ora = () => new Date().toISOString();
+const iso = (ms: number) => new Date(ms).toISOString();
+const ora = () => iso(Date.now());
+// le mappe del documento: validano insieme la chiave (id qualificato) e il record
+const {
+	attivita: SchemaMappaAttivita,
+	competenze: SchemaMappaCompetenze,
+	dati: SchemaMappaDati
+} = SchemaDocumento.entries;
 
 export class Progressi {
 	/** profili presenti sul dispositivo */
@@ -50,6 +63,8 @@ export class Progressi {
 	sync: StatoSync = $state('nessuna');
 	/** true quando l'ultimo salvataggio su IndexedDB è fallito (si ritenta al prossimo flush) */
 	erroreSalvataggio = $state(false);
+	/** documenti in IndexedDB che questa versione non sa leggere (es. scritti da una più nuova): restano lì, non si cancellano */
+	illeggibili = $state(0);
 	pronto = $state(false);
 
 	#db: Db | undefined;
@@ -58,17 +73,22 @@ export class Progressi {
 	#sporco = false;
 	#coda: Promise<void> = Promise.resolve();
 	#persistenzaChiesta = false;
+	#ultimoIstante = 0;
 
-	/** Apre il db, carica i profili e attiva l'ultimo usato (al primo avvio ne crea uno). In SSR non fa nulla. */
+	/**
+	 * Apre il db, carica i profili e attiva l'ultimo usato (al primo avvio ne crea uno). In SSR non fa nulla.
+	 * Se IndexedDB si apre ma poi non risponde (disco pieno, connessione persa su iOS) si continua in memoria,
+	 * con l'avviso per l'adulto, invece di restare senza profilo.
+	 */
 	async carica(): Promise<void> {
 		if (typeof window === 'undefined' || this.#db) return;
-		const db = (this.#db = await apriDb());
-		this.persistente = db.persistente;
-		await this.#aggiornaProfili();
-		const salvato = await db.get<string>('sistema', CHIAVE_ATTIVO);
-		const id = this.profili.find((p) => p.id === salvato)?.id ?? this.profili[0]?.id;
-		if (id) await this.scegliProfilo(id);
-		else await this.creaProfilo(scegli(AVATARI, Math.random));
+		try {
+			await this.#avvia(await apriDb());
+		} catch (e) {
+			registraErrore(e);
+			if (this.doc) this.erroreSalvataggio = true;
+			else await this.#avvia(await apriDb(null));
+		}
 		document.addEventListener('visibilitychange', () => {
 			if (document.visibilityState === 'hidden') void this.flush();
 		});
@@ -76,8 +96,9 @@ export class Progressi {
 		this.pronto = true;
 	}
 
+	/** Lancia ValiError se avatar o alias non sono validi (e non salva niente). */
 	async creaProfilo(avatar: string, alias?: string): Promise<Profilo> {
-		const doc = nuovoDocumento(avatar, alias);
+		const doc = v.parse(SchemaDocumento, nuovoDocumento(avatar, alias));
 		await this.#richiediDb().put('profili', doc);
 		this.#chiediPersistenza();
 		await this.#aggiornaProfili();
@@ -119,26 +140,36 @@ export class Progressi {
 		}
 	}
 
-	/** Avatar e alias. Aggiorna anche `preferenze.aggiornato`: nell'unione il profilo segue le preferenze. */
+	/**
+	 * Avatar e alias (un alias vuoto o di soli spazi toglie l'alias). Aggiorna anche `preferenze.aggiornato`:
+	 * nell'unione il profilo segue le preferenze. Valori non validi → ValiError, e niente cambia.
+	 */
 	aggiornaProfilo(patch: Partial<Omit<Profilo, 'id'>>): void {
 		const doc = this.#documento();
-		doc.profilo = { ...doc.profilo, ...patch };
-		doc.preferenze.aggiornato = ora();
-		this.profili = this.profili.map((p) => (p.id === doc.profilo.id ? { ...doc.profilo } : p));
+		const { alias, ...resto } = { ...doc.profilo, ...patch, id: doc.profilo.id };
+		doc.profilo = v.parse(SchemaProfilo, alias?.trim() ? { ...resto, alias } : resto);
+		doc.preferenze.aggiornato = this.#adesso();
+		this.#rifletti();
 		this.#programma();
 	}
 
+	/** Valori non validi → ValiError, e niente cambia. Gli oggetti annidati vanno passati interi. */
 	aggiornaPreferenze(patch: Partial<Omit<Preferenze, 'aggiornato'>>): void {
 		const doc = this.#documento();
-		doc.preferenze = { ...doc.preferenze, ...patch, aggiornato: ora() };
+		doc.preferenze = v.parse(SchemaPreferenze, {
+			...doc.preferenze,
+			...patch,
+			aggiornato: this.#adesso()
+		});
 		this.#programma();
 	}
 
-	/** Crea o aggiorna il record di un'attività (es. `{ stato: 'in_corso', scheda: 2 }`). */
+	/** Crea o aggiorna il record di un'attività (es. `{ stato: 'in_corso', scheda: 2 }`). Id o valori non validi → ValiError. */
 	aggiornaAttivita(id: string, patch: Partial<Omit<RecordAttivita, 'aggiornato'>>): RecordAttivita {
 		const doc = this.#documento();
 		const prev = doc.attivita[id] ?? { stato: 'nuova', scheda: 0, stelle: 0, tentativi: 0 };
-		doc.attivita[id] = { ...prev, ...patch, aggiornato: ora() };
+		const nuovo = { [id]: { ...prev, ...patch, aggiornato: this.#adesso() } };
+		doc.attivita[id] = v.parse(SchemaMappaAttivita, nuovo)[id];
 		this.#programma();
 		return doc.attivita[id];
 	}
@@ -166,18 +197,25 @@ export class Progressi {
 		};
 		const primaVolta = prev?.primaVolta ?? (esito.superata ? g : undefined);
 		if (primaVolta) record.primaVolta = primaVolta;
-		doc.attivita[attivitaId] = record;
-		for (const id of competenzeIds) {
-			doc.competenze[id] = aggiornaCompetenza(doc.competenze[id], esito, oggi);
-		}
+		// tutto validato prima di toccare il documento: o cambia tutto o niente
+		const attivita = v.parse(SchemaMappaAttivita, { [attivitaId]: record });
+		const competenze = v.parse(
+			SchemaMappaCompetenze,
+			Object.fromEntries(
+				competenzeIds.map((id) => [id, aggiornaCompetenza(doc.competenze[id], esito, oggi)])
+			)
+		);
+		Object.assign(doc.attivita, attivita);
+		Object.assign(doc.competenze, competenze);
 		this.#programma();
-		return record;
+		return attivita[attivitaId];
 	}
 
 	/** Blocco di dati di un modulo (`musica.canto`): la forma la decide il modulo. */
 	aggiornaDati(moduloId: string, patch: Record<string, unknown>): RecordDati {
 		const doc = this.#documento();
-		doc.dati[moduloId] = { ...doc.dati[moduloId], ...patch, aggiornato: ora() };
+		const nuovo = { [moduloId]: { ...doc.dati[moduloId], ...patch, aggiornato: this.#adesso() } };
+		doc.dati[moduloId] = v.parse(SchemaMappaDati, nuovo)[moduloId];
 		this.#programma();
 		return doc.dati[moduloId];
 	}
@@ -192,6 +230,7 @@ export class Progressi {
 		const id = importato.profilo.id;
 		if (id === doc.profilo.id) {
 			this.doc = unisci($state.snapshot(doc), importato);
+			this.#rifletti();
 			this.#sporco = true;
 			await this.flush();
 			return this.doc;
@@ -224,8 +263,9 @@ export class Progressi {
 
 	// --- file collegato (File System Access API); le chiamate con il picker richiedono un gesto dell'utente ---
 
-	/** Riprende la sync dopo un riavvio: chiede il permesso, legge il file, unisce e riscrive. */
-	riprendiSync(): Promise<void> {
+	/** Riprende la sync (dopo un riavvio o un errore): chiede il permesso, legge il file, unisce e riscrive. */
+	async riprendiSync(): Promise<void> {
+		this.#handle ??= await handleSalvato(this.#richiediDb(), this.#documento().profilo.id);
 		return this.#sincronizza(true);
 	}
 
@@ -239,7 +279,7 @@ export class Progressi {
 	/** Collega un file esistente: lo importa (anche se di un altro profilo) e lo tiene sincronizzato. */
 	async collegaFileEsistente(): Promise<void> {
 		const { handle, doc } = await collegaFileEsistente();
-		await this.importaEUnisci(doc);
+		if (doc) await this.importaEUnisci(doc); // un file vuoto si collega e basta
 		await this.#collega(handle);
 	}
 
@@ -261,16 +301,45 @@ export class Progressi {
 		return this.doc;
 	}
 
+	async #avvia(db: Db): Promise<void> {
+		this.#db = db;
+		this.persistente = db.persistente;
+		await this.#aggiornaProfili();
+		const salvato = await db.get<string>('sistema', CHIAVE_ATTIVO);
+		const id = this.profili.find((p) => p.id === salvato)?.id ?? this.profili[0]?.id;
+		if (id) await this.scegliProfilo(id);
+		else await this.creaProfilo(scegli(AVATARI, Math.random));
+	}
+
 	async #aggiornaProfili(): Promise<void> {
 		const docs = await this.#richiediDb().tutti<unknown>('profili');
-		// ponytail: un documento che non passa la validazione resta nel db ma non compare; un recupero se mai servirà
+		// ponytail: un documento illeggibile resta nel db, non compare e si conta (avviso nel layout); un export grezzo per l'adulto se mai servirà
+		let illeggibili = 0;
 		this.profili = docs.flatMap((d) => {
 			try {
 				return [migra(d).profilo];
-			} catch {
+			} catch (e) {
+				illeggibili++;
+				registraErrore(e);
 				return [];
 			}
 		});
+		this.illeggibili = illeggibili;
+	}
+
+	/** L'elenco dei profili mostra avatar e alias del documento attivo. */
+	#rifletti(): void {
+		const { profilo } = this.#documento();
+		this.profili = this.profili.map((p) => (p.id === profilo.id ? { ...profilo } : p));
+	}
+
+	/**
+	 * Istante per `aggiornato`: sempre successivo al precedente di questa istanza, così nell'unione con
+	 * IndexedDB (#salva) una modifica nuova non pareggia mai con quella salvata un attimo prima.
+	 */
+	#adesso(): string {
+		this.#ultimoIstante = Math.max(Date.now(), this.#ultimoIstante + 1);
+		return iso(this.#ultimoIstante);
 	}
 
 	#programma(): void {
@@ -279,17 +348,28 @@ export class Progressi {
 		this.#timer = setTimeout(() => void this.flush(), SALVA_DOPO_MS);
 	}
 
+	/**
+	 * Valida e unisce con quello che c'è già in IndexedDB prima di scrivere: un'altra scheda aperta sullo stesso
+	 * profilo può aver salvato record che questa non ha in memoria (unisci lavora per record, non si perde niente).
+	 * Un documento non valido, o illeggibile in IndexedDB, non si scrive: si segnala e si ritenta al flush dopo.
+	 */
 	async #salva(): Promise<void> {
 		if (!this.doc) return;
-		const doc = $state.snapshot(this.doc);
+		const db = this.#richiediDb();
+		let doc: Documento;
 		try {
-			await this.#richiediDb().put('profili', doc);
+			doc = v.parse(SchemaDocumento, $state.snapshot(this.doc));
+			const salvato = await db.get<unknown>('profili', doc.profilo.id);
+			if (salvato) doc = unisci(migra(salvato), doc);
+			await db.put('profili', doc);
 			this.erroreSalvataggio = false;
-		} catch {
+		} catch (e) {
+			registraErrore(e);
 			this.erroreSalvataggio = true;
 			this.#sporco = true;
 			return;
 		}
+		// ponytail: l'altra scheda vede questi record solo quando ricarica; BroadcastChannel se servirà dal vivo
 		this.#chiediPersistenza();
 		await this.#dopoSalvataggio(doc);
 	}
@@ -329,17 +409,17 @@ export class Progressi {
 			return;
 		}
 		try {
-			let unito: Documento = $state.snapshot(this.#documento());
-			try {
-				unito = unisci(unito, await leggi(handle));
-			} catch (e) {
-				// un file vuoto o danneggiato si riscrive; un file di un altro profilo no
-				if (e instanceof ErroreProgressi && e.codice === 'profili-diversi') throw e;
-			}
-			this.doc = unito;
+			// solo un file vuoto (undefined) si riscrive senza unire. Uno illeggibile (versione più nuova del sito,
+			// modificato a mano, danneggiato) o di un altro profilo (unisci lancia) può contenere progressi: si ferma tutto
+			const suFile = await leggi(handle);
+			if (suFile) this.doc = unisci($state.snapshot(this.#documento()), suFile);
+			this.#rifletti();
 			this.#sporco = true;
 			await this.flush();
-		} catch {
+		} catch (e) {
+			registraErrore(e);
+			// il collegamento resta in IndexedDB, ma non si scrive sul file finché riprendiSync non riesce a leggerlo
+			this.#handle = undefined;
 			this.sync = 'errore';
 		}
 	}

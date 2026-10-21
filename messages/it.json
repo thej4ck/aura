@@ -15,6 +15,7 @@
 	"profilo_scegli": "Chi impara adesso?",
 	"avviso_non_persistente": "Su questo browser i progressi restano solo finché la pagina è aperta.",
 	"avviso_errore_salvataggio": "I progressi non si sono salvati. Riprovo da solo tra poco.",
+	"avviso_illeggibili": "Alcuni progressi salvati su questo dispositivo non si aprono con questa versione del sito. Non sono stati cancellati: ricarica la pagina più tardi.",
 	"segnaposto_testo": "Questa pagina è in preparazione.",
 
 	"errore_404_titolo": "Questa pagina non c'è",

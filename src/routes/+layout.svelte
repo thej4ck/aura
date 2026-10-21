@@ -101,14 +101,19 @@
 	</div>
 </header>
 
-{#if progressi.pronto && (!progressi.persistente || progressi.erroreSalvataggio)}
+{#if progressi.pronto && (!progressi.persistente || progressi.erroreSalvataggio || progressi.illeggibili)}
 	<div class="avvisi">
-		<Avviso
-			tono="attenzione"
-			testo={progressi.erroreSalvataggio
-				? m.avviso_errore_salvataggio()
-				: m.avviso_non_persistente()}
-		/>
+		{#if !progressi.persistente || progressi.erroreSalvataggio}
+			<Avviso
+				tono="attenzione"
+				testo={progressi.erroreSalvataggio
+					? m.avviso_errore_salvataggio()
+					: m.avviso_non_persistente()}
+			/>
+		{/if}
+		{#if progressi.illeggibili}
+			<Avviso tono="info" testo={m.avviso_illeggibili()} />
+		{/if}
 	</div>
 {/if}
 
@@ -276,6 +281,8 @@
 	}
 
 	.avvisi {
+		display: grid;
+		gap: var(--spazio-3);
 		max-width: var(--larghezza-pagina);
 		margin-inline: auto;
 		padding-inline: var(--spazio-4);

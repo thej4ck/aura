@@ -97,12 +97,25 @@ export const PREFERENZE_PREDEFINITE: Preferenze = {
 	aggiornato: new Date(0).toISOString()
 };
 
+/**
+ * UUID v4. `crypto.randomUUID` esiste solo nei contesti sicuri (https, localhost): aperto in http dalla rete
+ * locale (prova su tablet con `vite --host`) si ripiega su `getRandomValues`, che c'è sempre.
+ */
+export function uuid(): string {
+	if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+	const b = crypto.getRandomValues(new Uint8Array(16));
+	b[6] = (b[6] & 0x0f) | 0x40; // versione 4
+	b[8] = (b[8] & 0x3f) | 0x80; // variante RFC 9562
+	const h = Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+	return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+
 export function nuovoDocumento(avatar: string, alias?: string): Documento {
 	alias = alias?.trim();
 	return {
 		formato: FORMATO,
 		schema: SCHEMA_ATTUALE,
-		profilo: { id: crypto.randomUUID(), avatar, ...(alias ? { alias } : {}) },
+		profilo: { id: uuid(), avatar, ...(alias ? { alias } : {}) },
 		preferenze: structuredClone(PREFERENZE_PREDEFINITE),
 		attivita: {},
 		competenze: {},
