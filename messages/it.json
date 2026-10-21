@@ -1,5 +1,116 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"app_nome": "Kindergarden",
-	"home_benvenuto": "Ciao! Qui si impara un passo alla volta, con calma."
+	"home_benvenuto": "Ciao! Qui si impara un passo alla volta, con calma.",
+
+	"layout_salta": "Vai al contenuto",
+	"layout_navigazione": "Navigazione principale",
+	"layout_home": "Kindergarden, home",
+	"layout_moduli": "Moduli",
+	"layout_genitori": "Per i genitori",
+	"layout_privacy": "Nessun account, nessun cookie, nessun dato inviato: i progressi restano su questo dispositivo.",
+	"layout_privacy_link": "Come funziona",
+	"profilo_attivo": "Profilo attivo: {avatar}",
+	"profilo_cambia": "Profilo attivo: {avatar}. Cambia profilo",
+	"profilo_scegli": "Chi impara adesso?",
+	"avviso_non_persistente": "Su questo browser i progressi restano solo finché la pagina è aperta.",
+	"avviso_errore_salvataggio": "I progressi non si sono salvati. Riprovo da solo tra poco.",
+	"segnaposto_testo": "Questa pagina è in preparazione.",
+
+	"errore_404_titolo": "Questa pagina non c'è",
+	"errore_404_testo": "Forse l'indirizzo è cambiato. Dalla home ritrovi tutto.",
+	"errore_titolo": "Qualcosa non ha funzionato",
+	"errore_testo": "Ricarica la pagina o torna alla home. I progressi sono al sicuro su questo dispositivo.",
+	"errore_home": "Torna alla home",
+	"errore_copia": "Copia i dettagli per un adulto",
+	"errore_copiati": "Dettagli copiati. Un adulto può incollarli in una segnalazione, se vuole.",
+	"errore_non_copiati": "Non riesco a copiare: i dettagli sono qui sotto, si possono selezionare a mano.",
+	"errore_mostra": "Mostra i dettagli tecnici",
+
+	"pulsante_avanti": "Avanti",
+	"pulsante_indietro": "Indietro",
+
+	"fase_scopri": "Scopri",
+	"fase_insieme": "Proviamo insieme",
+	"fase_prova": "Prova tu",
+
+	"attivita_lezione": "Lezione",
+	"attivita_gioco": "Gioco",
+	"attivita_minuti": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Circa {count} minuto",
+				"countPlural=other": "Circa {count} minuti"
+			}
+		}
+	],
+	"attivita_inizia": "Inizia",
+	"attivita_riprendi": "Riprendi da dove eri",
+	"attivita_ricomincia": "Ricomincia dall'inizio",
+	"attivita_ripeti": "Ripeti",
+	"attivita_prerequisiti": "Prima ti può aiutare:",
+	"attivita_scheda": "Scheda {numero} di {totale}",
+	"attivita_caricamento": "Sto preparando la scheda…",
+	"attivita_widget_errore": "Questa scheda non si è caricata. Puoi andare avanti lo stesso.",
+
+	"riepilogo_completata": "Attività completata",
+	"riepilogo_imparato": "Oggi hai imparato",
+	"riepilogo_prossimo": "Il prossimo passo",
+	"riepilogo_continua": "Continua",
+	"riepilogo_quasi": "Ci sei quasi",
+	"riepilogo_quasi_testo": "Ancora un po' di pratica nella parte «Prova tu» e ci arrivi.",
+	"riepilogo_riprova": "Riprova «Prova tu»",
+
+	"stelle_etichetta": "Stelle: {stelle} su 3",
+
+	"leggi_ascolta": "Ascolta",
+	"leggi_ferma": "Ferma la lettura",
+
+	"scelta_giusta": "Sì, è proprio questa!",
+	"scelta_riprova": "Non è questa. Prova un'altra risposta.",
+	"scelta_provata": "già provata",
+
+	"player_riproduci": "Riproduci",
+	"player_pausa": "Pausa",
+	"player_precedente": "Passo precedente",
+	"player_successivo": "Passo successivo",
+	"player_ricomincia": "Ricomincia",
+	"player_passo": "Passo {numero} di {totale}",
+
+	"gate_titolo": "Questa parte è per gli adulti",
+	"gate_istruzioni": "Scrivi in cifre questo numero:",
+	"gate_etichetta": "Il numero in cifre",
+	"gate_conferma": "Conferma",
+	"gate_annulla": "Annulla",
+	"gate_errore": "Il numero non corrisponde. Eccone un altro.",
+
+	"pref_testo_grande": "Testo grande",
+	"pref_contrasto_alto": "Contrasto alto",
+	"pref_riduci_movimento": "Meno movimento",
+	"pref_lettura": "Lettura ad alta voce",
+
+	"dev_titolo": "Vetrina dei componenti",
+	"dev_sottotitolo": "Solo in sviluppo: token, componenti e un'attività di prova per il motore.",
+	"dev_preferenze": "Preferenze di accessibilità",
+	"dev_colori": "Colori",
+	"dev_note": "Le 7 note",
+	"dev_tipografia": "Tipografia",
+	"dev_esempio_testo": "La musica si scrive su cinque linee: insieme si chiamano pentagramma.",
+	"dev_pulsanti": "Pulsanti",
+	"dev_contenitori": "Card, anelli e stelle",
+	"dev_card_testo": "Una card raccoglie un contenuto che sta insieme.",
+	"dev_anello": "{valore} per cento",
+	"dev_icone": "Icone",
+	"dev_avvisi": "Avvisi",
+	"dev_avviso_info": "Il prossimo passo è pronto.",
+	"dev_avviso_successo": "Fatto, l'attività è salvata.",
+	"dev_avviso_attenzione": "Prova a contare dal basso.",
+	"dev_gate": "Controllo per gli adulti",
+	"dev_gate_apri": "Apri il controllo",
+	"dev_gate_superato": "Controllo superato.",
+	"dev_player": "Spiegazione animata",
+	"dev_attivita": "Attività di esempio",
+	"dev_disattivato": "Disattivato"
 }
