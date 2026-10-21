@@ -1,6 +1,7 @@
 <script lang="ts">
 	// Pagina di un modulo: introduzione (Cosa imparerai · Come funziona · Cosa serve · Consigli per gli adulti),
-	// le attività come percorso con stato, stelle e prerequisiti suggeriti, e il glossario.
+	// le attività come percorso con stato, stelle e prerequisiti suggeriti, i traguardi delle Indicazioni
+	// Nazionali (per adulti e insegnanti) e il glossario.
 	import { m } from '#lib/paraglide/messages.js';
 	import { catalogo as catalogoReale, type Catalogo } from '../contenuti/registry';
 	import { progressi } from '../store/progressi.svelte';
@@ -87,6 +88,15 @@
 							{#each intro.consigliPerAdulti as punto, i (i)}<li>{punto}</li>{/each}
 						</ul>
 					</Card>
+				{/if}
+				{#if v.traguardi.length}
+					<section aria-labelledby="{id}-traguardi">
+						<h2 id="{id}-traguardi">{m.modulo_traguardi()}</h2>
+						<p class="nota">{m.modulo_traguardi_testo()}</p>
+						<ul class="elenco">
+							{#each v.traguardi as traguardo (traguardo)}<li>{traguardo}</li>{/each}
+						</ul>
+					</section>
 				{/if}
 				{#if v.modulo.glossario.length}
 					<section aria-labelledby="{id}-glossario">
@@ -199,6 +209,11 @@
 	}
 	.elenco li::marker {
 		color: var(--colore-accento);
+	}
+
+	.nota {
+		color: var(--colore-testo-tenue);
+		font-size: var(--testo-s);
 	}
 
 	.glossario {

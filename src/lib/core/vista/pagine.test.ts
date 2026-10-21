@@ -135,6 +135,12 @@ describe('vistaModulo', () => {
 		expect(vistaModulo(catalogo, DOC_VUOTO, 'numeri.nessuno')).toBeUndefined();
 	});
 
+	it('i traguardi delle attività, una volta sola', () => {
+		const v = vistaModulo(catalogo, DOC_VUOTO, 'suoni.ascolto')!;
+		expect(v.percorso.length).toBeGreaterThan(1);
+		expect(v.traguardi).toEqual(['Ascolta e riconosce suoni diversi.']);
+	});
+
 	it('attività nell’ordine del percorso, quelle fuori percorso in fondo', () => {
 		const v = vistaModulo(catalogo, DOC_VUOTO, 'numeri.contare')!;
 		expect(v.area.id).toBe('numeri');

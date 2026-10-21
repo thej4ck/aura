@@ -129,7 +129,11 @@ export function vistaArea(catalogo: Catalogo, doc: Documento, id: string): Vista
 	};
 }
 
-export type VistaModulo = VoceModulo & { percorso: Tappa[] };
+export type VistaModulo = VoceModulo & {
+	percorso: Tappa[];
+	/** traguardi delle Indicazioni Nazionali delle attività, senza ripetizioni: per adulti e insegnanti */
+	traguardi: string[];
+};
 
 /** `id` qualificato `area.modulo`. */
 export function vistaModulo(
@@ -139,8 +143,10 @@ export function vistaModulo(
 ): VistaModulo | undefined {
 	const m = catalogo.modulo(id);
 	if (!m) return;
+	const percorso = tappe(catalogo, doc, attivitaInOrdine(catalogo, m));
 	return {
 		...voceModulo(catalogo, doc, m),
-		percorso: tappe(catalogo, doc, attivitaInOrdine(catalogo, m))
+		percorso,
+		traguardi: [...new Set(percorso.flatMap((t) => t.attivita.traguardi))]
 	};
 }
