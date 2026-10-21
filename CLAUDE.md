@@ -4,7 +4,7 @@ Piattaforma didattica gratuita per bambini, a moduli (oggi area Musica: Pentagra
 
 ## Principi non negoziabili
 
-- **Zero dati personali**: nessun cookie, analytics, telemetria, account o richiesta di rete verso terzi a runtime. La CSP (`svelte.config.js`) e gli header (`Caddyfile`) devono continuare a garantirlo.
+- **Zero dati personali**: nessun cookie, analytics, telemetria, account o richiesta di rete verso terzi a runtime. La CSP (`vite.config.ts`, nella config di `sveltekit()`; con SvelteKit 3 `svelte.config.js` non esiste) e gli header (`Caddyfile`) devono continuare a garantirlo.
 - **Browser-first**: quello che può girare nel browser gira lì. Lavoro lato server solo dopo una valutazione esplicita (va scritta in un ADR).
 - **Niente dark pattern**: niente streak, vite, timer di pressione, notifiche, classifiche, ricompense casuali. Il feedback è formativo e orientato alla crescita, mai "sbagliato".
 - **Contenuti come dati**: un'attività è un elenco di schede che usano widget. Un nuovo modulo aggiunge cartelle in `src/lib/moduli/<area>/<modulo>/` e non tocca il core.
