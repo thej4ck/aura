@@ -14,6 +14,7 @@
 	import PlayerPassi from '#lib/core/ui/PlayerPassi.svelte';
 	import ProgressRing from '#lib/core/ui/ProgressRing.svelte';
 	import Stelle from '#lib/core/ui/Stelle.svelte';
+	import Notazione from './sezioni/Notazione.svelte';
 
 	const attivita = catalogoEsempio.attivita('esempio.linee.cinque-linee')!;
 
@@ -189,6 +190,8 @@
 			{/snippet}
 		</PlayerPassi>
 	</section>
+
+	<Notazione />
 
 	<section aria-labelledby="sez-attivita" class="sezione-attivita">
 		<h2 id="sez-attivita">{m.dev_attivita()}</h2>

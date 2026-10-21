@@ -7,3 +7,7 @@ bun.lockb
 
 # Miscellaneous
 /static/
+
+# Generati da inlang durante la compilazione dei messaggi (ignorati dal loro .gitignore)
+/project.inlang/*
+!/project.inlang/settings.json

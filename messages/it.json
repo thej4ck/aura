@@ -115,5 +115,169 @@
 	"dev_gate_superato": "Controllo superato.",
 	"dev_player": "Spiegazione animata",
 	"dev_attivita": "Attività di esempio",
-	"dev_disattivato": "Disattivato"
+	"dev_disattivato": "Disattivato",
+
+	"notazione_solfeggio": [
+		{
+			"declarations": ["input lettera"],
+			"selectors": ["lettera"],
+			"match": {
+				"lettera=C": "Do",
+				"lettera=D": "Re",
+				"lettera=E": "Mi",
+				"lettera=F": "Fa",
+				"lettera=G": "Sol",
+				"lettera=A": "La",
+				"lettera=B": "Si",
+				"lettera=*": "{lettera}"
+			}
+		}
+	],
+	"notazione_nome_parlato": [
+		{
+			"declarations": ["input nome", "input alterazione"],
+			"selectors": ["alterazione"],
+			"match": {
+				"alterazione=diesis": "{nome} diesis",
+				"alterazione=bemolle": "{nome} bemolle",
+				"alterazione=*": "{nome}"
+			}
+		}
+	],
+	"notazione_segno": [
+		{
+			"declarations": ["input segno"],
+			"selectors": ["segno"],
+			"match": {
+				"segno=diesis": "diesis",
+				"segno=bemolle": "bemolle",
+				"segno=*": "bequadro"
+			}
+		}
+	],
+	"notazione_linea": [
+		{
+			"declarations": ["input n"],
+			"selectors": ["n"],
+			"match": {
+				"n=1": "prima linea",
+				"n=2": "seconda linea",
+				"n=3": "terza linea",
+				"n=4": "quarta linea",
+				"n=5": "quinta linea",
+				"n=*": "linea {n}"
+			}
+		}
+	],
+	"notazione_spazio": [
+		{
+			"declarations": ["input n"],
+			"selectors": ["n"],
+			"match": {
+				"n=1": "primo spazio",
+				"n=2": "secondo spazio",
+				"n=3": "terzo spazio",
+				"n=4": "quarto spazio",
+				"n=*": "spazio {n}"
+			}
+		}
+	],
+	"notazione_taglio_sotto": [
+		{
+			"declarations": ["input n"],
+			"selectors": ["n"],
+			"match": {
+				"n=1": "primo taglio in basso",
+				"n=2": "secondo taglio in basso",
+				"n=3": "terzo taglio in basso",
+				"n=*": "taglio {n} in basso"
+			}
+		}
+	],
+	"notazione_taglio_sopra": [
+		{
+			"declarations": ["input n"],
+			"selectors": ["n"],
+			"match": {
+				"n=1": "primo taglio in alto",
+				"n=2": "secondo taglio in alto",
+				"n=3": "terzo taglio in alto",
+				"n=*": "taglio {n} in alto"
+			}
+		}
+	],
+	"notazione_spazio_sotto": [
+		{
+			"declarations": ["input n"],
+			"selectors": ["n"],
+			"match": {
+				"n=0": "spazio sotto la prima linea",
+				"n=1": "spazio sotto il primo taglio",
+				"n=2": "spazio sotto il secondo taglio",
+				"n=3": "spazio sotto il terzo taglio",
+				"n=*": "spazio sotto il taglio {n}"
+			}
+		}
+	],
+	"notazione_spazio_sopra": [
+		{
+			"declarations": ["input n"],
+			"selectors": ["n"],
+			"match": {
+				"n=0": "spazio sopra la quinta linea",
+				"n=1": "spazio sopra il primo taglio",
+				"n=2": "spazio sopra il secondo taglio",
+				"n=3": "spazio sopra il terzo taglio",
+				"n=*": "spazio sopra il taglio {n}"
+			}
+		}
+	],
+	"notazione_intervallo": [
+		{
+			"declarations": ["input semitoni"],
+			"selectors": ["semitoni"],
+			"match": {
+				"semitoni=0": "prima",
+				"semitoni=1": "seconda minore",
+				"semitoni=2": "seconda maggiore",
+				"semitoni=3": "terza minore",
+				"semitoni=4": "terza maggiore",
+				"semitoni=5": "quarta giusta",
+				"semitoni=6": "tritono",
+				"semitoni=7": "quinta giusta",
+				"semitoni=8": "sesta minore",
+				"semitoni=9": "sesta maggiore",
+				"semitoni=10": "settima minore",
+				"semitoni=11": "settima maggiore",
+				"semitoni=12": "ottava",
+				"semitoni=*": "{semitoni} semitoni"
+			}
+		}
+	],
+	"notazione_nota": "Nota {numero} di {totale}: {descrizione}",
+	"notazione_con_segno": "{descrizione}, con il {segno}",
+	"notazione_nome_e_posizione": "{nome}, {posizione}",
+	"notazione_evidenziata": "{descrizione}, evidenziata",
+	"notazione_scegli": "Scegli una linea o uno spazio",
+	"notazione_tastiera": "Tastiera",
+	"notazione_tasto": "{nome} {ottava}",
+	"notazione_tasto_evidenziato": "{nome}, evidenziato",
+	"notazione_tasti_evidenziati": "Tasti evidenziati: {elenco}",
+	"notazione_zona": "Zona colorata: da {da} a {a}",
+	"notazione_dev_titolo": "Pentagramma e tastiera",
+	"notazione_dev_nomi": "Nomi delle note",
+	"notazione_dev_solfeggio": "Do Re Mi",
+	"notazione_dev_lettere": "C D E",
+	"notazione_dev_scala": "Scala di Do maggiore",
+	"notazione_dev_arpeggio": "Arpeggio di Mi♭ maggiore",
+	"notazione_dev_arpeggio_armatura": "Arpeggio di Mi♭ maggiore, con l'armatura",
+	"notazione_dev_cromatica": "Scala cromatica da Do a Do",
+	"notazione_dev_tagli": "Tagli addizionali",
+	"notazione_dev_semibrevi": "Semibrevi",
+	"notazione_dev_interattivo": "Pentagramma da toccare",
+	"notazione_dev_rivela": "Nomi delle note per i lettori di schermo",
+	"notazione_dev_scelta": "Hai scelto: {posizione} ({nome}).",
+	"notazione_dev_tastiera": "Tastiera da toccare",
+	"notazione_dev_tasto": "Hai toccato: {nome}.",
+	"notazione_dev_registro": "Registro vocale, solo da guardare"
 }
