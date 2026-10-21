@@ -140,6 +140,25 @@ describe('apriMicrofono', () => {
 		expect(onchiuso).toHaveBeenCalledTimes(2);
 	});
 
+	it('iPhone: sessione audio playback, e play-and-record solo con il microfono aperto', async () => {
+		const audioSession = { type: 'auto' };
+		vi.stubGlobal('navigator', { mediaDevices: { getUserMedia }, audioSession });
+		void audio.sblocca();
+		expect(audioSession.type).toBe('playback');
+		getUserMedia.mockImplementationOnce(async () => {
+			expect(audioSession.type).toBe('play-and-record'); // già prima di chiedere il microfono
+			return { getTracks: () => [traccia] };
+		});
+		const m = await mic.apriMicrofono({ onframe: () => {} });
+		void audio.sblocca(); // un suono mentre il microfono ascolta non cambia la sessione
+		expect(audioSession.type).toBe('play-and-record');
+		m.chiudi();
+		expect(audioSession.type).toBe('playback');
+		getUserMedia.mockRejectedValueOnce(Object.assign(new Error('no'), { name: 'NotAllowedError' }));
+		await expect(mic.apriMicrofono({ onframe: () => {} })).rejects.toThrow();
+		expect(audioSession.type).toBe('playback');
+	});
+
 	it('chiudi() e pagehide rilasciano il microfono', async () => {
 		const onframe = vi.fn();
 		const m = await mic.apriMicrofono({ onframe });

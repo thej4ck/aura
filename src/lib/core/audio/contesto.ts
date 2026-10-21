@@ -8,6 +8,17 @@ let riproduzioni = 0;
 let microfoni = 0;
 let timerSospensione: ReturnType<typeof setTimeout> | undefined;
 
+/**
+ * Sessione audio di iPhone e iPad (Safari 16.4+; altrove non c'è e non si fa niente). Di suo Web Audio
+ * è 'ambient', che il tasto silenzioso ammutolisce: il sito suona come un video ('playback') e, con il
+ * microfono aperto, ascolta e suona insieme ('play-and-record').
+ * ponytail: non provato su un iPhone vero (anche l'uscita sull'altoparlante con il microfono aperto).
+ */
+function sessione() {
+	const s = (globalThis.navigator as { audioSession?: { type: string } } | undefined)?.audioSession;
+	if (s) s.type = microfoni > 0 ? 'play-and-record' : 'playback';
+}
+
 export function contesto(): AudioContext {
 	if (!ctx) {
 		ctx = new AudioContext({ latencyHint: 'interactive' });
@@ -38,6 +49,7 @@ export function uscita(): AudioNode {
  */
 export function sblocca(): Promise<void> {
 	const c = contesto();
+	sessione();
 	return c.state === 'running' ? Promise.resolve() : c.resume();
 }
 
@@ -57,12 +69,14 @@ export function usa(tipo: 'riproduzione' | 'microfono'): () => void {
 	if (c.state !== 'running') void c.resume();
 	if (tipo === 'riproduzione') riproduzioni++;
 	else microfoni++;
+	sessione();
 	let rilasciata = false;
 	return () => {
 		if (rilasciata) return;
 		rilasciata = true;
 		if (tipo === 'riproduzione') riproduzioni--;
 		else microfoni--;
+		sessione();
 		if (riproduzioni + microfoni > 0) return;
 		timerSospensione = setTimeout(() => {
 			if (riproduzioni + microfoni === 0 && c.state === 'running') void c.suspend();

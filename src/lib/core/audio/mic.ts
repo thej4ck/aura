@@ -74,6 +74,8 @@ export async function apriMicrofono({
 		throw new ErroreMic('non-supportato');
 	}
 	const c = contesto();
+	// prima di getUserMedia: su iOS la sessione audio passa ad ascoltare e suonare insieme
+	const rilascia = usa('microfono');
 	let stream: MediaStream;
 	try {
 		// la voce così com'è: i filtri per le chiamate tagliano le note tenute e cambiano il volume
@@ -81,6 +83,7 @@ export async function apriMicrofono({
 			audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
 		});
 	} catch (e) {
+		rilascia();
 		throw new ErroreMic(codiceDa(e), { cause: e });
 	}
 
@@ -92,6 +95,7 @@ export async function apriMicrofono({
 	} catch (e) {
 		// mai lasciare acceso il microfono (e la sua spia) se non lo si può usare
 		for (const traccia of stream.getTracks()) traccia.stop();
+		rilascia();
 		throw new ErroreMic('non-supportato', { cause: e });
 	}
 	// passa-basso nativo, poi un campione su due a YIN: regge il rumore di fondo e costa un quarto
@@ -100,7 +104,6 @@ export async function apriMicrofono({
 	filtro.frequency.value = PASSA_BASSO_HZ;
 	filtro.Q.value = Math.SQRT1_2;
 	sorgente.connect(filtro).connect(analizzatore); // e basta: mai verso gli altoparlanti
-	const rilascia = usa('microfono');
 	const buffer = new Float32Array(FFT);
 	const dimezzato = new Float32Array(FFT / 2);
 	const mediana = new Mediana();
