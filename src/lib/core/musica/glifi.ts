@@ -1,7 +1,8 @@
 /*! Glifi da Bravura 1.482, Copyright © 2015 Steinberg Media Technologies GmbH (http://www.steinberg.net/), Reserved Font Name "Bravura". SIL Open Font License 1.1: https://openfontlicense.org */
 // Glifi musicali estratti da Bravura 1.482 (Steinberg Media Technologies GmbH),
 // https://github.com/steinbergmedia/bravura, font di riferimento SMuFL (https://w3c.github.io/smufl/).
-// Licenza: SIL Open Font License 1.1, testo completo in ./BRAVURA-OFL.txt.
+// Licenza: SIL Open Font License 1.1, testo completo in static/licenze/bravura-ofl.txt (servito dal sito
+// e linkato in /genitori#crediti: la minificazione toglie il commento qui sopra).
 // Copyright © 2015, Steinberg Media Technologies GmbH, con Reserved Font Name "Bravura".
 // Questi path sono un sottoinsieme dei contorni del font, convertiti in SVG; non sono un font
 // e non vengono distribuiti con il nome riservato.

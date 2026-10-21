@@ -81,8 +81,8 @@ In sviluppo, `/dev` mostra token, componenti e un'attività di esempio che usa i
 
 - Codice: [MIT](LICENSE).
 - Contenuti didattici in `src/lib/moduli/**`: [CC BY-SA 4.0](LICENSE-CONTENUTI.md).
-- Font Atkinson Hyperlegible Next: SIL Open Font License 1.1.
-- Icone dell'interfaccia (`src/lib/core/ui/Icona.svelte`): path SVG da [Lucide](https://lucide.dev), licenza ISC (© Lucide Contributors; parte da Feather, © Cole Bemis, MIT).
-- Glifi musicali del pentagramma (`src/lib/core/musica/glifi.ts`): path SVG estratti dal font [Bravura](https://github.com/steinbergmedia/bravura) 1.482 (© Steinberg Media Technologies GmbH, Reserved Font Name "Bravura"), SIL Open Font License 1.1: testo in [`src/lib/core/musica/BRAVURA-OFL.txt`](src/lib/core/musica/BRAVURA-OFL.txt).
+- Font Atkinson Hyperlegible Next: SIL Open Font License 1.1 ([`static/licenze/atkinson-hyperlegible-next-ofl.txt`](static/licenze/atkinson-hyperlegible-next-ofl.txt)).
+- Icone dell'interfaccia (`src/lib/core/ui/Icona.svelte`): path SVG da [Lucide](https://lucide.dev), licenza ISC (© Lucide Contributors; parte da Feather, © Cole Bemis, MIT): [`static/licenze/lucide-isc.txt`](static/licenze/lucide-isc.txt).
+- Glifi musicali del pentagramma (`src/lib/core/musica/glifi.ts`): path SVG estratti dal font [Bravura](https://github.com/steinbergmedia/bravura) 1.482 (© Steinberg Media Technologies GmbH, Reserved Font Name "Bravura"), SIL Open Font License 1.1: testo in [`static/licenze/bravura-ofl.txt`](static/licenze/bravura-ofl.txt).
 
 Partecipando al progetto accetti il [Codice di Comportamento](CODE_OF_CONDUCT.md). Per le vulnerabilità vedi [SECURITY.md](SECURITY.md).

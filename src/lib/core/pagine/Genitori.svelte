@@ -1,6 +1,9 @@
 <script lang="ts">
-	// Pagina per i genitori: privacy, progressi, profili, backup e file, impostazioni, voce, come aiutare.
+	// Pagina per i genitori: privacy, progressi, profili, backup e file, impostazioni, voce, come aiutare,
+	// installazione, crediti e licenze.
 	// Le azioni delicate (importa, elimina, collega/scollega, impostazioni, link esterni) passano da GateAdulti.
+	import { asset } from '$app/paths';
+	import type { AssetPath } from '$app/types';
 	import { m } from '#lib/paraglide/messages.js';
 	import { catalogo as catalogoReale, type Catalogo } from '../contenuti/registry';
 	import { progressi } from '../store/progressi.svelte';
@@ -41,7 +44,8 @@
 		['impostazioni', m.genitori_impostazioni],
 		['voce', m.genitori_voce],
 		['aiutare', m.genitori_aiutare],
-		['installa', m.genitori_installa]
+		['installa', m.genitori_installa],
+		['crediti', m.genitori_crediti]
 	];
 	const VOCE = [m.genitori_voce_1, m.genitori_voce_2, m.genitori_voce_3, m.genitori_voce_4];
 	const AIUTARE = [
@@ -57,6 +61,17 @@
 		[m.genitori_privacy_invii_titolo, m.genitori_privacy_invii],
 		[m.genitori_privacy_microfono_titolo, m.genitori_privacy_microfono],
 		[m.genitori_privacy_server_titolo, m.genitori_privacy_server]
+	];
+
+	// opere di altri incluse nel sito: la licenza chiede di distribuirne il testo insieme alle copie
+	const CREDITI: [() => string, string, AssetPath][] = [
+		[m.genitori_crediti_bravura, 'Bravura', 'licenze/bravura-ofl.txt'],
+		[
+			m.genitori_crediti_atkinson,
+			'Atkinson Hyperlegible Next',
+			'licenze/atkinson-hyperlegible-next-ofl.txt'
+		],
+		[m.genitori_crediti_lucide, 'Lucide', 'licenze/lucide-isc.txt']
 	];
 
 	const promemoria = $derived(!!progressi.doc && serveBackup(progressi.doc, new Date()));
@@ -139,6 +154,19 @@
 	<section id="installa" aria-labelledby="titolo-installa">
 		<h2 id="titolo-installa">{m.genitori_installa()}</h2>
 		<InstallaApp />
+	</section>
+
+	<section id="crediti" aria-labelledby="titolo-crediti">
+		<h2 id="titolo-crediti">{m.genitori_crediti()}</h2>
+		<p class="lead">{m.genitori_crediti_intro()}</p>
+		<ul class="crediti">
+			{#each CREDITI as [testo, opera, licenza] (licenza)}
+				<li>
+					<p>{testo()}</p>
+					<a class="vai" href={asset(licenza)}>{m.genitori_crediti_licenza({ opera })}</a>
+				</li>
+			{/each}
+		</ul>
 	</section>
 </div>
 
@@ -235,6 +263,14 @@
 		display: inline-flex;
 		align-items: center;
 		min-height: var(--target);
+	}
+	.crediti {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spazio-3);
+		max-width: var(--larghezza-testo);
+		padding: 0;
+		list-style: none;
 	}
 
 	.consigli {

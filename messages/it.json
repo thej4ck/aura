@@ -213,6 +213,12 @@
 	"genitori_aiutare_6": "Le stelle non si perdono mai. La terza arriva ripassando un'attività in un altro giorno.",
 
 	"genitori_installa": "Installa l'app",
+	"genitori_crediti": "Crediti e licenze",
+	"genitori_crediti_intro": "Kindergarden usa anche lavori di altri, condivisi con licenze libere. Grazie a chi li ha creati.",
+	"genitori_crediti_bravura": "Simboli musicali: dal carattere Bravura, Copyright © 2015 Steinberg Media Technologies GmbH, con il nome riservato «Bravura». Licenza SIL Open Font License 1.1.",
+	"genitori_crediti_atkinson": "Carattere del testo: Atkinson Hyperlegible Next, Copyright © 2020-2024 The Atkinson Hyperlegible Next Project Authors. Licenza SIL Open Font License 1.1.",
+	"genitori_crediti_lucide": "Icone: Lucide, Copyright © Lucide Icons and Contributors, in parte dal progetto Feather, Copyright © Cole Bemis. Licenze ISC e MIT.",
+	"genitori_crediti_licenza": "Leggi la licenza di {opera}",
 
 	"dev_pagine": "Pagine",
 	"dev_pagine_testo": "Le pagine dell'app con il catalogo di prova e i progressi del profilo attivo. I link portano alle pagine vere, che con il catalogo reale possono non esserci.",
