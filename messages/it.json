@@ -115,5 +115,14 @@
 	"dev_gate_superato": "Controllo superato.",
 	"dev_player": "Spiegazione animata",
 	"dev_attivita": "Attività di esempio",
-	"dev_disattivato": "Disattivato"
+	"dev_disattivato": "Disattivato",
+
+	"audio_pitch_su": "Un po' più su",
+	"audio_pitch_giu": "Un po' più giù",
+	"audio_pitch_giusto": "Così! Tieni la nota",
+	"audio_pitch_attesa": "Ti ascolto: canta quando vuoi.",
+	"audio_pitch_ascolta": "Adesso ascolta.",
+	"audio_pitch_nota": "Nota da cantare: {nome}",
+	"audio_pitch_etichetta": "Misuratore della voce per la nota {nome}. La linea al centro è la nota, la fascia intorno è la zona giusta.",
+	"audio_pitch_etichetta_generica": "Misuratore della voce. La linea al centro è la nota da cantare, la fascia intorno è la zona giusta."
 }
