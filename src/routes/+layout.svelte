@@ -10,6 +10,8 @@
 	import { progressi } from '#lib/core/store/progressi.svelte.ts';
 	import Avviso from '#lib/core/ui/Avviso.svelte';
 	import Icona from '#lib/core/ui/Icona.svelte';
+	import PausaGentile from '#lib/core/ui/PausaGentile.svelte';
+	import { serveBackup } from '#lib/core/vista/genitori.ts';
 	import type { LayoutProps } from './$types';
 
 	let { children }: LayoutProps = $props();
@@ -29,6 +31,9 @@
 		html.toggleAttribute('data-contrasto-alto', !!a?.contrastoAlto);
 		html.toggleAttribute('data-riduci-movimento', !!a?.riduciMovimento);
 	});
+
+	// promemoria discreto per l'adulto: solo un link nel piè di pagina, niente finestre
+	const backup = $derived(!!progressi.doc && serveBackup(progressi.doc, new Date()));
 
 	const link = [
 		{ href: resolve('/moduli'), testo: m.layout_moduli },
@@ -128,7 +133,15 @@
 <footer class="piede">
 	<p>{m.layout_privacy()}</p>
 	<a href={resolve('/genitori')}>{m.layout_privacy_link()}</a>
+	{#if backup}
+		<a class="backup" href="{resolve('/genitori')}#backup">
+			<Icona nome="info" />
+			{m.layout_backup()}
+		</a>
+	{/if}
 </footer>
+
+<PausaGentile />
 
 <style>
 	.salta {
@@ -323,8 +336,12 @@
 	}
 	.piede a {
 		display: inline-flex;
+		gap: var(--spazio-2);
 		align-items: center;
 		min-height: var(--target);
+	}
+	.piede .backup {
+		color: var(--colore-info);
 	}
 
 	@media (max-width: 30rem) {
