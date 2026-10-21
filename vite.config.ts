@@ -45,7 +45,8 @@ export default defineConfig({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide',
 			emitTsDeclarations: true,
-			// niente cookie né localStorage: la lingua arriverà dalle preferenze del profilo
+			// niente cookie né localStorage: la lingua arriverà dalle preferenze del profilo.
+			// Stessa strategia nello script `i18n` di package.json (genera i tipi per `npm run check`)
 			strategy: ['globalVariable', 'baseLocale']
 		})
 	],
