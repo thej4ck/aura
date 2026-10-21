@@ -48,34 +48,49 @@ sw.addEventListener('activate', (event) => {
 });
 
 sw.addEventListener('fetch', (event) => {
-	const { request } = event;
-	const strategia = scegliStrategia(request, sw.location.origin);
+	const strategia = scegliStrategia(event.request, sw.location.origin);
 	if (strategia === 'ignora') return;
-	event.respondWith(strategia === 'cache-prima' ? cachePrima(request) : retePrima(request));
+	event.respondWith(strategia === 'cache-prima' ? cachePrima(event) : retePrima(event));
 });
 
-async function cachePrima(request: Request): Promise<Response> {
+async function cachePrima(event: FetchEvent): Promise<Response> {
 	const cache = await caches.open(CACHE);
-	const trovata = await cache.match(request, SENZA_VARY);
+	const trovata = await cache.match(event.request, SENZA_VARY);
 	if (trovata) return trovata;
-	const risposta = await fetch(request);
-	if (risposta.ok) await cache.put(request, risposta.clone());
+	const risposta = await fetch(event.request);
+	salva(event, cache, risposta);
 	return risposta;
 }
 
-async function retePrima(request: Request): Promise<Response> {
+async function retePrima(event: FetchEvent): Promise<Response> {
+	const { request } = event;
 	const cache = await caches.open(CACHE);
+	let risposta: Response;
 	try {
-		const risposta = await fetch(request);
-		if (risposta.ok) await cache.put(request, risposta.clone());
-		return risposta;
+		risposta = await fetch(request);
 	} catch (e) {
 		const trovata = await cache.match(request, SENZA_VARY);
 		if (trovata) return trovata;
-		if (request.mode === 'navigate') {
-			const nonTrovata = await cache.match(PAGINA_404, SENZA_VARY);
-			if (nonTrovata) return nonTrovata;
+		if (request.mode !== 'navigate') throw e;
+		const url = new URL(request.url);
+		// lo slash finale si toglie come fa Caddy (308): servita da /moduli/ la pagina sbaglierebbe i
+		// suoi percorsi relativi (./_app/…)
+		if (url.pathname.length > 1 && url.pathname.endsWith('/')) {
+			url.pathname = url.pathname.replace(/\/+$/, '');
+			return Response.redirect(url.href, 308);
 		}
+		// la stessa pagina con la query (/?da=home), poi la 404 dell'app
+		const simile = await cache.match(url.pathname, { ...SENZA_VARY, ignoreSearch: true });
+		const nonTrovata = simile ?? (await cache.match(PAGINA_404, SENZA_VARY));
+		if (nonTrovata) return nonTrovata;
 		throw e;
 	}
+	salva(event, cache, risposta);
+	return risposta;
+}
+
+/** Una copia per l'offline, senza mai perdere la risposta: cache piena o un 206 (Range) non sono errori. */
+function salva(event: FetchEvent, cache: Cache, risposta: Response) {
+	if (!risposta.ok || risposta.status === 206) return;
+	event.waitUntil(cache.put(event.request, risposta.clone()).catch(() => {}));
 }

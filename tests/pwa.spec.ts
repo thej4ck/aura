@@ -17,13 +17,18 @@ test('il service worker si registra e una pagina già visitata si apre offline',
 	expect(((await manifest.json()) as { lang: string }).lang).toBe('it');
 
 	await context.setOffline(true);
-	for (const percorso of ['/moduli', '/genitori', '/']) {
+	// anche con la query o con lo slash finale è la stessa pagina, non la 404
+	for (const percorso of ['/moduli', '/genitori', '/', '/?da=home', '/moduli/']) {
 		await page.goto(percorso);
-		await expect(page.locator('h1')).toBeVisible();
+		await expect(page.locator('h1'), percorso).toBeVisible();
+		await expect(page.locator('h1'), percorso).not.toHaveText("Questa pagina non c'è");
 	}
+	// come online con Caddy, senza lo slash finale (i percorsi relativi della pagina restano giusti)
+	await page.goto('/moduli/');
+	await expect(page).toHaveURL(/\/moduli$/);
 	// una pagina che non esiste offline mostra la 404 dell'app, non l'errore del browser
 	await page.goto('/non-esiste');
-	await expect(page.locator('h1')).toBeVisible();
+	await expect(page.locator('h1')).toHaveText("Questa pagina non c'è");
 	await context.setOffline(false);
 
 	expect(esterne).toEqual([]);
