@@ -73,12 +73,15 @@ tests/               test end-to-end (Playwright)
 docs/adr/            decisioni di architettura
 ```
 
-Aggiungere un modulo significa aggiungere una cartella `src/lib/moduli/<area>/<modulo>/` con il suo `modulo.ts`: routing, selettore, percorso e progressi funzionano senza toccare il core.
+Aggiungere un modulo significa aggiungere una cartella `src/lib/moduli/<area>/<modulo>/` con il suo `modulo.ts`: routing, selettore, percorso e progressi funzionano senza toccare il core. La guida passo passo è in [`docs/come-aggiungere-un-modulo.md`](docs/come-aggiungere-un-modulo.md).
+
+In sviluppo, `/dev` mostra token, componenti e un'attività di esempio che usa il motore; in produzione quella pagina non esiste (404).
 
 ## Licenze
 
 - Codice: [MIT](LICENSE).
 - Contenuti didattici in `src/lib/moduli/**`: [CC BY-SA 4.0](LICENSE-CONTENUTI.md).
 - Font Atkinson Hyperlegible Next: SIL Open Font License 1.1.
+- Icone dell'interfaccia (`src/lib/core/ui/Icona.svelte`): path SVG da [Lucide](https://lucide.dev), licenza ISC (© Lucide Contributors; parte da Feather, © Cole Bemis, MIT).
 
 Partecipando al progetto accetti il [Codice di Comportamento](CODE_OF_CONDUCT.md). Per le vulnerabilità vedi [SECURITY.md](SECURITY.md).
