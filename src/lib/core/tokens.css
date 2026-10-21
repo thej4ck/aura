@@ -1,0 +1,191 @@
+/*
+ * Token del design system. Tutto in rem: testo grande, fasce d'età e contrasto si ottengono
+ * cambiando questi valori, non i componenti. Varianti con attributi su <html>:
+ *   data-eta="6-10" · data-testo-grande · data-contrasto-alto · data-riduci-movimento
+ * Contrasti verificati (WCAG 2.2 AA): testo ≥ 4.5:1, bordi dei controlli e grafica ≥ 3:1, in chiaro e in scuro.
+ */
+:root {
+	color-scheme: light;
+
+	/* superfici e testo */
+	--colore-fondo: #f4f6f5;
+	--colore-superficie: #ffffff;
+	--colore-superficie-tenue: #eaefec;
+	--colore-bordo: #d3dbd7; /* separatori decorativi */
+	--colore-bordo-forte: #6f807a; /* bordi dei controlli: ≥ 3:1 */
+	--colore-testo: #172535;
+	--colore-testo-tenue: #4a5966;
+
+	/* accento (azioni principali, link) */
+	--colore-accento: #1f6b5a;
+	--colore-accento-forte: #17574a;
+	--colore-accento-tenue: #ddede7;
+	--colore-su-accento: #ffffff;
+
+	/* stati: mai punitivi, sempre accompagnati da icona e testo */
+	--colore-successo: #3a6b2a;
+	--colore-successo-tenue: #e5f0dc;
+	--colore-attenzione: #8a5300;
+	--colore-attenzione-tenue: #fbefd6;
+	--colore-info: #2d5c8a;
+	--colore-info-tenue: #e3ecf5;
+	--colore-stella: #b7791f;
+	--colore-focus: #2457a6;
+	--colore-velo: rgb(23 37 53 / 0.45);
+
+	/* le 7 note (desaturate); il testo bianco sopra è ≥ 4.5:1 */
+	--nota-do: #c2453d;
+	--nota-re: #b35f17;
+	--nota-mi: #8f700a;
+	--nota-fa: #437f34;
+	--nota-sol: #237c8a;
+	--nota-la: #4b63b0;
+	--nota-si: #8a4fa0;
+	--colore-su-nota: #ffffff;
+
+	/* spaziatura, base 4/8 */
+	--spazio-1: 0.25rem;
+	--spazio-2: 0.5rem;
+	--spazio-3: 0.75rem;
+	--spazio-4: 1rem;
+	--spazio-5: 1.5rem;
+	--spazio-6: 2rem;
+	--spazio-7: 3rem;
+	--spazio-8: 4rem;
+	--spazio-9: 6rem;
+
+	/* raggi: piccolo per i controlli interni, medio per i pulsanti, grande per i contenitori */
+	--raggio-s: 0.5rem;
+	--raggio-m: 0.75rem;
+	--raggio-l: 1.25rem;
+	--raggio-pieno: 999rem;
+
+	/* ombre leggere: solo per ciò che sta sopra la pagina (dialog, menu) */
+	--ombra-1: 0 1px 2px rgb(23 37 53 / 0.06), 0 1px 1px rgb(23 37 53 / 0.04);
+	--ombra-2: 0 12px 32px rgb(23 37 53 / 0.14), 0 2px 8px rgb(23 37 53 / 0.08);
+
+	/* tipografia: una sola famiglia, scala classica 14/16/18/21/24/36/48 */
+	--font: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+	--testo-xs: 0.875rem;
+	--testo-s: 1rem;
+	--testo-m: 1.125rem;
+	--testo-l: 1.3125rem;
+	--testo-xl: 1.5rem;
+	--testo-2xl: 2.25rem;
+	--testo-3xl: 3rem;
+	--testo-corpo: var(--testo-m);
+	--testo-titolo: clamp(var(--testo-2xl), 1.6rem + 2.4vw, var(--testo-3xl));
+	--interlinea-testo: 1.5;
+	--interlinea-titoli: 1.15;
+	--peso-normale: 400;
+	--peso-medio: 560;
+	--peso-forte: 720;
+
+	/* movimento */
+	--durata-breve: 120ms;
+	--durata-media: 220ms;
+	--durata-lunga: 480ms;
+	--easing: cubic-bezier(0.2, 0, 0, 1);
+	--easing-uscita: cubic-bezier(0.3, 0.7, 0.4, 1);
+
+	/* misure */
+	--target: 3rem; /* 48 px: area minima di tocco */
+	--larghezza-testo: 36rem;
+	--larghezza-pagina: 68rem;
+	--bordo-focus: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		color-scheme: dark;
+		--colore-fondo: #12202b;
+		--colore-superficie: #192a37;
+		--colore-superficie-tenue: #213442;
+		--colore-bordo: #2f4555;
+		--colore-bordo-forte: #7f95a3;
+		--colore-testo: #e6edf0;
+		--colore-testo-tenue: #a7b6c0;
+		--colore-accento: #7fcbb6;
+		--colore-accento-forte: #9adaca;
+		--colore-accento-tenue: #1e3d38;
+		--colore-su-accento: #0d2621;
+		--colore-successo: #a3d48a;
+		--colore-successo-tenue: #233a22;
+		--colore-attenzione: #ebc27a;
+		--colore-attenzione-tenue: #3d3220;
+		--colore-info: #9dc0ea;
+		--colore-info-tenue: #1f3350;
+		--colore-stella: #e8b64c;
+		--colore-focus: #9dc0ea;
+		--colore-velo: rgb(5 12 18 / 0.6);
+		--nota-do: #e58a80;
+		--nota-re: #e8a162;
+		--nota-mi: #dcc060;
+		--nota-fa: #8cc57a;
+		--nota-sol: #6cc3cf;
+		--nota-la: #93a8e8;
+		--nota-si: #c597d6;
+		--colore-su-nota: #12202b;
+		--ombra-1: 0 1px 2px rgb(0 0 0 / 0.3);
+		--ombra-2: 0 12px 32px rgb(0 0 0 / 0.45), 0 2px 8px rgb(0 0 0 / 0.3);
+	}
+}
+
+/* fascia 6-10 anni: testo del corpo più grande, target più comodi */
+:root[data-eta='6-10'] {
+	--testo-corpo: var(--testo-l);
+	--target: 3.5rem;
+}
+
+/* testo grande: tutto è in rem, basta cambiare la base */
+:root[data-testo-grande] {
+	font-size: 125%;
+}
+
+/* contrasto alto */
+:root[data-contrasto-alto] {
+	--colore-fondo: #ffffff;
+	--colore-superficie: #ffffff;
+	--colore-superficie-tenue: #f0f3f2;
+	--colore-bordo: #4a5966;
+	--colore-bordo-forte: #1b2733;
+	--colore-testo: #000000;
+	--colore-testo-tenue: #1b2733;
+	--colore-accento: #0b4f41;
+	--colore-accento-forte: #063a30;
+	--colore-successo: #24501a;
+	--colore-attenzione: #5e3800;
+	--colore-info: #173f66;
+	--colore-focus: #0a3a85;
+}
+@media (prefers-color-scheme: dark) {
+	:root[data-contrasto-alto] {
+		--colore-fondo: #000000;
+		--colore-superficie: #000000;
+		--colore-superficie-tenue: #101a22;
+		--colore-bordo: #a7b6c0;
+		--colore-bordo-forte: #e6edf0;
+		--colore-testo: #ffffff;
+		--colore-testo-tenue: #e6edf0;
+		--colore-accento: #a6eedb;
+		--colore-accento-forte: #c8f6ea;
+		--colore-successo: #c3eaae;
+		--colore-attenzione: #f7d899;
+		--colore-info: #c3daf5;
+		--colore-focus: #c3daf5;
+	}
+}
+
+/* movimento ridotto: preferenza del profilo o del sistema */
+:root[data-riduci-movimento] {
+	--durata-breve: 0ms;
+	--durata-media: 0ms;
+	--durata-lunga: 0ms;
+}
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--durata-breve: 0ms;
+		--durata-media: 0ms;
+		--durata-lunga: 0ms;
+	}
+}
