@@ -40,11 +40,11 @@ export type WidgetProps<P = Record<string, unknown>> = {
 export const WIDGET_CORE: Readonly<Record<string, CaricaWidget>> = {
 	spiegazione: () => import('../widget/Spiegazione.svelte'),
 	scelta: () => import('../widget/Scelta.svelte'),
-	animazione: () => import('../widget/Animazione.svelte')
-	// TODO(fase 2, audio): ascolta: () => import('../widget/Ascolta.svelte'),
-	// TODO(fase 2, notazione): 'staff-tocca': () => import('../widget/StaffTocca.svelte'),
-	// TODO(fase 2, audio): 'canta-nota': () => import('../widget/CantaNota.svelte'),
-	// TODO(fase 2, audio): 'canta-sequenza': () => import('../widget/CantaSequenza.svelte'),
+	animazione: () => import('../widget/Animazione.svelte'),
+	ascolta: () => import('../widget/Ascolta.svelte'),
+	'staff-tocca': () => import('../widget/StaffTocca.svelte'),
+	'canta-nota': () => import('../widget/CantaNota.svelte'),
+	'canta-sequenza': () => import('../widget/CantaSequenza.svelte')
 };
 
 /** Il caricatore di un widget: prima i core, poi quelli del modulo. */

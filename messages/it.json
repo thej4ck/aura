@@ -508,5 +508,99 @@
 	"pwa_perche": "Su Safari, i dati dei siti che non sono installati possono essere cancellati dopo 7 giorni senza visite. Con l’app installata i tuoi progressi restano al sicuro.",
 	"pwa_installa": "Installa l’app",
 	"pwa_ios": "Su iPhone e iPad: tocca Condividi, poi Aggiungi alla schermata Home.",
-	"pwa_gia_installata": "L’app è già installata. Bene così!"
+	"pwa_gia_installata": "L’app è già installata. Bene così!",
+
+	"widget_ascolta": "Ascolta",
+	"widget_ascolta_di_nuovo": "Ascolta di nuovo",
+	"widget_ferma": "Ferma",
+	"ascolta_rigo": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "La nota da ascoltare",
+				"countPlural=other": "Le note da ascoltare"
+			}
+		}
+	],
+	"staff_tocca_domanda": "Tocca il {nome}",
+	"staff_tocca_toccato": [
+		{
+			"declarations": ["input tipo", "input posizione", "input nome"],
+			"selectors": ["tipo"],
+			"match": {
+				"tipo=linea": "Hai toccato la {posizione}: lì c’è il {nome}.",
+				"tipo=fuori": "Hai toccato lo {posizione}: lì c’è il {nome}.",
+				"tipo=*": "Hai toccato il {posizione}: lì c’è il {nome}."
+			}
+		}
+	],
+	"staff_tocca_dove": [
+		{
+			"declarations": ["input tipo", "input posizione", "input nome"],
+			"selectors": ["tipo"],
+			"match": {
+				"tipo=linea": "Il {nome} sta sulla {posizione}.",
+				"tipo=spazio": "Il {nome} sta nel {posizione}.",
+				"tipo=taglio": "Il {nome} sta sul {posizione}.",
+				"tipo=*": "Il {nome} sta nello {posizione}."
+			}
+		}
+	],
+	"staff_tocca_piu_su": "Il {nome} è più in alto.",
+	"staff_tocca_piu_giu": "Il {nome} è più in basso.",
+	"staff_tocca_giusto": "Sì, è proprio qui!",
+	"canta_rigo": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "La nota da cantare",
+				"countPlural=other": "Le note da cantare"
+			}
+		}
+	],
+	"canta_microfono": "Il microfono serve solo per ascoltarti. Niente viene registrato.",
+	"canta_microfono_adulti": "Per gli adulti: il suono del microfono si analizza solo nel browser, mentre si canta. Non si salva e non si invia a nessuno.",
+	"canta_inizia": "Ascolta e canta",
+	"canta_turni": "A chi tocca",
+	"canta_turno_ascolta": "Ascolta",
+	"canta_turno_canta": "Canta",
+	"canta_tenuta": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Tieni la nota finché il cerchio si riempie.",
+				"countPlural=other": "Tieni ogni nota finché il cerchio si riempie."
+			}
+		}
+	],
+	"canta_tenuta_valore": "Nota tenuta: {valore} per cento",
+	"canta_nota_di": "Nota {numero} di {totale}",
+	"canta_riuscita": "Ce l’hai fatta! Hai tenuto la nota.",
+	"canta_sequenza_riuscita": "Ce l’hai fatta! Hai cantato tutte le note.",
+	"canta_riprova": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Ascolta di nuovo la nota e riprova: la freccia ti dice se andare più su o più giù.",
+				"countPlural=other": "Ascolta di nuovo le note e riprova: la freccia ti dice se andare più su o più giù."
+			}
+		}
+	],
+	"canta_cantate": [
+		{
+			"declarations": ["input count", "input totale", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Hai già cantato {count} nota su {totale}.",
+				"countPlural=other": "Hai già cantato {count} note su {totale}."
+			}
+		}
+	],
+	"canta_non_sentito": "Non ti ho sentito. Avvicinati al microfono e canta un po’ più forte.",
+	"canta_senza_microfono": "Puoi ascoltare e cantare lo stesso, poi vai avanti quando vuoi.",
+	"canta_riprova_pulsante": "Riprova"
 }
