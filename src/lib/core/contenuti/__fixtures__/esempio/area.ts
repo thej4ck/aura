@@ -7,5 +7,5 @@ export const area = {
 	descrizione: 'Contenuti di prova per il motore delle attività.',
 	icona: '🧪',
 	colore: '#1f6b5a',
-	percorso: ['esempio.linee.cinque-linee', 'esempio.linee.spazi']
+	percorso: ['esempio.linee.cinque-linee', 'esempio.linee.spazi', 'esempio.suoni.ascolta-e-canta']
 } satisfies AreaDati;

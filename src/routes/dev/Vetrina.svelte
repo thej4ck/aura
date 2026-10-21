@@ -1,5 +1,5 @@
 <script lang="ts">
-	// Vetrina per lo sviluppo: token, componenti UI e un'attività di esempio per provare il motore.
+	// Vetrina per lo sviluppo: token, componenti UI, widget e attività di esempio per provare il motore.
 	import { m } from '#lib/paraglide/messages.js';
 	import { catalogoEsempio } from '#lib/core/contenuti/__fixtures__/esempio/catalogo.ts';
 	import CinqueLinee from '#lib/core/contenuti/__fixtures__/esempio/linee/CinqueLinee.svelte';
@@ -17,8 +17,10 @@
 	import Notazione from './sezioni/Notazione.svelte';
 	import SezioneAudio from './sezioni/Audio.svelte';
 	import Pagine from './sezioni/Pagine.svelte';
+	import SezioneWidget from './sezioni/Widget.svelte';
 
 	const attivita = catalogoEsempio.attivita('esempio.linee.cinque-linee')!;
+	const attivitaMusica = catalogoEsempio.attivita('esempio.suoni.ascolta-e-canta')!;
 
 	const SUPERFICI = ['fondo', 'superficie', 'superficie-tenue', 'bordo', 'bordo-forte'];
 	const TESTI = ['testo', 'testo-tenue', 'accento', 'accento-tenue', 'focus'];
@@ -202,6 +204,17 @@
 			<!-- come nella route delle attività: un altro profilo fa ripartire il motore -->
 			{#key progressi.doc?.profilo.id}
 				<Attivita {attivita} catalogo={catalogoEsempio} />
+			{/key}
+		</div>
+	</section>
+
+	<SezioneWidget />
+
+	<section aria-labelledby="sez-attivita-musica" class="sezione-attivita">
+		<h2 id="sez-attivita-musica">{m.dev_attivita_musica()}</h2>
+		<div class="cornice">
+			{#key progressi.doc?.profilo.id}
+				<Attivita attivita={attivitaMusica} catalogo={catalogoEsempio} />
 			{/key}
 		</div>
 	</section>

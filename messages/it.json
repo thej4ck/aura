@@ -602,5 +602,13 @@
 	],
 	"canta_non_sentito": "Non ti ho sentito. Avvicinati al microfono e canta un po’ più forte.",
 	"canta_senza_microfono": "Puoi ascoltare e cantare lo stesso, poi vai avanti quando vuoi.",
-	"canta_riprova_pulsante": "Riprova"
+	"canta_riprova_pulsante": "Riprova",
+	"widget_dev_titolo": "Widget musicali",
+	"widget_dev_testo": "Ogni widget da solo, con gli esiti che manda al motore.",
+	"widget_dev_esiti": "Esiti",
+	"widget_dev_nessun_esito": "Nessun esito per ora.",
+	"widget_dev_esito": "corretto: {corretto}, item: {item}",
+	"widget_dev_fine": "fine (Avanti)",
+	"widget_dev_ricomincia": "Ricomincia",
+	"dev_attivita_musica": "Attività musicale di esempio"
 }

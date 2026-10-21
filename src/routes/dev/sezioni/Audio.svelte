@@ -2,18 +2,13 @@
 	// Vetrina dell'audio: il synth suona una scala, il microfono misura la voce sul La4.
 	import { TOLLERANZE_CENTS } from '#lib/core/audio/costanti.ts';
 	import { sblocca } from '#lib/core/audio/contesto.ts';
-	import {
-		ErroreMic,
-		apriMicrofono,
-		type CodiceErroreMic,
-		type FrameMic,
-		type Microfono
-	} from '#lib/core/audio/mic.ts';
+	import { ErroreMic, apriMicrofono, type FrameMic, type Microfono } from '#lib/core/audio/mic.ts';
 	import { suona, type Riproduzione } from '#lib/core/audio/synth.ts';
 	import { progressi } from '#lib/core/store/progressi.svelte.ts';
 	import Avviso from '#lib/core/ui/Avviso.svelte';
 	import Button from '#lib/core/ui/Button.svelte';
 	import PitchMeter from '#lib/core/ui/PitchMeter.svelte';
+	import { ERRORI_MIC } from '#lib/core/widget/musica.ts';
 	import { m } from '#lib/paraglide/messages.js';
 
 	const LA4 = 69;
@@ -23,12 +18,6 @@
 		inizio: i * 0.4,
 		durata: 0.35
 	}));
-	const ERRORI: Record<CodiceErroreMic, () => string> = {
-		'permesso-negato': m.audio_errore_permesso_negato,
-		'nessun-microfono': m.audio_errore_nessun_microfono,
-		'contesto-non-sicuro': m.audio_errore_contesto_non_sicuro,
-		'non-supportato': m.audio_errore_non_supportato
-	};
 	const hz = new Intl.NumberFormat('it', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 	// raw: oggetti sostituiti in blocco, niente proxy (e `riproduzione === r` resta vero)
@@ -69,7 +58,7 @@
 			if (vivo) microfono = aperto;
 			else aperto.chiudi();
 		} catch (e) {
-			errore = e instanceof ErroreMic ? ERRORI[e.codice]() : m.audio_errore_non_supportato();
+			errore = e instanceof ErroreMic ? ERRORI_MIC[e.codice]() : m.audio_errore_non_supportato();
 		} finally {
 			apertura = false;
 		}
