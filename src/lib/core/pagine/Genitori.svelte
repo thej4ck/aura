@@ -136,9 +136,10 @@
 		</ul>
 	</section>
 
-	<div id="installa">
+	<section id="installa" aria-labelledby="titolo-installa">
+		<h2 id="titolo-installa">{m.genitori_installa()}</h2>
 		<InstallaApp />
-	</div>
+	</section>
 </div>
 
 <GateAdulti

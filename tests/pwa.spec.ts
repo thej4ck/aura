@@ -34,3 +34,22 @@ test('il service worker si registra e una pagina già visitata si apre offline',
 	expect(esterne).toEqual([]);
 	expect(errori.filter((e) => !/Failed to load resource|net::ERR/.test(e))).toEqual([]);
 });
+
+test('l’invito a installare arriva nella home e si ritrova in /genitori', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByRole('img', { name: /Profilo attivo/ })).toBeVisible(); // pagina idratata
+	// Chromium lo manda una volta sola, poco dopo il caricamento: qui lo si simula
+	await page.evaluate(() =>
+		dispatchEvent(
+			Object.assign(new Event('beforeinstallprompt', { cancelable: true }), {
+				prompt: async () => ({ outcome: 'dismissed' })
+			})
+		)
+	);
+	await page
+		.getByRole('navigation', { name: 'Navigazione principale' })
+		.getByRole('link', { name: 'Per i genitori' })
+		.click();
+	await expect(page.getByRole('heading', { name: "Installa l'app" })).toBeVisible();
+	await expect(page.getByRole('button', { name: "Installa l'app" })).toBeVisible();
+});
