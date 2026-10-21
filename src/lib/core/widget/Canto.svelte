@@ -4,7 +4,8 @@
 	// misuratore e l'anello della tenuta. La prova finisce quando le note sono tenute in ordine o dopo
 	// ASCOLTO_MAX_MS di ascolto; l'esito conta il primo tentativo. Senza microfono si ascolta e si canta
 	// lo stesso, ma senza esito: la scheda non conta né come giusta né come da rivedere.
-	// Il microfono si chiude a fine prova e sempre quando si lascia la scheda.
+	// Il microfono si chiude a fine prova e sempre quando si lascia la scheda; se lo chiude il browser
+	// (scheda nascosta, pagina lasciata) si torna all'inizio, senza esito.
 	import { m } from '#lib/paraglide/messages.js';
 	import { ASCOLTO_MAX_MS, TOLLERANZE_CENTS } from '../audio/costanti.ts';
 	import { sblocca } from '../audio/contesto.ts';
@@ -91,6 +92,7 @@
 		try {
 			aperto = await apriMicrofono({
 				onframe: ascoltaFrame,
+				onchiuso: daCapo,
 				latenzaMs: contesto.preferenze.latenzaAudioMs
 			});
 		} catch (e) {
@@ -113,6 +115,14 @@
 		frame = f;
 		stato = avanzaSequenza(stato, f, opzioni);
 		if (stato.esito !== 'in-corso') concludi();
+	}
+
+	/** microfono chiuso dal browser: la prova non conta, al ritorno si rifà «Ascolta e canta» */
+	function daCapo() {
+		microfono = undefined;
+		frame = null;
+		riproduzione?.ferma();
+		if (fase === 'ascolto') fase = 'pronto';
 	}
 
 	function concludi() {

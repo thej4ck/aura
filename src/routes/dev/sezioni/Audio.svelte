@@ -52,6 +52,10 @@
 		try {
 			const aperto = await apriMicrofono({
 				onframe: (f) => (frame = f),
+				onchiuso: () => {
+					microfono = undefined;
+					frame = null;
+				},
 				latenzaMs: progressi.doc?.preferenze.latenzaAudioMs
 			});
 			// pagina lasciata mentre si aspettava il permesso: si chiude subito

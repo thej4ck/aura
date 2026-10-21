@@ -29,6 +29,9 @@ export class ErroreMic extends Error {
 
 export type Microfono = { chiudi(): void };
 
+/** Perché il microfono si è chiuso da solo: scheda nascosta, oppure pagina lasciata (anche verso la bfcache). */
+export type MotivoChiusura = 'nascosta' | 'pagina-lasciata';
+
 /** ~30 frame al secondo, anche con schermi a 60 o 120 Hz */
 const INTERVALLO_MS = 1000 / 30;
 
@@ -49,17 +52,21 @@ function codiceDa(e: unknown): CodiceErroreMic {
 
 /**
  * Apre il microfono e chiama `onframe` circa 30 volte al secondo. Chiamare prima sblocca() nel gesto
- * che apre il microfono (iOS). Lancia ErroreMic. Le tracce si rilasciano con chiudi() e su pagehide:
- * se il componente sparisce mentre si aspetta il permesso, chiudi() va chiamato appena arriva.
+ * che apre il microfono (iOS). Lancia ErroreMic. Le tracce si rilasciano con chiudi(); il microfono si
+ * chiude anche da solo quando la scheda si nasconde (rAF lì si ferma: niente frame, ma la spia resterebbe
+ * accesa) o la pagina viene lasciata, e allora chiama `onchiuso`. Se il componente sparisce mentre si
+ * aspetta il permesso, chiudi() va chiamato appena arriva.
  * `latenzaMs`: la manopola di latenza delle preferenze, tolta dal tempo dei frame.
- * ponytail: rAF a ~30 Hz basta per il canto; se servirà di più (ritmo, schede in background) si passa a
- * un AudioWorklet qui dentro, con la stessa interfaccia.
+ * ponytail: rAF a ~30 Hz basta per il canto; se servirà di più (ritmo) si passa a un AudioWorklet qui
+ * dentro, con la stessa interfaccia.
  */
 export async function apriMicrofono({
 	onframe,
+	onchiuso,
 	latenzaMs = 0
 }: {
 	onframe: (frame: FrameMic) => void;
+	onchiuso?: (motivo: MotivoChiusura) => void;
 	latenzaMs?: number;
 }): Promise<Microfono> {
 	if (globalThis.isSecureContext === false) throw new ErroreMic('contesto-non-sicuro');
@@ -129,13 +136,24 @@ export async function apriMicrofono({
 		if (chiuso) return;
 		chiuso = true;
 		cancelAnimationFrame(raf);
-		removeEventListener('pagehide', chiudi);
+		removeEventListener('pagehide', lasciata);
+		document.removeEventListener('visibilitychange', nascosta);
 		sorgente.disconnect();
 		for (const traccia of stream.getTracks()) traccia.stop();
 		rilascia();
 	}
+	function chiudiDaSolo(motivo: MotivoChiusura) {
+		if (chiuso) return;
+		chiudi();
+		onchiuso?.(motivo);
+	}
+	const lasciata = () => chiudiDaSolo('pagina-lasciata');
+	const nascosta = () => {
+		if (document.visibilityState === 'hidden') chiudiDaSolo('nascosta');
+	};
 
-	addEventListener('pagehide', chiudi);
+	addEventListener('pagehide', lasciata);
+	document.addEventListener('visibilitychange', nascosta);
 	raf = requestAnimationFrame(giro);
 	return { chiudi };
 }

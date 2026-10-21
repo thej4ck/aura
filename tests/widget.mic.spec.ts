@@ -124,3 +124,34 @@ test('staff-tocca da tastiera: feedback che aiuta, esito al primo tentativo', as
 		'fine (Avanti)'
 	]);
 });
+
+test('canta-nota: con la scheda nascosta o la pagina lasciata il microfono si spegne, e si ricomincia', async ({
+	page
+}) => {
+	const microfono = await spiaMicrofono(page);
+	await apriVetrina(page);
+	const w = widget(page, 'canta-nota');
+	const visibilita = (stato: 'hidden' | 'visible') =>
+		page.evaluate((s) => {
+			Object.defineProperty(document, 'visibilityState', { value: s, configurable: true });
+			document.dispatchEvent(new Event('visibilitychange'));
+		}, stato);
+
+	await w.getByRole('button', { name: 'Ascolta e canta' }).click();
+	await expect(w.getByRole('list', { name: 'A chi tocca' })).toBeVisible();
+	expect(await microfono()).toEqual({ aperti: 1, accesi: 1 });
+	await visibilita('hidden'); // qui rAF si fermerebbe: niente frame, niente fine della prova
+	await expect(w.getByRole('button', { name: 'Ascolta e canta' })).toBeVisible();
+	expect(await microfono()).toEqual({ aperti: 1, accesi: 0 });
+	await visibilita('visible');
+
+	await w.getByRole('button', { name: 'Ascolta e canta' }).click();
+	await expect(w.getByRole('list', { name: 'A chi tocca' })).toBeVisible();
+	// verso la bfcache: al ritorno la scheda non resta bloccata in ascolto
+	await page.evaluate(() =>
+		dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }))
+	);
+	await expect(w.getByRole('button', { name: 'Ascolta e canta' })).toBeVisible();
+	expect(await microfono()).toEqual({ aperti: 2, accesi: 0 });
+	await expect(esiti(page, 'canta-nota')).toHaveText(['Nessun esito per ora.']);
+});

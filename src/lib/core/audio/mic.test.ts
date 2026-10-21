@@ -56,6 +56,11 @@ beforeEach(async () => {
 	vi.stubGlobal('cancelAnimationFrame', () => (prossimoFrame = undefined));
 	vi.stubGlobal('addEventListener', (tipo: string, f: () => void) => ascoltatori.set(tipo, f));
 	vi.stubGlobal('removeEventListener', (tipo: string) => ascoltatori.delete(tipo));
+	vi.stubGlobal('document', {
+		visibilityState: 'visible',
+		addEventListener: (tipo: string, f: () => void) => ascoltatori.set(tipo, f),
+		removeEventListener: (tipo: string) => ascoltatori.delete(tipo)
+	});
 	vi.resetModules();
 	mic = await import('./mic.ts');
 	audio = await import('./contesto.ts');
@@ -109,6 +114,30 @@ describe('apriMicrofono', () => {
 			[false, true],
 			[true, false]
 		]);
+	});
+
+	it('scheda nascosta o pagina lasciata: il microfono si chiude da solo e lo dice', async () => {
+		const onchiuso = vi.fn();
+		await mic.apriMicrofono({ onframe: () => {}, onchiuso });
+		ascoltatori.get('visibilitychange')!(); // ancora visibile: niente
+		expect(traccia.stop).not.toHaveBeenCalled();
+		(document as { visibilityState: string }).visibilityState = 'hidden';
+		ascoltatori.get('visibilitychange')!();
+		expect(onchiuso).toHaveBeenCalledExactlyOnceWith('nascosta');
+		expect(traccia.stop).toHaveBeenCalledOnce();
+		expect(prossimoFrame).toBeUndefined();
+		expect(ascoltatori.has('visibilitychange')).toBe(false);
+
+		const m = await mic.apriMicrofono({ onframe: () => {}, onchiuso });
+		ascoltatori.get('pagehide')!();
+		expect(onchiuso).toHaveBeenLastCalledWith('pagina-lasciata');
+		m.chiudi(); // già chiuso: niente di nuovo
+		expect(onchiuso).toHaveBeenCalledTimes(2);
+		expect(traccia.stop).toHaveBeenCalledTimes(2);
+
+		// chiuso dal chiamante: onchiuso non si chiama
+		(await mic.apriMicrofono({ onframe: () => {}, onchiuso })).chiudi();
+		expect(onchiuso).toHaveBeenCalledTimes(2);
 	});
 
 	it('chiudi() e pagehide rilasciano il microfono', async () => {
