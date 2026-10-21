@@ -63,8 +63,9 @@
 	let stato = $state<Stato>('attesa');
 	let annuncio = $state('');
 
-	// la scia non è reattiva: la legge solo il disegno
-	let scia: { t: number; freq: number | null }[] = [];
+	// la scia non è reattiva: la legge solo il disegno. Ogni punto tiene i cent rispetto alla nota di quel
+	// momento: in una sequenza la nota appena tenuta bene resta giusta anche dopo il passaggio alla prossima
+	let scia: { t: number; freq: number | null; c: number; nota: number }[] = [];
 	let ultimoFrame: FrameMic | null | undefined;
 	let ultimoAnnuncio = -Infinity;
 
@@ -90,7 +91,8 @@
 		} else if (f !== ultimoFrame) {
 			if (ultimoFrame && f.t < ultimoFrame.t) scia = []; // microfono riaperto
 			ultimoFrame = f;
-			scia.push({ t: f.t, freq: f.silenziato ? null : f.freq });
+			const freq = f.silenziato ? null : f.freq;
+			scia.push({ t: f.t, freq, c: freq === null ? 0 : cents(freq), nota: target });
 			while (scia[0].t < f.t - SCIA_S) scia.shift();
 		}
 		const c = attuale();
@@ -178,18 +180,18 @@
 			};
 			g.lineCap = 'round';
 			g.lineJoin = 'round';
-			let prima: { x: number; y: number; c: number } | null = null;
+			let prima: { x: number; y: number; c: number; nota: number } | null = null;
 			for (const p of scia) {
 				if (p.freq === null) {
 					chiudiTratto();
 					prima = null;
 					continue;
 				}
-				const c = cents(p.freq);
-				const punto = { x: x(p.t), y: y(c), c };
+				const c = p.c;
+				const punto = { x: x(p.t), y: y(c), c, nota: p.nota };
 				const dentro = Math.abs(c) <= tol;
-				// un salto grande (es. d'ottava) interrompe la linea invece di tracciare una verticale
-				const unito = prima && Math.abs(c - prima.c) <= 300;
+				// un salto grande (es. d'ottava) o una nota nuova interrompono la linea invece di tracciare una verticale
+				const unito = prima && prima.nota === p.nota && Math.abs(c - prima.c) <= 300;
 				if (unito && tratto === dentro) g.lineTo(punto.x, punto.y);
 				else {
 					chiudiTratto();
