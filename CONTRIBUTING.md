@@ -22,7 +22,7 @@ Grazie per il tuo aiuto. Questo progetto è usato da bambini: privacy, accessibi
 
 - Messaggi in inglese secondo [Conventional Commits](https://www.conventionalcommits.org/): `feat(store): ...`, `fix(audio): ...`, `docs: ...`, `test: ...`, `build: ...`, `ci: ...`, `chore: ...`.
 - Commit piccoli, un passo logico per commit.
-- **DCO**: ogni commit porta la riga `Signed-off-by` (`git commit -s`). Con questa riga dichiari di avere il diritto di inviare il contributo secondo il [Developer Certificate of Origin](https://developercertificate.org/).
+- **DCO**: ogni commit di una pull request porta la riga `Signed-off-by` (`git commit -s`). Con questa riga dichiari di avere il diritto di inviare il contributo secondo il [Developer Certificate of Origin](https://developercertificate.org/).
 
 ## Id stabili
 
