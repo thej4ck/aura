@@ -61,3 +61,11 @@ test('/dev in produzione non esiste: pagina 404 amichevole, accessibile e senza 
 	expect(errori.filter((e) => e !== documento)).toEqual([]);
 	expect(await violazioniGravi(page)).toEqual([]);
 });
+
+test('crediti: il link alla licenza apre il testo, non una pagina dell’app', async ({ page }) => {
+	await page.goto('/genitori');
+	await expect(page.getByRole('img', { name: /Profilo attivo/ })).toBeVisible(); // pagina idratata
+	await page.getByRole('link', { name: 'Leggi la licenza di Bravura' }).click();
+	await expect(page).toHaveURL(/\/licenze\/bravura-ofl\.txt$/);
+	await expect(page.getByText('SIL OPEN FONT LICENSE Version 1.1')).toBeVisible();
+});

@@ -163,7 +163,10 @@
 			{#each CREDITI as [testo, opera, licenza] (licenza)}
 				<li>
 					<p>{testo()}</p>
-					<a class="vai" href={asset(licenza)}>{m.genitori_crediti_licenza({ opera })}</a>
+					<!-- un file, non una pagina: senza reload il router lo prenderebbe per /[area]/[modulo] -->
+					<a class="vai" href={asset(licenza)} data-sveltekit-reload>
+						{m.genitori_crediti_licenza({ opera })}
+					</a>
 				</li>
 			{/each}
 		</ul>
