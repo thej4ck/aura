@@ -26,7 +26,11 @@
 			</span>
 			<div class="corpo">
 				{#if t.consigliata}
-					<p class="consiglio"><Icona nome="germoglio" /> {m.percorso_consigliata()}</p>
+					<!-- come nella home: "Continua" per quella in corso, "Prossimo passo" per una nuova -->
+					<p class="consiglio">
+						<Icona nome="germoglio" />
+						{t.stato === 'in_corso' ? m.percorso_continua() : m.percorso_consigliata()}
+					</p>
 				{/if}
 				<svelte:element this={`h${livello}`} class="titolo">
 					<a href={indirizzoAttivita(t.attivita)}>{t.attivita.titolo}</a>

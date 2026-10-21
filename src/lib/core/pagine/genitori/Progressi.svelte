@@ -111,7 +111,9 @@
 							<p class="prossimo">
 								<Icona nome="germoglio" />
 								<a href={indirizzoAttivita(v.prossimo.attivita)}>
-									{m.genitori_prossimo({ titolo: v.prossimo.attivita.titolo })}
+									{v.prossimo.stato === 'in_corso'
+										? m.genitori_continua({ titolo: v.prossimo.attivita.titolo })
+										: m.genitori_prossimo({ titolo: v.prossimo.attivita.titolo })}
 								</a>
 							</p>
 						{/if}

@@ -32,6 +32,7 @@
 	"percorso_in_corso": "In corso",
 	"percorso_completata": "Fatta",
 	"percorso_consigliata": "Prossimo passo",
+	"percorso_continua": "Continua da qui",
 	"percorso_prerequisiti": "Prima ti può aiutare:",
 
 	"home_titolo": "Ciao!",
@@ -125,6 +126,7 @@
 	"genitori_competenze": "Competenze",
 	"genitori_da_ripassare": "da ripassare",
 	"genitori_prossimo": "Prossimo passo: {titolo}",
+	"genitori_continua": "Da continuare: {titolo}",
 	"genitori_livello_nuova": "Nuova",
 	"genitori_livello_tentata": "Tentata",
 	"genitori_livello_familiare": "Familiare",
