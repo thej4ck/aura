@@ -1,17 +1,17 @@
 node_modules
 
 # Output
-build
-.output
-.vercel
-.netlify
-.wrangler
+/build
 /.svelte-kit
-/package
+.output
 
 # Test
 test-results
 playwright-report
+
+# Paraglide (generato in build)
+src/lib/paraglide
+project.inlang/cache/
 
 # OS
 .DS_Store
