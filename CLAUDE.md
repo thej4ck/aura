@@ -39,6 +39,6 @@ Piattaforma didattica gratuita per bambini, a moduli (oggi area Musica: Pentagra
 
 Lo sviluppo sostanziale si fa con Workflow multi-agente: implementazione → revisione indipendente → correzioni. Modello in base al compito:
 
-- `fable`: ragionamento difficile e correttezza critica (contratti dei dati, unione dei salvataggi, audio/pitch, logica dei giochi), revisioni scettiche;
-- `opus`: design, UI, motore, contenuti didattici, correzioni;
+- `fable`: **solo eccezionalmente**, per compiti fondamentali che solo lui sa fare con qualità (es. un audit finale trasversale prima di un rilascio, un problema che Opus non ha risolto). Costa più del doppio di Opus: in ogni altro caso Opus;
+- `opus`: default per codice non banale, design, UI, motore, audio/pitch, logica dei giochi, contenuti didattici, revisioni, correzioni;
 - `sonnet`: lavoro meccanico (tooling, configurazione, pagine semplici, commit).
