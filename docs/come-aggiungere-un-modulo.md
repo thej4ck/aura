@@ -23,6 +23,7 @@ Il registry (`src/lib/core/contenuti/registry.ts`) trova da solo tutti i file `*
 
 Gli id sono in kebab-case (`note-linee`) e nel catalogo diventano qualificati: `area.modulo` per i moduli, `area.modulo.attivita` e `area.modulo.competenza` per attività e competenze.
 Finiscono negli URL (`/musica/pentagramma/note-linee`) e nei file di salvataggio delle famiglie, quindi **un id non si rinomina mai e non si riusa**. Il titolo visibile si può cambiare quando vuoi.
+L'id di un'area è il primo pezzo dell'URL (`/musica`): non può essere `moduli`, `genitori` o `dev`, che sono già pagine del sito.
 Se un id deve proprio cambiare, serve una migrazione in `src/lib/core/store/migrazioni.ts` (vedi CONTRIBUTING).
 
 Dentro un modulo i riferimenti (competenze allenate, prerequisiti) si scrivono con l'id locale (`note-linee`); verso altri moduli o aree con l'id qualificato (`musica.canto.estensione`).

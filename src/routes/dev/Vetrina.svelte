@@ -16,6 +16,7 @@
 	import Stelle from '#lib/core/ui/Stelle.svelte';
 	import Notazione from './sezioni/Notazione.svelte';
 	import SezioneAudio from './sezioni/Audio.svelte';
+	import Pagine from './sezioni/Pagine.svelte';
 
 	const attivita = catalogoEsempio.attivita('esempio.linee.cinque-linee')!;
 
@@ -204,6 +205,8 @@
 			{/key}
 		</div>
 	</section>
+
+	<Pagine />
 </div>
 
 <style>
