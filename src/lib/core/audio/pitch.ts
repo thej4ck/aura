@@ -37,8 +37,9 @@ export function rilevaAltezza(
 	const rms = calcolaRms(buffer);
 	if (rms < gateRms) return null;
 
-	// metà frame per i lag e metà per la finestra: con 2048 campioni a 48 kHz si arriva a 47 Hz, sotto
-	// FREQ_MIN, così una nota appena più grave si riconosce (e si scarta) invece di diventare un'ottava sopra.
+	// metà frame per i lag e metà per la finestra: con 1024 campioni a 24 kHz (il microfono passa metà dei
+	// 2048 a 48 kHz) si arriva a 47 Hz, sotto FREQ_MIN, così una nota appena più grave si riconosce (e si
+	// scarta) invece di diventare un'ottava sopra.
 	// ponytail: a 96 kHz il lag massimo copre solo da 94 Hz in su; se mai servirà, FFT in base al sampleRate
 	const tauMax = Math.floor(buffer.length / 2);
 	const finestra = buffer.length - tauMax;

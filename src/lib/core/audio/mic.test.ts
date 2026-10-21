@@ -5,6 +5,9 @@ import type { FrameMic } from './mic.ts';
 const nodo = () => ({ connect: vi.fn((n: unknown) => n), disconnect: vi.fn() });
 const param = () => ({ value: 0 });
 
+/** cosa "sente" il microfono finto: di base un La4 a 48 kHz */
+let segnale = (i: number) => 0.3 * Math.sin((2 * Math.PI * 440 * i) / 48_000);
+
 class ContestoFinto {
 	currentTime = 10;
 	sampleRate = 48_000;
@@ -23,14 +26,16 @@ class ContestoFinto {
 		release: param()
 	});
 	createMediaStreamSource = () => this.sorgente;
-	// il microfono "sente" un La4
-	createAnalyser = () => ({
+	filtro = { ...nodo(), type: '', frequency: param(), Q: param() };
+	createBiquadFilter = () => this.filtro;
+	analizzatore = {
 		...nodo(),
 		fftSize: 0,
 		getFloatTimeDomainData: (b: Float32Array) => {
-			for (let i = 0; i < b.length; i++) b[i] = 0.3 * Math.sin((2 * Math.PI * 440 * i) / 48_000);
+			for (let i = 0; i < b.length; i++) b[i] = segnale(i);
 		}
-	});
+	};
+	createAnalyser = () => this.analizzatore;
 }
 
 let traccia: { stop: ReturnType<typeof vi.fn> };
@@ -41,6 +46,7 @@ let mic: typeof import('./mic.ts');
 let audio: typeof import('./contesto.ts');
 
 beforeEach(async () => {
+	segnale = (i) => 0.3 * Math.sin((2 * Math.PI * 440 * i) / 48_000);
 	traccia = { stop: vi.fn() };
 	getUserMedia = vi.fn(async () => ({ getTracks: () => [traccia] }));
 	vi.stubGlobal('isSecureContext', true);
@@ -75,6 +81,21 @@ describe('apriMicrofono', () => {
 		expect(f.rms).toBeGreaterThan(0.2);
 		// centro della finestra (1024 campioni) e latenza tolti dal clock audio
 		expect(f.t).toBeCloseTo(10 - 1024 / 48_000 - 0.1, 10);
+	});
+
+	it('passa-basso nativo prima dell’analizzatore, e a YIN un campione su due', async () => {
+		const frame: FrameMic[] = [];
+		await mic.apriMicrofono({ onframe: (f) => frame.push(f) });
+		const c = audio.contesto() as unknown as ContestoFinto;
+		expect(c.filtro).toMatchObject({ type: 'lowpass', frequency: { value: 2000 } });
+		expect(c.sorgente.connect).toHaveBeenCalledWith(c.filtro);
+		expect(c.filtro.connect).toHaveBeenCalledWith(c.analizzatore);
+		// campioni pari: un La4 a 24 kHz; dispari: rumore forte. Solo il frame dimezzato è un La4
+		let seme = 1;
+		const rumore = () => ((seme = (seme * 16807) % 2147483647) / 2147483647) * 1.8 - 0.9;
+		segnale = (i) => (i % 2 ? rumore() : 0.3 * Math.sin((2 * Math.PI * 440 * (i / 2)) / 24_000));
+		giro(0);
+		expect(frame[0].freq).toBeCloseTo(440, 0);
 	});
 
 	it('mentre suona il sito i frame sono silenziati', async () => {

@@ -11,6 +11,13 @@ export const GATE_RMS = 0.01;
 /** Campioni per frame del microfono: a 48 kHz sono ~43 ms, più di due periodi della nota più grave. */
 export const FFT = 2048;
 
+/**
+ * Passa-basso prima di YIN (Hz): toglie il rumore a banda larga (ventola, fruscio, respiro), che sotto
+ * ~8 dB di SNR non fa più riconoscere la voce, e permette di analizzare metà dei campioni. Resta sopra
+ * FREQ_MAX con margine: la fondamentale non si tocca.
+ */
+export const PASSA_BASSO_HZ = 2000;
+
 /** Frame su cui si calcola la mediana dell'altezza (a ~30 frame/s sono ~170 ms). */
 export const MEDIANA = 5;
 

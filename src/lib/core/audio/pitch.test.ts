@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { creaCasuale } from '../casuale.ts';
-import { FFT, GATE_RMS } from './costanti.ts';
+import { FFT, GATE_RMS, PASSA_BASSO_HZ, TOLLERANZE_CENTS } from './costanti.ts';
 import { centsTra, midiDaFreq } from './frequenze.ts';
 import { Mediana, calcolaRms, rilevaAltezza } from './pitch.ts';
 
@@ -51,6 +51,33 @@ describe('rilevaAltezza (YIN)', () => {
 			const pulito = segnale(f, sinusoide(ampiezza));
 			const sporco = pulito.map((x) => x + (2 * r() - 1) * k);
 			expect(errore(sporco, f), `${f} Hz`).toBeLessThan(5);
+		}
+	});
+
+	it('rumore forte (SNR 5 dB): con il passa-basso e metà dei campioni, come nel microfono', () => {
+		// lo stesso biquad passa-basso del BiquadFilterNode di mic.ts (Q = 1/√2), poi un campione su due
+		const w = (2 * Math.PI * PASSA_BASSO_HZ) / SR;
+		const al = Math.sin(w) / Math.SQRT2;
+		const [b0, b1, a1, a2] = [(1 - Math.cos(w)) / 2, 1 - Math.cos(w), -2 * Math.cos(w), 1 - al];
+		const filtra = (x: Float32Array) => {
+			const y = new Float32Array(x.length);
+			for (let i = 0; i < x.length; i++) {
+				const [x1, x2, y1, y2] = [x[i - 1] ?? 0, x[i - 2] ?? 0, y[i - 1] ?? 0, y[i - 2] ?? 0];
+				y[i] = (b0 * x[i] + b1 * x1 + b0 * x2 - a1 * y1 - a2 * y2) / (1 + al);
+			}
+			return y.subarray(x.length - FFT); // senza l'avvio del filtro
+		};
+		const r = creaCasuale(11);
+		const ampiezza = 0.4;
+		const k = ((ampiezza / Math.SQRT2) * Math.sqrt(3)) / 10 ** (5 / 20); // RMS del rumore: −5 dB
+		for (const f of [220, 440, 880]) {
+			const sporco = segnale(f, sinusoide(ampiezza), 2 * FFT).map((x) => x + (2 * r() - 1) * k);
+			// senza filtro il rumore copre la periodicità: per YIN il bambino sarebbe muto
+			expect(rilevaAltezza(sporco.subarray(FFT), SR), `${f} Hz senza filtro`).toBeNull();
+			const filtrato = filtra(sporco);
+			const dimezzato = Float32Array.from({ length: FFT / 2 }, (_, i) => filtrato[2 * i]);
+			// un frame solo, con tanto rumore: sotto la tolleranza più stretta (la mediana fa il resto)
+			expect(errore(dimezzato, f, SR / 2), `${f} Hz`).toBeLessThan(TOLLERANZE_CENTS.preciso);
 		}
 	});
 

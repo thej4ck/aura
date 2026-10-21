@@ -1,6 +1,6 @@
 // Microfono → frame di altezza, tutto dentro la pagina: l'audio non si registra, non si salva e non
 // esce mai dal browser (e la CSP vieta comunque le connessioni verso altri siti).
-import { FFT } from './costanti.ts';
+import { FFT, PASSA_BASSO_HZ } from './costanti.ts';
 import { contesto, riproduzioneAttiva, usa } from './contesto.ts';
 import { Mediana, calcolaRms, rilevaAltezza } from './pitch.ts';
 
@@ -87,9 +87,15 @@ export async function apriMicrofono({
 		for (const traccia of stream.getTracks()) traccia.stop();
 		throw new ErroreMic('non-supportato', { cause: e });
 	}
-	sorgente.connect(analizzatore); // e basta: mai verso gli altoparlanti
+	// passa-basso nativo, poi un campione su due a YIN: regge il rumore di fondo e costa un quarto
+	const filtro = c.createBiquadFilter();
+	filtro.type = 'lowpass';
+	filtro.frequency.value = PASSA_BASSO_HZ;
+	filtro.Q.value = Math.SQRT1_2;
+	sorgente.connect(filtro).connect(analizzatore); // e basta: mai verso gli altoparlanti
 	const rilascia = usa('microfono');
 	const buffer = new Float32Array(FFT);
+	const dimezzato = new Float32Array(FFT / 2);
 	const mediana = new Mediana();
 	const ritardo = FFT / 2 / c.sampleRate + latenzaMs / 1000;
 	let ultimo = -Infinity;
@@ -108,7 +114,8 @@ export async function apriMicrofono({
 			onframe({ t, freq: null, chiarezza: 0, rms, silenziato: true });
 			return;
 		}
-		const a = rilevaAltezza(buffer, c.sampleRate);
+		for (let i = 0; i < dimezzato.length; i++) dimezzato[i] = buffer[2 * i];
+		const a = rilevaAltezza(dimezzato, c.sampleRate / 2);
 		onframe({
 			t,
 			freq: mediana.aggiungi(a?.freq ?? null),
