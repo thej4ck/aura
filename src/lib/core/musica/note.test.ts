@@ -7,12 +7,9 @@ import {
 	altezzaInTonalita,
 	armaturaMaggiore,
 	arpeggioMaggiore,
-	cents,
 	classe,
 	componi,
-	frequenza,
 	midi,
-	midiDaFrequenza,
 	nomeIntervallo,
 	nomeNota,
 	nomeNotaParlato,
@@ -65,24 +62,6 @@ describe('altezze e midi', () => {
 		expect(classe(71)).toBe(11);
 		expect(classe(-1)).toBe(11);
 		expect(classe(-12)).toBe(0);
-	});
-});
-
-describe('frequenze', () => {
-	it('La4 = 440 Hz e le ottave raddoppiano', () => {
-		expect(frequenza(69)).toBe(440);
-		expect(frequenza(81)).toBeCloseTo(880, 9);
-		expect(frequenza(57)).toBeCloseTo(220, 9);
-		expect(frequenza(60)).toBeCloseTo(261.6256, 3);
-		expect(frequenza(69, 442)).toBe(442);
-	});
-
-	it('midi frazionario e cent', () => {
-		expect(midiDaFrequenza(440)).toBe(69);
-		expect(midiDaFrequenza(frequenza(64))).toBeCloseTo(64, 9);
-		expect(cents(440, 69)).toBe(0);
-		expect(cents(frequenza(69.25), 69)).toBeCloseTo(25, 9);
-		expect(cents(frequenza(68.9), 69)).toBeCloseTo(-10, 9);
 	});
 });
 

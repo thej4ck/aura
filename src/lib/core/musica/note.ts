@@ -45,13 +45,6 @@ export function midi(altezza: string): number {
 /** Classe d'altezza 0-11 (0 = Do), anche per midi negativi. */
 export const classe = (midi: number) => ((midi % 12) + 12) % 12;
 
-export const frequenza = (midi: number, la4 = 440) => la4 * 2 ** ((midi - 69) / 12);
-/** midi frazionario: 69.5 è un quarto di tono sopra il La4 */
-export const midiDaFrequenza = (hz: number, la4 = 440) => 69 + 12 * Math.log2(hz / la4);
-/** scarto in cent di `hz` dalla nota `midi` (positivo = più acuto) */
-export const cents = (hz: number, midi: number, la4 = 440) =>
-	100 * (midiDaFrequenza(hz, la4) - midi);
-
 /** Armatura della tonalità maggiore (+ diesis, − bemolle) per classe d'altezza della tonica:
  *  Do 0, Re♭ 5♭, Re 2♯, Mi♭ 3♭, Mi 4♯, Fa 1♭, Fa♯ 6♯, Sol 1♯, La♭ 4♭, La 3♯, Si♭ 2♭, Si 5♯. */
 export const ARMATURE_MAGGIORI = [0, -5, 2, -3, 4, -1, 6, 1, -4, 3, -2, 5] as const;
