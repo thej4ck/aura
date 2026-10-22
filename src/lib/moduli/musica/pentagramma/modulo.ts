@@ -106,13 +106,13 @@ export const modulo = {
 			id: 'note-linee',
 			titolo: 'Le note sulle linee',
 			descrizione: 'Legge le note sulle linee: Mi, Sol, Si, Re, Fa.',
-			prerequisiti: ['chiave-violino']
+			prerequisiti: ['chiave-violino', 'musica.canto.nomi-note']
 		},
 		{
 			id: 'note-spazi',
 			titolo: 'Le note negli spazi',
 			descrizione: 'Legge le note negli spazi: Fa, La, Do, Mi.',
-			prerequisiti: ['chiave-violino']
+			prerequisiti: ['chiave-violino', 'musica.canto.nomi-note']
 		},
 		{
 			id: 'acuto-grave',
@@ -355,7 +355,7 @@ export const modulo = {
 				'Sulle linee, dal basso: Mi, Sol, Si, Re, Fa. Negli spazi, dal basso: Fa, La, Do, Mi.',
 			minuti: 8,
 			allena: ['note-linee', 'note-spazi'],
-			prerequisiti: ['chiave-di-violino'],
+			prerequisiti: ['chiave-di-violino', 'musica.canto.cosa-sono-le-note'],
 			traguardi: [NOTAZIONE, ELEMENTI],
 			schede: [
 				{
@@ -488,7 +488,7 @@ export const modulo = {
 			riepilogo:
 				'Hai letto le note sul pentagramma. Quelle che ti sembrano difficili tornano più spesso, finché diventano facili.',
 			minuti: 5,
-			allena: ['note-linee', 'note-spazi', 'lettura'],
+			allena: ['note-linee', 'note-spazi', 'lettura', 'musica.canto.nomi-note'],
 			prerequisiti: ['note-linee-spazi'],
 			traguardi: [NOTAZIONE, ELEMENTI],
 			schede: [
@@ -531,7 +531,7 @@ export const modulo = {
 				'Più una nota è in alto sul pentagramma, più il suo suono è acuto. Più è in basso, più è grave.',
 			minuti: 5,
 			allena: ['acuto-grave'],
-			prerequisiti: ['linee-e-spazi'],
+			prerequisiti: ['linee-e-spazi', 'musica.canto.su-e-giu'],
 			traguardi: [ALTEZZA, NOTAZIONE],
 			schede: [
 				{
@@ -944,8 +944,8 @@ export const modulo = {
 			riepilogo:
 				'Hai letto le note e le hai cantate, senza sentirle prima. Leggere e cantare insieme: proprio come fanno i musicisti.',
 			minuti: 6,
-			allena: ['lettura'],
-			prerequisiti: ['che-nota-e'],
+			allena: ['lettura', 'musica.canto.intonazione'],
+			prerequisiti: ['che-nota-e', 'musica.canto.tieni-la-nota'],
 			traguardi: [VOCE, NOTAZIONE],
 			schede: [
 				{

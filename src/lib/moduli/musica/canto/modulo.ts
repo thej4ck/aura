@@ -701,7 +701,7 @@ export const modulo = {
 				'Da un tasto al vicino c’è un semitono; due semitoni fanno un tono. Salendo il tasto nero si scrive con il diesis, scendendo con il bemolle.',
 			minuti: 7,
 			allena: ['semitoni'],
-			prerequisiti: ['una-alla-volta'],
+			prerequisiti: ['una-alla-volta', 'musica.pentagramma.alterazioni'],
 			traguardi: [IN.elementi, IN.notazione],
 			schede: [
 				{

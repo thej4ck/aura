@@ -212,23 +212,6 @@
 		margin: 0;
 		accent-color: var(--colore-accento);
 	}
-	.campo {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spazio-2);
-		align-items: flex-start;
-	}
-	.campo label {
-		font-weight: var(--peso-forte);
-	}
-	.campo input {
-		width: 8rem;
-		min-height: var(--target);
-		padding: var(--spazio-2) var(--spazio-3);
-		border: 2px solid var(--colore-bordo-forte);
-		border-radius: var(--raggio-s);
-		background: var(--colore-superficie);
-	}
 	.aiuto {
 		max-width: var(--larghezza-testo);
 		color: var(--colore-testo-tenue);
