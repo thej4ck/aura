@@ -142,3 +142,20 @@ export class ErroreProgressi extends Error {
 		this.codice = codice;
 	}
 }
+
+/** Avatar proposti a un nuovo profilo; al primo avvio se ne sceglie uno a caso. */
+export const AVATARI = ['🦊', '🐻', '🐼', '🐨', '🐸', '🦉', '🐙', '🦋', '🐢', '🐧'] as const;
+
+/** Parola italiana (ASCII minuscola) di ogni avatar, per il nome del file di backup: niente emoji nei nomi di file. */
+export const PAROLA_AVATAR: Record<(typeof AVATARI)[number], string> = {
+	'🦊': 'volpe',
+	'🐻': 'orso',
+	'🐼': 'panda',
+	'🐨': 'koala',
+	'🐸': 'rana',
+	'🦉': 'gufo',
+	'🐙': 'polpo',
+	'🦋': 'farfalla',
+	'🐢': 'tartaruga',
+	'🐧': 'pinguino'
+};

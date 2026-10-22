@@ -1,8 +1,7 @@
 import { giorno, type Giorno } from '../giorno';
 import type { Db } from './db';
-import { PAROLA_AVATAR } from './progressi.svelte';
 import { migra } from './migrazioni';
-import { ErroreProgressi, type Documento } from './schema-progressi';
+import { ErroreProgressi, PAROLA_AVATAR, type Documento } from './schema-progressi';
 
 export const MAX_COMPRESSO = 2 * 1024 * 1024;
 export const MAX_DECOMPRESSO = 10 * 1024 * 1024;

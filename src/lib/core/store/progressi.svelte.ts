@@ -20,6 +20,7 @@ import {
 } from './file';
 import { migra } from './migrazioni';
 import {
+	AVATARI,
 	nuovoDocumento,
 	SchemaDocumento,
 	SchemaPreferenze,
@@ -34,23 +35,7 @@ import { unisci } from './unisci';
 
 /** Ritardo del salvataggio dopo l'ultima modifica. */
 export const SALVA_DOPO_MS = 400;
-/** Avatar proposti a un nuovo profilo; al primo avvio se ne sceglie uno a caso. */
-export const AVATARI = ['🦊', '🐻', '🐼', '🐨', '🐸', '🦉', '🐙', '🦋', '🐢', '🐧'] as const;
-
-/** Parola italiana (ASCII minuscola) di ogni avatar, per il nome del file di backup: niente emoji nei nomi di file. */
-export const PAROLA_AVATAR: Record<(typeof AVATARI)[number], string> = {
-	'🦊': 'volpe',
-	'🐻': 'orso',
-	'🐼': 'panda',
-	'🐨': 'koala',
-	'🐸': 'rana',
-	'🦉': 'gufo',
-	'🐙': 'polpo',
-	'🦋': 'farfalla',
-	'🐢': 'tartaruga',
-	'🐧': 'pinguino'
-};
-
+export { AVATARI, PAROLA_AVATAR } from './schema-progressi';
 /**
  * Sincronizzazione con il file collegato (File System Access).
  * 'in-pausa': c'è un file ma manca il permesso di scrittura, serve un gesto dell'utente (riprendiSync).
