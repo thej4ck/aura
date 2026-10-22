@@ -156,7 +156,7 @@ export const modulo = {
 			id: 'semitoni',
 			titolo: 'Toni e semitoni',
 			descrizione:
-				'Trova i tasti neri, distingue semitono e tono, sa quando si scrive il diesis e quando il bemolle.',
+				'Trova i tasti neri, distingue semitono e tono, sa che nella scala cromatica si scrive il diesis salendo e il bemolle scendendo.',
 			prerequisiti: ['scala']
 		}
 	],
@@ -550,7 +550,7 @@ export const modulo = {
 			tipo: 'lezione',
 			obiettivo: 'Scopri prima, seconda e terza: ascolta due note e ripetile.',
 			riepilogo:
-				'Prima: la stessa nota due volte. Seconda: il gradino vicino. Terza: si scavalca un gradino.',
+				'Prima: la stessa nota due volte. Seconda: il gradino vicino, per grado congiunto. Terza: un salto che scavalca un gradino.',
 			minuti: 6,
 			allena: ['intervalli', 'intonazione'],
 			prerequisiti: ['su-e-giu'],
@@ -562,7 +562,7 @@ export const modulo = {
 					widget: 'spiegazione',
 					titolo: 'Da una nota all’altra',
 					testo:
-						'Tra due note c’è una distanza: si chiama intervallo. Per dargli un nome si contano le note.'
+						'Tra due note c’è una distanza: si chiama intervallo. Per dargli un nome si contano le note. Con la seconda si va al gradino vicino; dalla terza in su si fa un salto.'
 				},
 				{
 					id: 'salti',
@@ -648,11 +648,11 @@ export const modulo = {
 					fase: 'prova',
 					widget: 'scelta',
 					props: {
-						domanda: 'Dal Do al Mi: che salto è?',
+						domanda: 'Dal Re al Fa: che intervallo è?',
 						opzioni: ['Una prima', 'Una seconda', 'Una terza'],
 						corretta: 2,
-						suggerimento: 'Conta le note dal Do al Mi, comprese tutte e due: Do, Re, Mi.',
-						spiegazione: 'Do, Re, Mi sono tre note: è una terza.'
+						suggerimento: 'Conta le note dal Re al Fa, comprese tutte e due: Re, Mi, Fa.',
+						spiegazione: 'Re, Mi, Fa sono tre note: è una terza.'
 					}
 				},
 				{
@@ -660,7 +660,7 @@ export const modulo = {
 					fase: 'prova',
 					widget: 'scelta',
 					props: {
-						domanda: 'Sol e Sol: che salto è?',
+						domanda: 'Sol e Sol: che intervallo è?',
 						opzioni: ['Una prima, o unisono', 'Una seconda', 'Una terza'],
 						corretta: 0,
 						suggerimento: 'Le due note sono uguali: si resta sullo stesso gradino.',
@@ -692,7 +692,7 @@ export const modulo = {
 				'Sai fare l’eco: ascolti alcune note e le ripeti, per gradi vicini e con piccoli salti.',
 			minuti: 5,
 			allena: ['intonazione', 'scala'],
-			prerequisiti: ['su-e-giu'],
+			prerequisiti: ['su-e-giu', 'i-salti'],
 			traguardi: [IN.ascolto, IN.intonazione],
 			schede: [
 				{
@@ -726,7 +726,7 @@ export const modulo = {
 			tipo: 'lezione',
 			obiettivo: 'Scopri i tasti neri, il semitono e la scala che usa tutti i tasti.',
 			riepilogo:
-				'Da un tasto al vicino c’è un semitono; due semitoni fanno un tono. Salendo il tasto nero si scrive con il diesis, scendendo con il bemolle.',
+				'Da un tasto al vicino c’è un semitono; due semitoni fanno un tono. Nella scala cromatica, salendo il tasto nero si scrive con il diesis, scendendo con il bemolle.',
 			minuti: 7,
 			allena: ['semitoni'],
 			prerequisiti: ['una-alla-volta', 'musica.pentagramma.alterazioni'],
@@ -765,7 +765,7 @@ export const modulo = {
 					widget: 'spiegazione',
 					titolo: 'Diesis e bemolle',
 					testo:
-						'Il tasto nero ha due nomi. Salendo si usa il diesis ♯: dopo il Do viene il Do♯. Scendendo si usa il bemolle ♭: dopo il Re viene il Re♭.'
+						'Il tasto nero ha due nomi. Nella scala cromatica, salendo si usa il diesis ♯: dopo il Do viene il Do♯. Scendendo si usa il bemolle ♭: dopo il Re viene il Re♭.'
 				},
 				{
 					id: 'cromatica-sale',
@@ -790,7 +790,7 @@ export const modulo = {
 					widget: 'tastiera',
 					titolo: 'Saliamo con il diesis',
 					testo:
-						'Tocca un tasto nero e guarda come si scrive quando si sale: con il diesis, il nome della nota di sotto.',
+						'Tocca un tasto nero e guarda come si scrive nella scala cromatica che sale: con il diesis e il nome della nota di sotto.',
 					props: { grafia: 'diesis', etichette: true }
 				},
 				{
@@ -799,7 +799,7 @@ export const modulo = {
 					widget: 'tastiera',
 					titolo: 'Scendiamo con il bemolle',
 					testo:
-						'Ora lo stesso tasto si scrive come quando si scende: con il bemolle, il nome della nota di sopra.',
+						'Ora lo stesso tasto si scrive come nella scala cromatica che scende: con il bemolle e il nome della nota di sopra.',
 					props: { grafia: 'bemolle', etichette: true }
 				},
 				{
@@ -831,11 +831,12 @@ export const modulo = {
 					fase: 'prova',
 					widget: 'scelta',
 					props: {
-						domanda: 'Salendo dal Fa, il tasto nero si chiama…',
+						domanda: 'Nella scala cromatica che sale, dopo il Fa viene…',
 						opzioni: ['Fa♯', 'Fa♭', 'Sol♯'],
 						corretta: 0,
-						suggerimento: 'Salendo si usa il diesis, con il nome della nota da cui parti.',
-						spiegazione: 'Salendo dal Fa si trova il Fa♯.'
+						suggerimento:
+							'Nella scala cromatica che sale si usa il diesis, con il nome della nota da cui parti.',
+						spiegazione: 'Nella scala cromatica che sale, dopo il Fa viene il Fa♯.'
 					}
 				},
 				{
@@ -843,11 +844,12 @@ export const modulo = {
 					fase: 'prova',
 					widget: 'scelta',
 					props: {
-						domanda: 'Scendendo dal Si, il tasto nero si chiama…',
+						domanda: 'Nella scala cromatica che scende, dopo il Si viene…',
 						opzioni: ['Si♯', 'Si♭', 'La♭'],
 						corretta: 1,
-						suggerimento: 'Scendendo si usa il bemolle, con il nome della nota da cui parti.',
-						spiegazione: 'Scendendo dal Si si trova il Si♭.'
+						suggerimento:
+							'Nella scala cromatica che scende si usa il bemolle, con il nome della nota da cui parti.',
+						spiegazione: 'Nella scala cromatica che scende, dopo il Si viene il Si♭.'
 					}
 				},
 				{
