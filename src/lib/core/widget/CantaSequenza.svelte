@@ -35,6 +35,7 @@
 	tenutaMs={p.tenutaMs}
 	equivalenzaOttava={p.equivalenzaOttava}
 	durataS={0.7}
+	bastaCosi
 	etichette={p.etichette}
 	colori={p.colori}
 	{contesto}

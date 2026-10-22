@@ -1,5 +1,6 @@
 <script lang="ts">
 	// Sezione della vetrina: i widget musicali core da soli, con gli esiti che manderebbero al motore.
+	// Ogni esempio ha il nome del suo id: è il nome del widget, o del widget con props particolari.
 	import type { Scheda } from '#lib/core/contenuti/schema.ts';
 	import { caricaWidget, type EsitoWidget } from '#lib/core/motore/widget.ts';
 	import { progressi } from '#lib/core/store/progressi.svelte.ts';
@@ -16,6 +17,12 @@
 		},
 		{ id: 'staff-tocca', fase: 'prova', widget: 'staff-tocca', props: { nota: 'G4' } },
 		{ id: 'canta-nota', fase: 'prova', widget: 'canta-nota', props: { nota: 'A4' } },
+		{
+			id: 'canta-nota-da-leggere',
+			fase: 'prova',
+			widget: 'canta-nota',
+			props: { nota: 'A4', suonaPrima: false }
+		},
 		{
 			id: 'canta-sequenza',
 			fase: 'prova',
@@ -48,7 +55,7 @@
 	{#each ESEMPI as scheda (scheda.id)}
 		<article class="esempio" aria-labelledby="widget-{scheda.id}">
 			<header>
-				<h3 id="widget-{scheda.id}"><code>{scheda.widget}</code></h3>
+				<h3 id="widget-{scheda.id}"><code>{scheda.id}</code></h3>
 				<Button variante="quieta" icona="ricomincia" onclick={() => ricomincia(scheda.id)}>
 					{m.widget_dev_ricomincia()}
 				</Button>
@@ -68,7 +75,7 @@
 			</div>
 			<div class="esiti">
 				<h4>{m.widget_dev_esiti()}</h4>
-				<ol aria-label="{m.widget_dev_esiti()} {scheda.widget}">
+				<ol aria-label="{m.widget_dev_esiti()} {scheda.id}">
 					{#each esiti[scheda.id] ?? [] as riga, i (i)}
 						<li><code>{riga}</code></li>
 					{:else}

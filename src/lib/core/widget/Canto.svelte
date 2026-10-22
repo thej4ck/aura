@@ -6,6 +6,9 @@
 	// lo stesso, ma senza esito: la scheda non conta né come giusta né come da rivedere.
 	// Il microfono si chiude a fine prova e sempre quando si lascia la scheda; se lo chiude il browser
 	// (scheda nascosta, pagina lasciata) si torna all'inizio, senza esito.
+	// In lettura (`daSuonare` 'partenza' o 'nessuna') le note sono da leggere: il sito suona al massimo la
+	// prima, la nota di partenza. Sentirle tutte è un aiuto: prima dell'esito lo rende non giusto, dopo
+	// serve per controllarsi.
 	import { m } from '#lib/paraglide/messages.js';
 	import { ASCOLTO_MAX_MS, TOLLERANZE_CENTS } from '../audio/costanti.ts';
 	import { sblocca } from '../audio/contesto.ts';
@@ -29,8 +32,13 @@
 		/** tenuta di ogni nota, in ms */
 		tenutaMs: number;
 		equivalenzaOttava: boolean;
-		/** false: le note sono solo scritte, da leggere; il sito le suona solo con «Ascolta» */
-		suonaPrima?: boolean;
+		/**
+		 * cosa suona il sito prima del turno del bambino: tutte le note, solo la prima (la nota di partenza,
+		 * come nel solfeggio cantato) o nessuna; con 'partenza' e 'nessuna' le altre si leggono
+		 */
+		daSuonare?: 'tutte' | 'partenza' | 'nessuna';
+		/** «Basta così, vado avanti» mentre il microfono ascolta: passa oltre senza esito (lezioni) */
+		bastaCosi?: boolean;
 		/** secondi di ogni nota suonata dal sito */
 		durataS: number;
 		etichette: boolean;
@@ -45,7 +53,8 @@
 		rigo,
 		tenutaMs,
 		equivalenzaOttava,
-		suonaPrima = true,
+		daSuonare = 'tutte',
+		bastaCosi = false,
 		durataS,
 		etichette,
 		colori,
@@ -64,10 +73,17 @@
 	let errore = $state('');
 	let microfono: Microfono | undefined;
 	let emesso = false;
+	/** in lettura: le note da leggere sentite prima dell'esito */
+	let aiutato = false;
 	let vivo = true;
 
 	const altezze = $derived(rigo.note.map((n) => n.altezza));
 	const una = $derived(altezze.length === 1);
+	const lettura = $derived(daSuonare !== 'tutte');
+	/** quante note, dall'inizio, suona il sito prima del turno del bambino */
+	const suonate = $derived(
+		daSuonare === 'tutte' ? altezze.length : daSuonare === 'partenza' ? 1 : 0
+	);
 	const opzioni = $derived({
 		note: altezze.map(midi),
 		tolleranzaCents: TOLLERANZE_CENTS[contesto.preferenze.tolleranza],
@@ -78,9 +94,9 @@
 	const corrente = $derived(Math.min(stato.indice, altezze.length - 1));
 	const finita = $derived(fase === 'riuscita' || fase === 'scaduta' || fase === 'senza-microfono');
 
-	function ascolta() {
+	function ascolta(quante = altezze.length) {
 		riproduzione?.ferma();
-		const r = suonaSeguendo(altezze, durataS, (i) => (suona = i));
+		const r = suonaSeguendo(altezze.slice(0, quante), durataS, (i) => (suona = i));
 		riproduzione = r;
 		void r.fine.then(() => {
 			if (riproduzione === r) riproduzione = undefined;
@@ -102,7 +118,7 @@
 			if (!vivo) return;
 			errore = ERRORI_MIC[e instanceof ErroreMic ? e.codice : 'non-supportato']();
 			fase = 'senza-microfono';
-			if (suonaPrima) ascolta(); // si canta lo stesso, senza verifica
+			if (suonate) ascolta(suonate); // si canta lo stesso, senza verifica
 			return;
 		}
 		// scheda lasciata mentre si aspettava il permesso: il microfono si chiude subito
@@ -110,7 +126,7 @@
 		microfono = aperto;
 		stato = nuovaSequenza();
 		fase = 'ascolto';
-		if (suonaPrima) ascolta(); // prima il turno del sito, poi quello del bambino
+		if (suonate) ascolta(suonate); // prima il turno del sito, poi quello del bambino
 	}
 
 	function ascoltaFrame(f: FrameMic) {
@@ -137,17 +153,26 @@
 		if (emesso) return;
 		emesso = true; // conta il primo tentativo; poi si riprova quanto si vuole
 		onesito({
-			corretto: riuscita,
+			corretto: riuscita && !aiutato,
 			item,
-			dettagli: { riuscite: stato.indice, totale: altezze.length }
+			dettagli: { riuscite: stato.indice, totale: altezze.length, ...(aiutato && { aiuto: true }) }
 		});
 	}
 
 	/** un solo pulsante principale, che cambia nome: il focus della tastiera non si perde */
 	function principale() {
 		if (fase === 'permesso') return;
-		if (fase === 'ascolto' || fase === 'riuscita') ascolta();
+		if (fase === 'riuscita' || (fase === 'ascolto' && !lettura)) ascolta();
+		else if (fase === 'ascolto' && suonate)
+			ascolta(suonate); // di nuovo la nota di partenza
+		else if (fase === 'ascolto') aiuto();
 		else void comincia();
+	}
+
+	/** tutte le note, anche quelle da leggere: un aiuto, che prima dell'esito lo rende non giusto */
+	function aiuto() {
+		if (fase === 'ascolto' && !emesso) aiutato = true;
+		ascolta();
 	}
 
 	$effect(() => () => {
@@ -164,7 +189,9 @@
 				if (!stato.sentita) return m.canta_non_sentito();
 				return [
 					stato.indice > 0 && m.canta_cantate({ count: stato.indice, totale: altezze.length }),
-					m.canta_riprova({ count: altezze.length })
+					lettura
+						? m.canta_leggi_riprova({ count: altezze.length })
+						: m.canta_riprova({ count: altezze.length })
 				]
 					.filter(Boolean)
 					.join(' ');
@@ -225,7 +252,7 @@
 			tolleranzaCents={opzioni.tolleranzaCents}
 			{frame}
 			{equivalenzaOttava}
-			nomeTarget={suonaPrima
+			nomeTarget={corrente < suonate
 				? nomeNota(altezze[corrente], contesto.preferenze.nomiNote)
 				: undefined}
 		/>
@@ -244,16 +271,30 @@
 			aria-disabled={fase === 'permesso'}
 			onclick={principale}
 		>
-			{fase === 'ascolto' || fase === 'riuscita'
-				? suonaPrima
-					? m.widget_ascolta_di_nuovo()
-					: m.widget_ascolta()
-				: fase === 'scaduta'
-					? m.canta_riprova_pulsante()
-					: suonaPrima
-						? m.canta_inizia()
-						: m.canta_leggi_inizia()}
+			{fase === 'ascolto' && lettura && suonate
+				? m.canta_ascolta_partenza({ nome: nomeNota(altezze[0], contesto.preferenze.nomiNote) })
+				: fase === 'ascolto' || fase === 'riuscita'
+					? lettura
+						? m.widget_ascolta()
+						: m.widget_ascolta_di_nuovo()
+					: fase === 'scaduta'
+						? m.canta_riprova_pulsante()
+						: lettura
+							? m.canta_leggi_inizia()
+							: m.canta_inizia()}
 		</Button>
+		{#if lettura && (fase === 'scaduta' || fase === 'senza-microfono')}
+			<!-- le note da leggere, da sentire per controllarsi -->
+			<Button dimensione="l" variante="secondaria" icona="volume" onclick={aiuto}>
+				{m.widget_ascolta()}
+			</Button>
+		{/if}
+		{#if bastaCosi && fase === 'ascolto'}
+			<!-- la voce non si forza: ci si può fermare senza aspettare la fine dell'ascolto -->
+			<Button dimensione="l" variante="quieta" icona="chiudi" onclick={onfine}>
+				{m.canta_basta_avanti()}
+			</Button>
+		{/if}
 		{#if finita}
 			<Button
 				dimensione="l"
