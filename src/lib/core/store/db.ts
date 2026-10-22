@@ -21,7 +21,7 @@ function fabbricaPredefinita(): IDBFactory | null {
 
 function apri(fabbrica: IDBFactory): Promise<IDBDatabase> {
 	return new Promise((ok, ko) => {
-		const r = fabbrica.open('kindergarden', 1);
+		const r = fabbrica.open('aura', 1);
 		r.onupgradeneeded = () => {
 			r.result.createObjectStore('profili', { keyPath: 'profilo.id' });
 			r.result.createObjectStore('sistema');

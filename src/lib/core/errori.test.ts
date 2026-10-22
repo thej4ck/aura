@@ -35,7 +35,7 @@ describe('errori', () => {
 	});
 
 	it('ignora un localStorage illeggibile o manomesso', async () => {
-		memoria.set('kindergarden:errori', '{"non": "una lista"}');
+		memoria.set('aura:errori', '{"non": "una lista"}');
 		const { ultimiErrori, registraErrore } = await import('./errori');
 		expect(ultimiErrori()).toEqual([]);
 		vi.stubGlobal('localStorage', {

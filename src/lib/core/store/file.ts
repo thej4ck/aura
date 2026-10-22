@@ -5,7 +5,7 @@ import { ErroreProgressi, type Documento } from './schema-progressi';
 
 export const MAX_COMPRESSO = 2 * 1024 * 1024;
 export const MAX_DECOMPRESSO = 10 * 1024 * 1024;
-const TIPI = [{ description: 'Kindergarden', accept: { 'application/gzip': ['.kgz'] } }];
+const TIPI = [{ description: 'Aura', accept: { 'application/gzip': ['.kgz'] } }];
 
 /**
  * L'avatar nel nome del file, mai il nome del bambino: i nomi dei file finiscono negli elenchi dei
@@ -24,7 +24,7 @@ export async function esporta(
 	doc: Documento,
 	oggi: Giorno = giorno(new Date())
 ): Promise<{ blob: Blob; nomeFile: string }> {
-	const base = `kindergarden-${perNomeFile(doc.profilo.avatar)}-${oggi}`;
+	const base = `aura-${perNomeFile(doc.profilo.avatar)}-${oggi}`;
 	const json = JSON.stringify(doc);
 	if (typeof CompressionStream !== 'function') {
 		return { blob: new Blob([json], { type: 'application/json' }), nomeFile: `${base}.json` };

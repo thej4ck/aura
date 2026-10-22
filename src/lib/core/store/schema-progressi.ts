@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 import { ID_LOCALE, ID_MODULO, ID_QUALIFICATO } from '../contenuti/schema';
 
-export const FORMATO = 'kindergarden-progressi';
+export const FORMATO = 'aura-progressi';
 export const SCHEMA_ATTUALE = 1;
 
 export const STATI_ATTIVITA = ['nuova', 'in_corso', 'completata'] as const;

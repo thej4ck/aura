@@ -4,7 +4,7 @@
 
 Per favore **non aprire una issue pubblica**.
 
-Usa la segnalazione privata di GitHub: nella scheda **Security** del repository scegli **Report a vulnerability**.
+Usa la segnalazione privata di GitHub: nella scheda **Security** del repository ([github.com/thej4ck/aura](https://github.com/thej4ck/aura/security/advisories/new)) scegli **Report a vulnerability**.
 La segnalazione resta visibile solo a te e ai manutentori, e diventa un [GitHub Security Advisory](https://docs.github.com/it/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability).
 
 Indica, se puoi:

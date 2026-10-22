@@ -36,7 +36,7 @@ Questo Codice di Comportamento si applica sia all'interno degli spazi della comu
 
 ## Applicazione
 
-I casi di comportamento abusivo, molesto o altrimenti inaccettabile possono essere presentate contattando in privato i responsabili dell'applicazione di questo Codice di Condotta della comunità, cioè il manutentore del progetto ([@thej4ck](https://github.com/thej4ck)), tramite la segnalazione privata disponibile nella scheda **Security** del repository su GitHub. Tutti i reclami saranno prontamente esaminati ed indagati.
+I casi di comportamento abusivo, molesto o altrimenti inaccettabile possono essere presentate contattando in privato i responsabili dell'applicazione di questo Codice di Condotta della comunità, cioè il manutentore del progetto ([@thej4ck](https://github.com/thej4ck)), tramite la [segnalazione privata](https://github.com/thej4ck/aura/security/advisories/new) disponibile nella scheda **Security** del repository su GitHub. Tutti i reclami saranno prontamente esaminati ed indagati.
 
 Tutte le guide della comunità sono obbligate a mantenere la riservatezza della persona che ha riportato il caso.
 

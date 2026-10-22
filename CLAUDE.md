@@ -1,4 +1,4 @@
-# Kindergarden — istruzioni per Claude
+# Aura — istruzioni per Claude
 
 Piattaforma didattica gratuita per bambini, a moduli (oggi area Musica: Pentagramma e Canto). Sito statico SvelteKit servito da Caddy su Railway. Decisioni architetturali in `docs/adr/`, guida ai moduli in `docs/come-aggiungere-un-modulo.md`.
 
@@ -16,7 +16,7 @@ Piattaforma didattica gratuita per bambini, a moduli (oggi area Musica: Pentagra
 
 - `npm run dev` · `npm run build` · `npm run preview`
 - `npm run lint` · `npm run check` · `npm run test` (Vitest) · `npm run test:e2e` (Playwright)
-- Container (in locale c'è podman, non docker): `podman build -t kindergarden .` → `podman run --rm -e PORT=8080 -p 8080:8080 kindergarden`
+- Container (in locale c'è podman, non docker): `podman build -t aura .` → `podman run --rm -e PORT=8080 -p 8080:8080 aura`
 - Prima di ogni commit: lint, check, test e build verdi.
 
 ## Git

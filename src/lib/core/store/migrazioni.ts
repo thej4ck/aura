@@ -20,7 +20,7 @@ export function migra(json: unknown): Documento {
 		json === null ||
 		(json as { formato?: unknown }).formato !== FORMATO
 	) {
-		throw new ErroreProgressi('formato', 'Non è un file di progressi di Kindergarden.');
+		throw new ErroreProgressi('formato', 'Non è un file di progressi di Aura.');
 	}
 	let doc = json as Record<string, unknown>;
 	const versione = doc.schema;
@@ -33,7 +33,7 @@ export function migra(json: unknown): Documento {
 	if (versione > SCHEMA_ATTUALE) {
 		throw new ErroreProgressi(
 			'versione-futura',
-			`Il file usa lo schema ${versione}, questa versione di Kindergarden arriva al ${SCHEMA_ATTUALE}: aggiorna la pagina e riprova.`
+			`Il file usa lo schema ${versione}, questa versione di Aura arriva al ${SCHEMA_ATTUALE}: aggiorna la pagina e riprova.`
 		);
 	}
 	for (let n = versione; n < SCHEMA_ATTUALE; n++) doc = MIGRAZIONI[n](doc);

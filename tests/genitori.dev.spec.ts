@@ -48,7 +48,7 @@ test('backup: si scarica un file .kgz e la data dell’ultimo backup compare', a
 		STORE
 	);
 	expect(file.suggestedFilename()).toMatch(
-		new RegExp(String.raw`^kindergarden-${avatar}-\d{4}-\d{2}-\d{2}\.kgz$`, 'u')
+		new RegExp(String.raw`^aura-${avatar}-\d{4}-\d{2}-\d{2}\.kgz$`, 'u')
 	);
 	await expect(page.getByText(`Backup scaricato: ${file.suggestedFilename()}.`)).toBeVisible();
 	await expect(page.getByText(/^Ultimo backup: /)).toBeVisible();

@@ -42,7 +42,7 @@ describe('esporta e importa', () => {
 	it('roundtrip gzip .kgz, con l’avatar nel nome del file e mai il nome del bambino', async () => {
 		const doc = documento();
 		const { blob, nomeFile } = await esporta(doc, '2026-10-21');
-		expect(nomeFile).toBe('kindergarden-🦊-2026-10-21.kgz');
+		expect(nomeFile).toBe('aura-🦊-2026-10-21.kgz');
 		expect(blob.type).toBe('application/gzip');
 		expect([...new Uint8Array(await blob.slice(0, 2).arrayBuffer())]).toEqual([0x1f, 0x8b]);
 		expect(await importa(blob)).toEqual(doc);
@@ -50,9 +50,9 @@ describe('esporta e importa', () => {
 
 	it('un avatar importato senza emoji (o con caratteri da file system) dà "profilo"', async () => {
 		const { nomeFile } = await esporta(nuovoDocumento('a/b:c', 'Zoë'), '2026-01-02');
-		expect(nomeFile).toBe('kindergarden-profilo-2026-01-02.kgz');
+		expect(nomeFile).toBe('aura-profilo-2026-01-02.kgz');
 		expect((await esporta(nuovoDocumento('🐻/x'), '2026-01-02')).nomeFile).toBe(
-			'kindergarden-🐻-2026-01-02.kgz'
+			'aura-🐻-2026-01-02.kgz'
 		);
 	});
 
@@ -61,7 +61,7 @@ describe('esporta e importa', () => {
 		try {
 			const doc = documento();
 			const { blob, nomeFile } = await esporta(doc, '2026-10-21');
-			expect(nomeFile).toBe('kindergarden-🦊-2026-10-21.json');
+			expect(nomeFile).toBe('aura-🦊-2026-10-21.json');
 			expect(JSON.parse(await blob.text())).toEqual(doc);
 			expect(await importa(blob)).toEqual(doc);
 		} finally {

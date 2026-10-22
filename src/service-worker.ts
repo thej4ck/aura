@@ -7,7 +7,7 @@ import { version } from '$app/env';
 import { scegliStrategia } from '#lib/core/pwa/strategia.ts';
 
 const sw = self as unknown as ServiceWorkerGlobalScope;
-const CACHE = `kindergarden-${version}`;
+const CACHE = `aura-${version}`;
 const PAGINA_404 = '/404.html';
 // il precache non invia Origin ma i moduli sì: con `Vary: Origin` (es. vite preview) non si troverebbero
 const SENZA_VARY = { ignoreVary: true };

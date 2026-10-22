@@ -1,4 +1,4 @@
-# Kindergarden
+# Aura
 
 Una piattaforma didattica gratuita e pubblica, a moduli, per bambini dai 6 ai 10 anni.
 Si impara per aree (oggi la musica, domani matematica, fisica e scienze) e, dentro ogni area, per moduli brevi e guidati.
@@ -54,8 +54,8 @@ Il sito è un insieme di file statici servito da [Caddy](https://caddyserver.com
 Per provarlo in locale (Docker o Podman):
 
 ```sh
-podman build -t kindergarden .
-podman run --rm -e PORT=8080 -p 8080:8080 kindergarden
+podman build -t aura .
+podman run --rm -e PORT=8080 -p 8080:8080 aura
 ```
 
 Il proxy di Railway può registrare dati tecnici delle richieste (per esempio l'indirizzo IP): il sito non li legge e non li conserva. La pagina per i genitori lo spiega con chiarezza.

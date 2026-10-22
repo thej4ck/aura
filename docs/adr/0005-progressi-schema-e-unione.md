@@ -10,10 +10,10 @@ Il file e il browser possono divergere (per esempio un backup vecchio importato 
 ## Decisione
 
 - **Un documento per profilo**, più profili sullo stesso dispositivo fin dalla prima versione. Lo stesso JSON è il dato in IndexedDB, il file esportato e il file sincronizzato.
-- Il documento dichiara `formato: 'kindergarden-progressi'` e `schema: 1`. Ogni cambio di forma incrementa `schema` e aggiunge una **migrazione** pura, con test.
+- Il documento dichiara `formato: 'aura-progressi'` e `schema: 1`. Ogni cambio di forma incrementa `schema` e aggiunge una **migrazione** pura, con test.
 - Ogni record (ogni attività, ogni competenza, ogni blocco di `dati` e le `preferenze`) ha il proprio campo **`aggiornato`**.
 - La funzione pura **`unisci(a, b)`** applica last-write-wins **record per record**, mai sull'intero documento.
-- File: `kindergarden-<alias>-<AAAA-MM-GG>.kgz` (alias ridotto a lettere e cifre ASCII, `profilo` se non c'è), JSON compresso con `CompressionStream('gzip')`; `.json` semplice dove `CompressionStream` manca. Il piano prevedeva l'avatar nel nome: un'emoji nei nomi di file si rompe su alcuni file system, archivi e allegati, e due fratelli possono avere lo stesso avatar, mentre l'alias li distingue. In import si riconosce il magic `1f 8b`; altrimenti si legge JSON semplice.
+- File: `aura-<parola>-<AAAA-MM-GG>.kgz`, dove `<parola>` è una parola italiana ASCII minuscola associata all'avatar (`volpe` per 🦊; `profilo` per un avatar sconosciuto), mai l'alias del bambino. JSON compresso con `CompressionStream('gzip')`; `.json` semplice dove `CompressionStream` manca. Niente emoji nei nomi di file: si rompono su alcuni file system, archivi e allegati.
 - Import: decompressione → controllo della dimensione → validazione Valibot → migrazione → `unisci`. Il file è sempre input non fidato.
 - Ogni modifica passa dallo schema Valibot prima di entrare nel documento: un valore fuori schema in IndexedDB farebbe fallire la migrazione al riavvio e il profilo sparirebbe. Ogni salvataggio unisce con il documento già in IndexedDB, così più schede aperte sullo stesso profilo non si cancellano i record a vicenda.
 - La sincronizzazione riscrive senza unire solo un file vuoto. Un file collegato che non si legge (versione più nuova del sito, modificato a mano, danneggiato) o di un altro profilo ferma la sincronizzazione: decide l'adulto.
@@ -26,3 +26,7 @@ Il file e il browser possono divergere (per esempio un backup vecchio importato 
 - A parità di `aggiornato` la scelta deve essere deterministica, così `unisci(a, b)` e `unisci(b, a)` danno lo stesso risultato.
 - L'ordine dipende dagli orologi dei dispositivi: per progressi scolastici è un compromesso accettabile.
 - Gli id usati come chiavi non si rinominano mai: se serve, migrazione.
+
+## Nota sul nome del formato
+
+Il formato è stato rinominato (`kindergarden-progressi` → `aura-progressi`, database IndexedDB `kindergarden` → `aura`) prima del primo rilascio, quindi senza migrazione: non esistevano utenti né dati. Da ora gli id e il formato sono stabili.

@@ -4,7 +4,7 @@ Stato: accettata · 2026-10-21
 
 ## Contesto
 
-Kindergarden è gratuito, pubblico e usato da bambini. Non deve raccogliere dati personali, deve funzionare anche offline e costare poco da tenere in linea.
+Aura è gratuito, pubblico e usato da bambini. Non deve raccogliere dati personali, deve funzionare anche offline e costare poco da tenere in linea.
 Quasi tutto il lavoro (motore delle attività, progressi, sintesi del suono, riconoscimento dell'altezza della voce) può girare nel browser.
 
 ## Decisione

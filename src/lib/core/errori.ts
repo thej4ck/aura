@@ -3,7 +3,7 @@
 import * as v from 'valibot';
 
 export const MAX_ERRORI = 10;
-const CHIAVE = 'kindergarden:errori';
+const CHIAVE = 'aura:errori';
 
 const SchemaVoce = v.object({
 	quando: v.string(),
@@ -51,5 +51,5 @@ export function dettagliErrori(): string {
 	const righe = ultimiErrori().map(
 		(e) => `[${e.quando}] ${e.pagina}\n${e.messaggio}${e.stack ? `\n${e.stack}` : ''}`
 	);
-	return [`Kindergarden - browser: ${browser}`, ...righe].join('\n\n');
+	return [`Aura - browser: ${browser}`, ...righe].join('\n\n');
 }

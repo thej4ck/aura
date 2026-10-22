@@ -1,4 +1,4 @@
-# Contribuire a Kindergarden
+# Contribuire a Aura
 
 Grazie per il tuo aiuto. Questo progetto è usato da bambini: privacy, accessibilità e tono dei contenuti contano quanto il codice.
 
