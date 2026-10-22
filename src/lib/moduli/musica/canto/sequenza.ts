@@ -9,7 +9,7 @@ import {
 	TENUTA_SEQUENZA_MS
 } from '#lib/core/audio/costanti.ts';
 import { midiDaFreq } from '#lib/core/audio/frequenze.ts';
-import { creaCasuale, scegli, type Casuale } from '#lib/core/casuale.ts';
+import { creaCasuale, scegli } from '#lib/core/casuale.ts';
 import type { Rigo } from '#lib/core/contenuti/schema.ts';
 import {
 	MAX_PASSO_S,
@@ -23,11 +23,13 @@ import {
 } from '#lib/core/musica/intonazione.ts';
 import {
 	ARPEGGIO_MAGGIORE,
+	GIRI_MELODIA,
 	altezza,
 	altezzaInTonalita,
 	armaturaMaggiore,
 	arpeggioMaggiore,
 	classe,
+	melodia,
 	midi
 } from '#lib/core/musica/note.ts';
 
@@ -125,41 +127,14 @@ export function serieTieni(seed: number, registro: Registro): string[] {
 	return serie.map((n) => altezza(n));
 }
 
-/** I giri dell'eco: prima per gradi congiunti, poi con qualche piccolo salto (una terza). */
-export const GIRI_ECO: readonly { note: number; salti: boolean }[] = [
-	{ note: 3, salti: false },
-	{ note: 4, salti: false },
-	{ note: 4, salti: true },
-	{ note: 5, salti: true }
-];
-
-/** Una melodia sulle note naturali: passi di un grado (±1) e, con `salti`, almeno una terza (±2). */
-function melodia(r: Casuale, note: readonly number[], lunghezza: number, salti: boolean): number[] {
-	const mosse = salti ? [-2, -1, 1, 2] : [-1, 1];
-	let indici: number[] = [];
-	// ponytail: si estrae finché c'è un salto, al massimo 50 volte; con ≥ 4 note basta quasi sempre la prima
-	for (let prova = 0; prova < 50; prova++) {
-		indici = [Math.floor(r() * note.length)];
-		while (indici.length < lunghezza) {
-			const i = indici.at(-1)!;
-			indici.push(
-				i +
-					scegli(
-						mosse.filter((d) => note[i + d] !== undefined),
-						r
-					)
-			);
-		}
-		if (!salti || indici.some((i, k) => k > 0 && Math.abs(i - indici[k - 1]) === 2)) break;
-	}
-	return indici.map((i) => note[i]);
-}
-
-/** Le melodie dei giri di "Eco" (3-5 note ciascuna), nel registro. Stesso seed, stesse melodie. */
+/**
+ * Le melodie dei giri di "Eco" (GIRI_MELODIA: prima per gradi congiunti, poi con qualche terza), sulle
+ * note naturali del registro. Stesso seed, stesse melodie.
+ */
 export function serieEco(seed: number, registro: Registro): string[][] {
 	const r = creaCasuale(seed);
 	const note = naturali(registro);
-	return GIRI_ECO.map((g) => melodia(r, note, g.note, g.salti).map((n) => altezza(n)));
+	return GIRI_MELODIA.map((g) => melodia(r, note, g.note, g.salti).map((n) => altezza(n)));
 }
 
 // --- G3 "Estensione vocale" ---------------------------------------------------------------------

@@ -1,6 +1,7 @@
 // Teoria musicale pura: altezze in notazione scientifica ('C4', 'F#4', 'Bb3') ↔ midi, frequenze,
-// nomi delle note, grafia per tonalità maggiore, intervalli, scale e arpeggi.
+// nomi delle note, grafia per tonalità maggiore, intervalli, scale, arpeggi e melodie estratte con seed.
 // Convenzioni: Do centrale = C4 = midi 60, La4 = midi 69 = 440 Hz. Niente doppie alterazioni (come lo schema).
+import { scegli, type Casuale } from '#lib/core/casuale.ts';
 import { ALTEZZA } from '#lib/core/contenuti/schema.ts';
 import type { Preferenze } from '#lib/core/store/schema-progressi.ts';
 import { m } from '#lib/paraglide/messages.js';
@@ -140,4 +141,43 @@ export function scalaCromatica(da: number, a: number): string[] {
 	const passo = a >= da ? 1 : -1;
 	const g: Grafia = passo > 0 ? 'diesis' : 'bemolle';
 	return Array.from({ length: Math.abs(a - da) + 1 }, (_, i) => altezza(da + i * passo, g));
+}
+
+/** I giri delle melodie da ripetere o da leggere, dal più facile: quante note e se c'è almeno una terza. */
+export const GIRI_MELODIA: readonly { note: number; salti: boolean }[] = [
+	{ note: 3, salti: false },
+	{ note: 4, salti: false },
+	{ note: 4, salti: true },
+	{ note: 5, salti: true }
+];
+
+/**
+ * Una melodia sulle note di una scala (`note`, dal basso): passi di un grado (±1) e, con `salti`, almeno
+ * una terza (±2). Parte dalla nota di indice `inizio`, o da una a caso. Stesso `r`, stessa melodia.
+ */
+export function melodia<T>(
+	r: Casuale,
+	note: readonly T[],
+	lunghezza: number,
+	salti: boolean,
+	inizio?: number
+): T[] {
+	const mosse = salti ? [-2, -1, 1, 2] : [-1, 1];
+	let indici: number[] = [];
+	// ponytail: si estrae finché c'è un salto, al massimo 50 volte; con ≥ 4 note basta quasi sempre la prima
+	for (let prova = 0; prova < 50; prova++) {
+		indici = [inizio ?? Math.floor(r() * note.length)];
+		while (indici.length < lunghezza) {
+			const i = indici.at(-1)!;
+			indici.push(
+				i +
+					scegli(
+						mosse.filter((d) => note[i + d] !== undefined),
+						r
+					)
+			);
+		}
+		if (!salti || indici.some((i, k) => k > 0 && Math.abs(i - indici[k - 1]) === 2)) break;
+	}
+	return indici.map((i) => note[i]);
 }

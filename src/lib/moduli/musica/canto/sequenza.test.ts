@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { freqDaMidi } from '#lib/core/audio/frequenze.ts';
 import type { FrameVoce } from '#lib/core/musica/intonazione.ts';
-import { midi } from '#lib/core/musica/note.ts';
+import { GIRI_MELODIA, midi } from '#lib/core/musica/note.ts';
 import {
-	GIRI_ECO,
 	GIRI_PAUSA,
 	MAX_PASSI,
 	REGISTRO_PREDEFINITO,
@@ -257,12 +256,12 @@ describe('note dei giochi', () => {
 	it('"Eco": prima per gradi congiunti, poi con almeno una terza, sempre nel registro', () => {
 		for (const seed of seeds) {
 			const giri = serieEco(seed, [57, 72]);
-			expect(giri.map((g) => g.length)).toEqual(GIRI_ECO.map((g) => g.note));
+			expect(giri.map((g) => g.length)).toEqual(GIRI_MELODIA.map((g) => g.note));
 			for (const [k, giro] of giri.entries()) {
 				const gradi = giro.map((a) => naturali([57, 72]).indexOf(midi(a)));
 				expect(gradi.every((g) => g >= 0)).toBe(true);
 				const passi = gradi.slice(1).map((g, i) => Math.abs(g - gradi[i]));
-				if (GIRI_ECO[k].salti) {
+				if (GIRI_MELODIA[k].salti) {
 					expect(passi.every((p) => p === 1 || p === 2)).toBe(true);
 					expect(passi).toContain(2);
 				} else expect(passi.every((p) => p === 1)).toBe(true);

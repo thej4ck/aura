@@ -7,7 +7,7 @@
 
 <script lang="ts">
 	// Gioco G2 "Eco": il sito suona da 3 a 5 note, il bambino le ripete (TENUTA_SEQUENZA_MS per nota).
-	// Quattro giri: i primi per gradi congiunti, gli altri con qualche piccolo salto (GIRI_ECO), nel
+	// Quattro giri: i primi per gradi congiunti, gli altri con qualche piccolo salto (GIRI_MELODIA), nel
 	// registro comodo come "Tieni la nota". Un esito per giro (item = le note, "C4-D4-E4").
 	import { TENUTA_SEQUENZA_MS } from '#lib/core/audio/costanti.ts';
 	import type { WidgetProps } from '#lib/core/motore/widget.ts';
