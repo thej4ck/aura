@@ -1,12 +1,13 @@
 import type { ModuloDati } from '#lib/core/contenuti/schema.ts';
 
-// Traguardi delle Indicazioni Nazionali per il primo ciclo (Musica, fine della primaria), parafrasati.
+// Traguardi delle Indicazioni Nazionali per il primo ciclo (Musica, fine della primaria), parafrasati;
+// dove è scritto, un obiettivo di apprendimento di fine primaria.
 const NOTAZIONE = 'Usa forme di notazione codificate per rappresentare e leggere i suoni.';
 const ELEMENTI = 'Riconosce gli elementi di base del linguaggio musicale e li usa nella pratica.';
 const ALTEZZA =
 	'Esplora e distingue i suoni secondo le loro qualità, come l’altezza: acuto e grave.';
 const VOCE =
-	'Esplora le possibilità della voce imparando ad ascoltare sé stesso, e canta curando l’intonazione.';
+	'Esplora le possibilità della voce imparando ad ascoltare sé stesso; canta curando l’intonazione (obiettivo di fine primaria).';
 
 const LINEA_O_SPAZIO = ['Su una linea', 'In uno spazio'];
 const PRIMA_O_SECONDA = ['La prima, a sinistra', 'La seconda, a destra'];
@@ -227,7 +228,8 @@ export const modulo = {
 						domanda: 'Quanti spazi ci sono tra le cinque linee?',
 						opzioni: ['Tre', 'Quattro', 'Cinque'],
 						corretta: 1,
-						suggerimento: 'Conta i posti tra una linea e l’altra, dal basso.'
+						suggerimento:
+							'Immagina le cinque linee: tra la prima e la seconda c’è il primo spazio. Continua a contare fino alla quinta.'
 					}
 				}
 			]
@@ -307,7 +309,8 @@ export const modulo = {
 						domanda: 'Quale linea avvolge il ricciolo della chiave di violino?',
 						opzioni: ['La prima', 'La seconda', 'La terza'],
 						corretta: 1,
-						suggerimento: 'Conta le linee dal basso e segui il ricciolo con il dito.'
+						suggerimento:
+							'Ricorda l’animazione: il ricciolo gira attorno alla linea del Sol. Contando dal basso, qual è?'
 					}
 				},
 				{
@@ -792,7 +795,7 @@ export const modulo = {
 			titolo: 'Diesis, bemolle e bequadro',
 			tipo: 'lezione',
 			obiettivo:
-				'Scopri i segni che alzano o abbassano una nota di un semitono: il diesis, il bemolle e il bequadro.',
+				'Scopri il diesis e il bemolle, che alzano o abbassano una nota di un semitono, e il bequadro, che li annulla.',
 			riepilogo:
 				'Il diesis ♯ alza la nota di un semitono, il bemolle ♭ la abbassa di un semitono, il bequadro ♮ annulla il segno. Nel Canto li ritroverai tutti nella scala cromatica.',
 			minuti: 8,
@@ -915,7 +918,7 @@ export const modulo = {
 					props: {
 						note: ['Bb4', 'B4'],
 						domanda: 'Che segno c’è davanti alla seconda nota?',
-						opzioni: SEGNI,
+						opzioni: ['Diesis', 'Bemolle', 'Bequadro'],
 						corretta: 2,
 						suggerimento: 'Questo segno annulla il bemolle della prima nota.'
 					}
@@ -930,6 +933,19 @@ export const modulo = {
 						domanda: 'Rispetto alla prima, la seconda nota è…',
 						opzioni: ['Più acuta di un semitono', 'Più grave di un semitono'],
 						corretta: 0,
+						suggerimento: 'Guarda il segno davanti alla seconda nota, poi ascoltale.'
+					}
+				},
+				{
+					id: 'semitono-giu',
+					fase: 'prova',
+					widget: 'guarda-e-scegli',
+					props: {
+						note: ['B4', 'Bb4'],
+						ascolta: true,
+						domanda: 'Rispetto alla prima, la seconda nota è…',
+						opzioni: ['Più acuta di un semitono', 'Più grave di un semitono'],
+						corretta: 1,
 						suggerimento: 'Guarda il segno davanti alla seconda nota, poi ascoltale.'
 					}
 				}
