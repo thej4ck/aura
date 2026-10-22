@@ -74,18 +74,6 @@
 		);
 	}
 
-	/** manopola di latenza (ms): il ritardo di audio e microfono di questo dispositivo, tolto dai frame */
-	const LATENZA_MAX = 500;
-	function latenza(e: Evento) {
-		const el = e.currentTarget;
-		const prima = progressi.doc!.preferenze.latenzaAudioMs;
-		const ripristina = () => (el.value = String(prima));
-		if (Number.isNaN(el.valueAsNumber)) return ripristina();
-		const valore = Math.min(LATENZA_MAX, Math.max(0, Math.round(el.valueAsNumber)));
-		el.value = String(valore);
-		cambia(() => ({ latenzaAudioMs: valore }), ripristina);
-	}
-
 	// letta al momento di applicare: gli oggetti annidati vanno passati interi
 	const accessibilita = (chiave: keyof Accessibilita, valore: boolean): Patch => ({
 		accessibilita: { ...progressi.doc!.preferenze.accessibilita, [chiave]: valore }
@@ -163,21 +151,13 @@
 			</div>
 		</fieldset>
 
-		<div class="campo">
-			<label for="{id}-latenza">{m.genitori_latenza()}</label>
-			<input
-				id="{id}-latenza"
-				type="number"
-				inputmode="numeric"
-				min="0"
-				max={LATENZA_MAX}
-				step="10"
-				value={p.latenzaAudioMs}
-				aria-describedby="{id}-latenza-aiuto"
-				onchange={latenza}
-			/>
-			<p id="{id}-latenza-aiuto" class="aiuto">{m.genitori_latenza_aiuto()}</p>
-		</div>
+		<!--
+			ponytail: manopola della latenza audio (preferenze.latenzaAudioMs, 0..500 ms, messaggi
+			genitori_latenza e genitori_latenza_aiuto) nascosta: oggi nessun widget ne ha bisogno. Va
+			mostrata quando arriva il modulo Ritmo o una calibrazione guidata (suona e tocca, la
+			latenza si misura invece di chiederla); la preferenza resta nello schema, nel salvataggio e
+			nel microfono.
+		-->
 	</form>
 	<Avviso tono="successo" testo={salvata} />
 {/if}

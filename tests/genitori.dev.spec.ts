@@ -142,26 +142,14 @@ test('impostazioni: dopo il controllo si riflettono sugli attributi di <html> e 
 	await expect(html).toHaveAttribute('data-contrasto-alto');
 	await page.getByRole('radio', { name: 'C, D, E' }).click();
 	await expect(page.getByRole('radio', { name: 'C, D, E' })).toBeChecked();
-	// la manopola di latenza: fuori intervallo si ferma al massimo
-	const latenza = page.getByRole('spinbutton', { name: "Ritardo dell'audio, in millisecondi" });
-	await latenza.fill('9000');
-	await latenza.press('Tab');
-	await expect(latenza).toHaveValue('500');
-	await latenza.fill('120');
-	await latenza.press('Tab');
 
 	await page.waitForTimeout(800); // salvataggio debounced (400 ms) su IndexedDB
 	await apri(page, '/genitori');
 	await expect(html).toHaveAttribute('data-testo-grande');
 	await expect(html).toHaveAttribute('data-contrasto-alto');
 	await expect(page.getByRole('radio', { name: 'C, D, E' })).toBeChecked();
-	await expect(latenza).toHaveValue('120');
-	expect(
-		await page.evaluate(
-			async (u) => (await import(/* @vite-ignore */ u)).progressi.doc.preferenze.latenzaAudioMs,
-			STORE
-		)
-	).toBe(120);
+	// la manopola della latenza è nascosta finché non c'è il modulo Ritmo o una calibrazione
+	await expect(page.getByRole('spinbutton')).toHaveCount(0);
 });
 
 test('selettore: il filtro si annuncia e resta nelle preferenze', async ({ page }) => {
