@@ -2,7 +2,7 @@ import { IDBFactory, IDBObjectStore } from 'fake-indexeddb';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apriDb } from './db';
 import { leggi, permesso, salvaHandle, scrivi } from './file';
-import { AVATARI, Progressi, SALVA_DOPO_MS } from './progressi.svelte';
+import { AVATARI, PAROLA_AVATAR, Progressi, SALVA_DOPO_MS } from './progressi.svelte';
 import { ErroreProgressi, nuovoDocumento, type Documento } from './schema-progressi';
 
 // picker, permessi e scrittura su file restano finti; esporta, salvaHandle e handleSalvato sono quelli veri
@@ -404,7 +404,7 @@ describe('backup e sync su file', () => {
 	it('esportaBackup segna ultimoBackup', async () => {
 		const p = await avvia();
 		const { nomeFile } = await p.esportaBackup();
-		expect(nomeFile).toBe(`aura-${p.doc!.profilo.avatar}-2026-10-21.kgz`);
+		expect(nomeFile).toBe(`aura-${PAROLA_AVATAR[p.doc!.profilo.avatar as keyof typeof PAROLA_AVATAR]}-2026-10-21.kgz`);
 		expect(p.doc?.ultimoBackup).toBe(T0.toISOString());
 		await p.flush();
 		expect((await salvati())[0].ultimoBackup).toBe(T0.toISOString());
@@ -499,5 +499,13 @@ describe('backup e sync su file', () => {
 		const p = await avvia();
 		expect(p.sync).toBe('attiva');
 		expect(scrivi).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe('PAROLA_AVATAR', () => {
+	it('ogni avatar ha una parola ASCII minuscola, tutte diverse', () => {
+		for (const a of AVATARI) expect(PAROLA_AVATAR[a]).toMatch(/^[a-z]+$/);
+		expect(new Set(AVATARI.map((a) => PAROLA_AVATAR[a])).size).toBe(AVATARI.length);
+		expect(Object.keys(PAROLA_AVATAR).sort()).toEqual([...AVATARI].sort());
 	});
 });

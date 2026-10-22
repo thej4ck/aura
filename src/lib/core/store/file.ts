@@ -1,5 +1,6 @@
 import { giorno, type Giorno } from '../giorno';
 import type { Db } from './db';
+import { PAROLA_AVATAR } from './progressi.svelte';
 import { migra } from './migrazioni';
 import { ErroreProgressi, type Documento } from './schema-progressi';
 
@@ -8,15 +9,11 @@ export const MAX_DECOMPRESSO = 10 * 1024 * 1024;
 const TIPI = [{ description: 'Aura', accept: { 'application/gzip': ['.kgz'] } }];
 
 /**
- * L'avatar nel nome del file, mai il nome del bambino: i nomi dei file finiscono negli elenchi dei
- * download, negli allegati e nelle cartelle sincronizzate. Restano solo le emoji (un avatar importato
- * potrebbe contenere altro); senza, "profilo".
+ * Mai il nome del bambino né emoji nel nome del file: i nomi finiscono negli elenchi dei download,
+ * negli allegati e nelle cartelle sincronizzate. Una parola ASCII per avatar, "profilo" se sconosciuto.
  */
 function perNomeFile(avatar: string): string {
-	return (
-		avatar.match(/[\p{Extended_Pictographic}\p{Join_Control}\p{Variation_Selector}]/gu)?.join('') ||
-		'profilo'
-	);
+	return (PAROLA_AVATAR as Record<string, string>)[avatar] ?? 'profilo';
 }
 
 /** File di salvataggio: JSON gzip `.kgz`, oppure `.json` semplice se CompressionStream manca. */

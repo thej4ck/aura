@@ -42,13 +42,9 @@ test('backup: si scarica un file .kgz e la data dell’ultimo backup compare', a
 	const scaricato = page.waitForEvent('download');
 	await page.getByRole('button', { name: 'Scarica il backup' }).click();
 	const file = await scaricato;
-	// nel nome del file l'avatar, mai il nome del bambino
-	const avatar = await page.evaluate(
-		async (u) => (await import(/* @vite-ignore */ u)).progressi.doc.profilo.avatar as string,
-		STORE
-	);
+	// nel nome del file la parola dell'avatar (ASCII), mai il nome del bambino
 	expect(file.suggestedFilename()).toMatch(
-		new RegExp(String.raw`^aura-${avatar}-\d{4}-\d{2}-\d{2}\.kgz$`, 'u')
+		new RegExp(String.raw`^aura-[a-z]+-\d{4}-\d{2}-\d{2}\.kgz$`, 'u')
 	);
 	await expect(page.getByText(`Backup scaricato: ${file.suggestedFilename()}.`)).toBeVisible();
 	await expect(page.getByText(/^Ultimo backup: /)).toBeVisible();
