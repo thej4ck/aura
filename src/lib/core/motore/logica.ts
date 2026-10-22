@@ -1,6 +1,6 @@
 // Logica pura del motore delle attività: avanzamento delle schede e verifica.
 import type { AttivitaCatalogo } from '../contenuti/registry';
-import type { Fase } from '../contenuti/schema';
+import type { Attivita, Fase } from '../contenuti/schema';
 import type { Esito } from '../padronanza';
 import type { ProssimoPasso } from '../percorso';
 
@@ -10,6 +10,7 @@ export const SOGLIA_SUPERATA = 0.8;
 export const FASE_VERIFICA: Fase = 'prova';
 
 type ConFase = { readonly fase: Fase };
+type TipoAttivita = Attivita['tipo'];
 
 /** Un esito emesso da un widget, con l'indice della scheda che l'ha prodotto. */
 export type EsitoRegistrato = { scheda: number; corretto: boolean; item?: string };
@@ -59,20 +60,26 @@ export function conteggioProva(
 
 /**
  * Esito della verifica, a fine attività: superata se corretti/totali ≥ SOGLIA_SUPERATA nella fase "prova".
- * Senza esiti di prova (nessuna scheda prova, o schede che non valutano) è superata arrivando in fondo,
- * con `risposte: 0`: non c'è niente da misurare, quindi niente padronanza e al massimo una stella.
+ * Senza esiti di prova (nessuna scheda prova, o schede che non valutano) una lezione è superata arrivando
+ * in fondo, con `risposte: 0`: non c'è niente da misurare, quindi niente padronanza e al massimo una stella.
+ * Un gioco invece valuta sempre: finito senza nessuna risposta («Ho finito» o «Basta così» subito, niente
+ * microfono) non è superato, e non è nemmeno un tentativo da rivedere (vedi `senzaRisposte`).
  */
 export function valutaVerifica(
 	schede: readonly ConFase[],
-	esiti: readonly EsitoRegistrato[]
+	esiti: readonly EsitoRegistrato[],
+	tipo: TipoAttivita = 'lezione'
 ): Esito {
 	const { corretti, totali } = conteggioProva(schede, esiti);
 	return {
-		superata: totali === 0 || corretti / totali >= SOGLIA_SUPERATA,
+		superata: totali === 0 ? tipo !== 'gioco' : corretti / totali >= SOGLIA_SUPERATA,
 		errori: totali - corretti,
 		risposte: totali
 	};
 }
+
+/** Un gioco lasciato prima di rispondere: non si registra niente, il gioco aspetta. */
+export const senzaRisposte = (esito: Esito): boolean => !esito.superata && esito.risposte === 0;
 
 /** Da dove riprovare dopo una verifica non superata: la prima scheda "prova" (o l'inizio). */
 export const primaSchedaProva = (schede: readonly ConFase[]): number =>

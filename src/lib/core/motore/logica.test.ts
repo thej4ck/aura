@@ -9,6 +9,7 @@ import {
 	limitaIndice,
 	primaSchedaProva,
 	puntoDiRipresa,
+	senzaRisposte,
 	suggerisci,
 	valutaVerifica,
 	type EsitoRegistrato
@@ -114,6 +115,20 @@ describe('verifica', () => {
 			risposte: 0
 		});
 		expect(valutaVerifica(tipica, [])).toEqual({ superata: true, errori: 0, risposte: 0 });
+		expect(senzaRisposte(valutaVerifica(tipica, []))).toBe(false);
+	});
+
+	it('un gioco finito senza nessuna risposta non è superato, e non conta come tentativo', () => {
+		const vuoto = valutaVerifica(tipica, [{ scheda: 2, corretto: true }], 'gioco');
+		expect(vuoto).toEqual({ superata: false, errori: 0, risposte: 0 });
+		expect(senzaRisposte(vuoto)).toBe(true);
+		// basta una risposta perché il gioco valga come una verifica qualsiasi
+		expect(valutaVerifica(tipica, esiti(true), 'gioco')).toEqual({
+			superata: true,
+			errori: 0,
+			risposte: 1
+		});
+		expect(senzaRisposte(valutaVerifica(tipica, esiti(false), 'gioco'))).toBe(false);
 	});
 });
 

@@ -25,6 +25,7 @@
 		gruppiFase,
 		primaSchedaProva,
 		puntoDiRipresa,
+		senzaRisposte,
 		suggerisci,
 		valutaVerifica,
 		type EsitoRegistrato
@@ -58,7 +59,8 @@
 	let giro = $state(0);
 	let seed = $state(nuovoSeed());
 	let esiti: EsitoRegistrato[] = $state([]);
-	let risultato: { superata: boolean; stelle: number; prossimo?: AttivitaCatalogo } | undefined =
+	let risultato:
+		{ superata: boolean; vuota: boolean; stelle: number; prossimo?: AttivitaCatalogo } | undefined =
 		$state();
 	let titolo: HTMLElement | undefined = $state();
 
@@ -133,11 +135,16 @@
 	}
 
 	function concludi() {
-		const esito = valutaVerifica(attivita.schede, esiti);
+		const esito = valutaVerifica(attivita.schede, esiti, attivita.tipo);
+		const vuota = senzaRisposte(esito);
 		const oggi = new Date();
 		let stelle = 0;
 		let prossimo: AttivitaCatalogo | undefined;
-		if (progressi.doc) {
+		if (vuota) {
+			// un gioco lasciato prima di rispondere: niente da registrare, si riparte dal gioco
+			if (progressi.doc)
+				progressi.aggiornaAttivita(attivita.id, { scheda: primaSchedaProva(attivita.schede) });
+		} else if (progressi.doc) {
 			stelle = progressi.registraVerifica(attivita.id, attivita.allena, esito, oggi).stelle;
 			// da dove ripartire la prossima volta: dall'inizio, o dalla pratica se c'è ancora da fare
 			progressi.aggiornaAttivita(attivita.id, {
@@ -145,7 +152,7 @@
 			});
 			prossimo = suggerisci(prossimoPasso(catalogo, progressi.doc, oggi), attivita.id);
 		}
-		risultato = { superata: esito.superata, stelle, prossimo };
+		risultato = { superata: esito.superata, vuota, stelle, prossimo };
 		void mostra('riepilogo');
 	}
 </script>
@@ -314,6 +321,15 @@
 				<div class="azioni">
 					<Button variante="secondaria" icona="ricomincia" onclick={() => inizia(0)}>
 						{m.attivita_ripeti()}
+					</Button>
+					{@render home()}
+				</div>
+			{:else if risultato.vuota}
+				<h2 id="{id}-riepilogo" tabindex="-1" bind:this={titolo}>{m.riepilogo_vuota()}</h2>
+				<p class="lead">{m.riepilogo_vuota_testo()}</p>
+				<div class="azioni">
+					<Button dimensione="l" onclick={() => inizia(primaSchedaProva(attivita.schede))}>
+						{m.riepilogo_vuota_gioca()}
 					</Button>
 					{@render home()}
 				</div>

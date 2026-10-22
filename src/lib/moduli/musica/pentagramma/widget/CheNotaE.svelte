@@ -9,7 +9,7 @@
 	// PG1 «Che nota è?»: una nota sul pentagramma, sette nomi da toccare. Al proprio ritmo, senza timer:
 	// la nota dopo arriva solo quando si trova il nome. Conta il primo tentativo (esito e scatola di
 	// Leitner); dopo SERIE_SBLOCCO giuste di fila arriva una nota nuova, presentata con il suo nome.
-	// Si smette quando si vuole con «Ho finito».
+	// Si smette quando si vuole con «Ho finito», che compare dopo la prima risposta.
 	import { untrack } from 'svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { creaCasuale } from '#lib/core/casuale.ts';
@@ -167,9 +167,12 @@
 			<span>{m.pentagramma_che_nota_lette({ count: lette })}</span>
 			<span class="in-gioco">{m.pentagramma_che_nota_in_gioco({ note: inGioco.join(', ') })}</span>
 		</p>
-		<Button variante="secondaria" dimensione="l" onclick={onfine}>
-			{m.pentagramma_ho_finito()}
-		</Button>
+		<!-- si può smettere dopo la prima risposta: un gioco senza risposte non misura niente -->
+		{#if lette || provate.length}
+			<Button variante="secondaria" dimensione="l" onclick={onfine}>
+				{m.pentagramma_ho_finito()}
+			</Button>
+		{/if}
 	</div>
 </div>
 
