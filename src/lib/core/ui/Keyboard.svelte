@@ -3,6 +3,7 @@
 	// evidenziati, sempre con un segno oltre al colore (barra sopra la zona, pallino sul tasto).
 	// Con `onpick` i tasti sono pulsanti (frecce per muoversi, Invio o Spazio per scegliere);
 	// senza è un'immagine con una descrizione. Inizia e finisce sempre su un tasto bianco.
+	// Con `soloBianchi` i tasti neri si vedono ma non si toccano (prima che arrivino diesis e bemolle).
 	import {
 		altezza,
 		classe,
@@ -24,6 +25,8 @@
 		etichette?: boolean;
 		nomiNote?: NomiNote;
 		onpick?: (midi: number) => void;
+		/** con `onpick`: si toccano solo i tasti bianchi */
+		soloBianchi?: boolean;
 		/** nome accessibile */
 		etichetta?: string;
 	};
@@ -36,6 +39,7 @@
 		etichette = false,
 		nomiNote = 'solfeggio',
 		onpick,
+		soloBianchi = false,
 		etichetta = m.notazione_tastiera()
 	}: Props = $props();
 
@@ -110,7 +114,10 @@
 		};
 		if (!(e.key in dove)) return;
 		e.preventDefault();
-		corrente = Math.min(fine, Math.max(inizio, dove[e.key]));
+		let n = Math.min(fine, Math.max(inizio, dove[e.key]));
+		// i tasti neri non toccabili si saltano (inizio e fine sono sempre bianchi)
+		if (soloBianchi && nero(n)) n += n > tabulabile! ? 1 : -1;
+		corrente = n;
 		const tastiera = (e.currentTarget as HTMLElement).parentElement;
 		tastiera?.querySelector<HTMLElement>(`[data-midi="${corrente}"]`)?.focus();
 	}
@@ -145,7 +152,7 @@
 					'in-zona': !!zona && t.midi >= zona.basso && t.midi <= zona.alto
 				}
 			]}
-			{#if onpick}
+			{#if onpick && !(soloBianchi && t.nero)}
 				<button
 					type="button"
 					class={classi}

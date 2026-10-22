@@ -15,6 +15,8 @@
 			durata: v.optional(v.pipe(v.number(), v.minValue(0.2), v.maxValue(4)), 0.8),
 			/** come si scrivono i tasti neri toccati: Do♯ (salendo) o Re♭ (scendendo) */
 			grafia: v.optional(v.picklist(['diesis', 'bemolle']), 'diesis'),
+			/** i tasti neri si vedono ma non si toccano: per le lezioni che vengono prima di diesis e bemolle */
+			soloBianchi: v.optional(v.boolean(), false),
 			...schemaAspetto
 		}),
 		v.check((p) => midi(p.da) < midi(p.a), 'da: il primo tasto deve stare sotto l’ultimo')
@@ -100,6 +102,7 @@
 		etichette
 		nomiNote={nomi}
 		onpick={tocca}
+		soloBianchi={p.soloBianchi}
 		etichetta={m.canto_tastiera()}
 	/>
 	<Avviso

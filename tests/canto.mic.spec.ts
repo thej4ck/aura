@@ -110,3 +110,37 @@ test('estensione: la nota comoda fa da radice; «Basta così» ferma tutto e spe
 	expect(esterne).toEqual([]);
 	expect(errori).toEqual([]);
 });
+
+test('cosa sono le note: si toccano solo i tasti bianchi, i neri arrivano più avanti', async ({
+	page,
+	baseURL
+}) => {
+	const { esterne, errori } = sorveglia(page, baseURL!);
+	await apri(page, 'cosa-sono-le-note', 'Cosa sono le note');
+	const avanti = page.getByRole('button', { name: 'Avanti' });
+	await avanti.click();
+	await avanti.click();
+	for (const titolo of ['Sette note', 'Più grave, più acuto']) {
+		await expect(page.getByRole('heading', { name: titolo })).toBeVisible();
+		// l'altro «Ascolta», se c'è, è la lettura ad alta voce
+		await page.locator('.azioni').getByRole('button', { name: 'Ascolta', exact: true }).click();
+		await avanti.click();
+	}
+
+	await expect(page.getByRole('heading', { name: 'Tocca e senti' })).toBeVisible();
+	const tastiera = page.getByRole('group', { name: 'Tastiera da toccare' });
+	await expect(tastiera.getByRole('button')).toHaveCount(7); // dal Do al Si, solo i bianchi
+	await tastiera.getByRole('button', { name: 'Do 4' }).focus();
+	await page.keyboard.press('ArrowRight'); // il Do♯ si salta
+	await expect(tastiera.getByRole('button', { name: 'Re 4' })).toBeFocused();
+	await page.keyboard.press('Enter');
+	await expect(feedback(page)).toHaveText('È il Re.');
+	// il contrasto si misura a colore del tasto evidenziato arrivato (c'è una breve transizione)
+	await expect(tastiera.getByRole('button', { name: 'Re 4, evidenziato' })).toHaveCSS(
+		'background-color',
+		'rgb(31, 107, 90)'
+	);
+	expect(await violazioniGravi(page)).toEqual([]);
+	expect(esterne).toEqual([]);
+	expect(errori).toEqual([]);
+});

@@ -218,8 +218,8 @@ export const modulo = {
 					widget: 'tastiera',
 					titolo: 'Tocca e senti',
 					testo:
-						'Tocca i tasti bianchi: ogni tasto è una nota. Guarda dove si scrive sul pentagramma.',
-					props: { da: 'C4', a: 'B4', etichette: true, colori: true }
+						'Tocca i tasti bianchi: ogni tasto è una nota. Guarda dove si scrive sul pentagramma. I tasti neri li scoprirai più avanti.',
+					props: { da: 'C4', a: 'B4', soloBianchi: true, etichette: true, colori: true }
 				},
 				{
 					id: 'quante',
