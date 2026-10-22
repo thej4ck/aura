@@ -622,5 +622,46 @@
 	"widget_dev_esito": "corretto: {corretto}, item: {item}",
 	"widget_dev_fine": "fine (Avanti)",
 	"widget_dev_ricomincia": "Ricomincia",
-	"dev_attivita_musica": "Attività musicale di esempio"
+	"dev_attivita_musica": "Attività musicale di esempio",
+	"canto_basta": "Basta così",
+	"canto_giro_di": "Giro {numero} di {totale}",
+	"canto_tastiera": "Tastiera da toccare",
+	"canto_tastiera_rigo": "La nota che hai toccato",
+	"canto_tastiera_toccato": "È il {nome}.",
+	"canto_estensione_salute": "La voce non si forza mai: se fa fatica, fermati con «Basta così».",
+	"canto_estensione_inizia": "Comincia",
+	"canto_estensione_comoda": "Canta un «aaa» tranquillo, su una nota comoda, e tienilo.",
+	"canto_estensione_comoda_valore": "Nota comoda: {valore} per cento",
+	"canto_estensione_rigo": "L’arpeggio da cantare",
+	"canto_estensione_rigo_comoda": "La nota che stai cantando",
+	"canto_estensione_ascolta": "Ascolta l’arpeggio.",
+	"canto_estensione_canta": "Ora canta tu, una nota dopo l’altra.",
+	"canto_estensione_radice": "La tua nota comoda è il {nome}. Ascolta, poi canta.",
+	"canto_estensione_su": "Bene! Ora un gradino più su.",
+	"canto_estensione_giu": "Bene! Ora un gradino più giù.",
+	"canto_estensione_ripeti": "Riproviamo lo stesso gradino, con calma.",
+	"canto_estensione_scendiamo": "In alto ci fermiamo qui. Ora scendiamo.",
+	"canto_estensione_pausa": "Pausa: bevi un sorso d’acqua. Quando vuoi, continuiamo.",
+	"canto_estensione_continua": "Continua",
+	"canto_estensione_risultato": "La tua voce va dal {basso} al {alto}: {count} note, contando anche i tasti neri.",
+	"canto_estensione_crescita": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Si è allargata di {count} nota rispetto all’ultima volta.",
+				"countPlural=other": "Si è allargata di {count} note rispetto all’ultima volta."
+			}
+		}
+	],
+	"canto_estensione_uguale": "È ampia come l’ultima volta.",
+	"canto_estensione_stretta": "Oggi è un po’ più stretta dell’ultima volta: la voce cambia da un giorno all’altro, ed è normale.",
+	"canto_estensione_prima_volta": "È la tua prima misura: la prossima volta vedrai come cresce.",
+	"canto_estensione_nessuno": "Oggi l’arpeggio non è venuto, e va bene così. Riproviamo un altro giorno, con calma.",
+	"canto_estensione_basta": "Va bene così: ci fermiamo qui. Riproviamo quando vuoi.",
+	"canto_estensione_non_sentita": "Non ti ho sentito. Avvicinati al microfono e canta un «aaa» tranquillo.",
+	"canto_estensione_ricomincia": "Ricomincia",
+	"canto_estensione_tastiera": "Le note della tua voce, sulla tastiera",
+	"canto_estensione_rigo_limiti": "La nota più grave e la più acuta della tua voce",
+	"canto_estensione_senza_microfono": "Per scoprire fin dove arriva la voce serve il microfono. Puoi tornare quando vuoi."
 }
