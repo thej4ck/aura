@@ -268,6 +268,20 @@ export const modulo = {
 						suggerimento: 'Pensa al fischietto: le sue onde sono vicine vicine.',
 						spiegazione: 'Il suono acuto fa onde strette e fitte.'
 					}
+				},
+				{
+					id: 'piu-acuta',
+					fase: 'prova',
+					widget: 'guarda-e-scegli',
+					props: {
+						note: ['A4', 'D4'],
+						ascolta: true,
+						domanda: 'Ascolta: quale nota è più acuta?',
+						opzioni: ['La prima', 'La seconda'],
+						corretta: 0,
+						suggerimento: 'Ascoltale di nuovo: la più acuta è più sottile, come un fischietto.',
+						spiegazione: 'La prima nota, il La, è più acuta del Re.'
+					}
 				}
 			]
 		},
@@ -651,6 +665,20 @@ export const modulo = {
 						corretta: 0,
 						suggerimento: 'Le due note sono uguali: si resta sullo stesso gradino.',
 						spiegazione: 'La stessa nota due volte è una prima, o unisono.'
+					}
+				},
+				{
+					id: 'ascolta-intervallo',
+					fase: 'prova',
+					widget: 'guarda-e-scegli',
+					props: {
+						note: ['G4', 'A4'],
+						ascolta: true,
+						domanda: 'Ascolta e guarda: che intervallo è?',
+						opzioni: ['Una prima', 'Una seconda', 'Una terza'],
+						corretta: 1,
+						suggerimento: 'Conta le note dalla prima all’ultima, comprese tutte e due.',
+						spiegazione: 'Sol, La: due note vicine, il gradino accanto. È una seconda.'
 					}
 				}
 			]
