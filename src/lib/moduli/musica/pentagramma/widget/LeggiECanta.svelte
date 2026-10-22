@@ -1,85 +1,80 @@
 <script lang="ts" module>
 	import * as v from 'valibot';
-	import { schemaAltezza } from '#lib/core/widget/musica.ts';
+	import { schemaAspetto } from '#lib/core/widget/musica.ts';
 
 	/** Props di `leggi-e-canta`. */
 	export const schemaProps = v.object({
-		/** il mazzo da cui si estraggono le note; di default la scala di Do, comoda per le voci dei bambini */
-		note: v.optional(v.pipe(v.array(schemaAltezza), v.minLength(1)), [
-			'C4',
-			'D4',
-			'E4',
-			'F4',
-			'G4',
-			'A4',
-			'B4',
-			'C5'
-		]),
-		/** quante note cantare */
-		quante: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(10)), 5)
+		/** quante melodie leggere e cantare */
+		quante: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(8)), 4),
+		/** nomi e colori sotto le note: un aiuto per «Proviamo insieme», di default spenti */
+		...schemaAspetto
 	});
 </script>
 
 <script lang="ts">
-	// PG3 «Leggi e canta»: la nota è solo scritta, il sito non la suona prima; il bambino la legge e la
-	// canta, e il misuratore conferma. Ogni nota è il widget core `canta-nota` con `suonaPrima: false`
-	// (microfono, turni, esito al primo tentativo, chiusura quando si lascia la scheda).
-	// «Basta così» è sempre lì: non si forza mai la voce.
+	// PG3 «Leggi e canta», come nel solfeggio cantato: il sito suona solo la nota di partenza, il Do; il
+	// bambino la canta, poi legge e canta le altre note di una breve melodia, per gradi vicini e piccoli
+	// salti. Ogni melodia è il turno di canto del core (Canto.svelte, `daSuonare: 'partenza'`): misuratore,
+	// esito al primo tentativo, microfono chiuso quando si passa oltre. Sentire tutte le note prima
+	// dell'esito è un aiuto, e l'esito non conta come giusto. «Basta così» è sempre lì: la voce non si forza.
 	import { m } from '#lib/paraglide/messages.js';
+	import { TENUTA_SEQUENZA_MS } from '#lib/core/audio/costanti.ts';
 	import { creaCasuale } from '#lib/core/casuale.ts';
 	import type { WidgetProps } from '#lib/core/motore/widget.ts';
 	import Button from '#lib/core/ui/Button.svelte';
-	import CantaNota from '#lib/core/widget/CantaNota.svelte';
-	import { serie } from '../lettura.ts';
+	import Canto from '#lib/core/widget/Canto.svelte';
+	import { melodieDaDo } from '../lettura.ts';
 
-	let { scheda, props, contesto, onesito, onfine }: WidgetProps = $props();
+	let { props, contesto, onesito, onfine }: WidgetProps = $props();
 
 	const p = $derived(v.parse(schemaProps, props));
-	const note = $derived(serie(p.note, p.quante, creaCasuale(contesto.seed)));
+	const melodie = $derived(melodieDaDo(p.quante, creaCasuale(contesto.seed)));
 	let i = $state(0);
+	const melodia = $derived(melodie[Math.min(i, melodie.length - 1)]);
 
 	function prossima() {
-		if (i < note.length - 1) i++;
+		if (i < melodie.length - 1) i++;
 		else onfine();
 	}
 </script>
 
 <div class="testa">
-	<p class="conta">{m.pentagramma_nota_di({ numero: i + 1, totale: note.length })}</p>
-	<p class="consiglio">{m.pentagramma_leggi_consiglio()}</p>
+	<p class="conta">{m.pentagramma_melodia_di({ numero: i + 1, totale: melodie.length })}</p>
+	<Button variante="quieta" icona="chiudi" onclick={onfine}>{m.pentagramma_basta_cosi()}</Button>
 </div>
+<p class="consiglio">{m.pentagramma_leggi_consiglio()}</p>
 
 {#key i}
-	<CantaNota
-		{scheda}
-		props={{ nota: note[i], suonaPrima: false }}
+	<Canto
+		rigo={{ chiave: 'violino', note: melodia.map((altezza) => ({ altezza })) }}
+		tenutaMs={TENUTA_SEQUENZA_MS}
+		equivalenzaOttava
+		daSuonare="partenza"
+		durataS={1}
+		etichette={p.etichette}
+		colori={p.colori}
 		{contesto}
+		item={melodia.join('-')}
 		{onesito}
 		onfine={prossima}
 	/>
 {/key}
 
-<div class="basta">
-	<Button variante="secondaria" icona="chiudi" onclick={onfine}>
-		{m.pentagramma_basta_cosi()}
-	</Button>
-</div>
-
 <style>
+	/* «Basta così» sempre in vista, in alto accanto al contatore */
 	.testa {
 		display: flex;
-		flex-direction: column;
-		gap: var(--spazio-1);
-		margin-block-end: var(--spazio-4);
+		flex-wrap: wrap;
+		gap: var(--spazio-3);
+		align-items: center;
+		justify-content: space-between;
 	}
 	.conta {
+		font-size: var(--testo-l);
 		font-weight: var(--peso-medio);
 	}
 	.consiglio {
+		margin-block: var(--spazio-2) var(--spazio-4);
 		color: var(--colore-testo-tenue);
-	}
-	.basta {
-		display: flex;
-		margin-block-start: var(--spazio-5);
 	}
 </style>

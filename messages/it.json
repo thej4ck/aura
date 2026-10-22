@@ -667,7 +667,8 @@
 		}
 	],
 	"pentagramma_trovala_ascolta": "Ascolta la nota",
-	"pentagramma_leggi_consiglio": "Leggi la nota, immagina il suono, poi cantala piano, senza forzare la voce.",
+	"pentagramma_leggi_consiglio": "Canta il Do che senti, poi leggi le altre note e cantale piano, senza forzare la voce.",
+	"pentagramma_melodia_di": "Melodia {numero} di {totale}",
 	"pentagramma_basta_cosi": "Basta così",
 	"pentagramma_disegno_note_linee": "Le note sulle linee",
 	"pentagramma_disegno_note_spazi": "Le note negli spazi",

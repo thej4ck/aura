@@ -939,9 +939,10 @@ export const modulo = {
 			id: 'leggi-e-canta',
 			titolo: 'Leggi e canta',
 			tipo: 'gioco',
-			obiettivo: 'Leggi una nota sul pentagramma e cantala: il microfono ti dice se ci sei.',
+			obiettivo:
+				'Leggi alcune note sul pentagramma e cantale, partendo dal Do: il microfono ti dice se ci sei.',
 			riepilogo:
-				'Hai letto le note e le hai cantate, senza sentirle prima. Leggere e cantare insieme: proprio come fanno i musicisti.',
+				'Hai letto le note e le hai cantate partendo dal Do: proprio come fanno i musicisti.',
 			minuti: 6,
 			allena: ['lettura', 'musica.canto.intonazione'],
 			prerequisiti: ['che-nota-e', 'musica.canto.tieni-la-nota'],
@@ -953,31 +954,32 @@ export const modulo = {
 					widget: 'spiegazione',
 					titolo: 'Come si gioca',
 					testo:
-						'Vedi una nota scritta, ma non la senti. Leggila, immagina il suo suono e cantala. Canta piano: la voce non si forza mai. Puoi fermarti quando vuoi con «Basta così».'
+						'Vedi alcune note scritte, ma ne senti solo una: il Do, la nota di partenza. Canta il Do, poi leggi le altre note e cantale, una dopo l’altra. Canta piano: la voce non si forza mai. Puoi fermarti quando vuoi con «Basta così».'
 				},
 				{
 					id: 'insieme-ascolta',
 					fase: 'insieme',
-					widget: 'canta-nota',
+					widget: 'canta-sequenza',
 					titolo: 'Prima con l’aiuto',
-					testo: 'Questa volta la nota la suoniamo noi: ascoltala, poi cantala.',
-					props: { nota: 'A4' }
+					testo:
+						'Questa volta le note le suoniamo tutte noi: ascolta Do, Re, Mi, poi cantale. Guarda come salgono sul pentagramma, un gradino alla volta.',
+					props: { note: ['C4', 'D4', 'E4'], etichette: true, colori: true, item: 'do-re-mi' }
 				},
 				{
 					id: 'insieme-leggi',
 					fase: 'insieme',
-					widget: 'canta-nota',
-					titolo: 'Ora leggila tu',
+					widget: 'leggi-e-canta',
+					titolo: 'Ora leggile tu',
 					testo:
-						'È il La, nel secondo spazio: prova a cantarlo senza sentirlo. Se non ti viene, tocca «Ascolta».',
-					props: { nota: 'A4', suonaPrima: false }
+						'Adesso senti solo il Do. Canta il Do, poi segui le note: se la nota dopo è più in alto, la voce sale di un gradino; se è più in basso, scende. I nomi sotto le note ti aiutano.',
+					props: { quante: 1, etichette: true, colori: true }
 				},
 				{
 					id: 'gioco',
 					fase: 'prova',
 					widget: 'leggi-e-canta',
 					titolo: 'Leggi e canta',
-					props: { quante: 5 }
+					testo: 'Se il Do è troppo basso per la tua voce, cantalo più in alto: va bene lo stesso.'
 				}
 			]
 		}

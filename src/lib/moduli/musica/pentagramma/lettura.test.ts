@@ -8,6 +8,8 @@ import {
 	SERIE_SBLOCCO,
 	estrai,
 	leggiLeitner,
+	melodieDaDo,
+	SCALA_DO,
 	prossimaDaSbloccare,
 	MAX_PASSI_TROVALA,
 	registro,
@@ -124,6 +126,25 @@ describe('serie di item', () => {
 		expect(a).toHaveLength(10);
 		expect(new Set(a.slice(0, 4))).toEqual(new Set(mazzo));
 		for (let i = 1; i < a.length; i++) expect(a[i]).not.toBe(a[i - 1]);
+	});
+});
+
+describe('melodie di «Leggi e canta»', () => {
+	it('partono dal Do, vanno per gradi e piccoli salti nella scala di Do, sempre più lunghe', () => {
+		const grado = (n: string) => SCALA_DO.indexOf(n as (typeof SCALA_DO)[number]);
+		for (let seed = 0; seed < 200; seed++) {
+			const melodie = melodieDaDo(6, creaCasuale(seed));
+			expect(melodie).toEqual(melodieDaDo(6, creaCasuale(seed)));
+			expect(melodie.map((m) => m.length)).toEqual([3, 4, 4, 5, 5, 5]);
+			for (const [k, melodia] of melodie.entries()) {
+				expect(melodia[0]).toBe('C4'); // la nota di partenza, l'unica che il sito suona
+				const passi = melodia.slice(1).map((n, j) => grado(n) - grado(melodia[j]));
+				expect(melodia.every((n) => grado(n) >= 0)).toBe(true);
+				expect(passi.every((d) => d !== 0 && Math.abs(d) <= 2)).toBe(true);
+				if (k < 2) expect(passi.every((d) => Math.abs(d) === 1)).toBe(true);
+				else expect(passi.some((d) => Math.abs(d) === 2)).toBe(true);
+			}
+		}
 	});
 });
 

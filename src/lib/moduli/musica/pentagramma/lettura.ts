@@ -2,7 +2,7 @@
 // serie di item estratte con seed. Le scatole si salvano in dati['musica.pentagramma'].leitner.
 import * as v from 'valibot';
 import { mescola, sceltaPesata, type Casuale } from '#lib/core/casuale.ts';
-import { scomponi, type Lettera } from '#lib/core/musica/note.ts';
+import { GIRI_MELODIA, melodia, scomponi, type Lettera } from '#lib/core/musica/note.ts';
 import { passo } from '#lib/core/musica/notazione.ts';
 
 /**
@@ -127,3 +127,17 @@ export function registro(
 
 /** Ampiezza massima (max − min) dei passi toccabili: due posti per nome al massimo, mai tre. */
 export const MAX_PASSI_TROVALA = 2 * OTTAVA - 1;
+
+/** La scala di Do dal Do sotto il pentagramma al Do nel terzo spazio: le note di «Leggi e canta». */
+export const SCALA_DO = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'] as const;
+/**
+ * `quante` melodie che partono tutte dal Do, la nota di partenza che il sito suona (come nel solfeggio
+ * cantato): i giri di GIRI_MELODIA, prima per gradi vicini e poi con qualche terza, sempre nella scala di
+ * Do dal Do4 al Do5. Stesso `r`, stesse melodie.
+ */
+export function melodieDaDo(quante: number, r: Casuale): string[][] {
+	return Array.from({ length: quante }, (_, k) => {
+		const g = GIRI_MELODIA[Math.min(k, GIRI_MELODIA.length - 1)];
+		return melodia(r, SCALA_DO, g.note, g.salti, 0);
+	});
+}
