@@ -13,6 +13,11 @@
 		),
 		/** la stessa nota in un'altra ottava va bene (un bambino canta un'ottava sopra l'adulto) */
 		equivalenzaOttava: v.optional(v.boolean(), true),
+		/**
+		 * false: la nota è solo scritta e il bambino la legge ("Leggi e canta"): il sito non la suona
+		 * prima e il misuratore non ne dice il nome; «Ascolta» resta come aiuto
+		 */
+		suonaPrima: v.optional(v.boolean(), true),
 		...schemaAspetto
 	});
 </script>
@@ -32,6 +37,7 @@
 	rigo={{ chiave: 'violino', note: [{ altezza: p.nota }] }}
 	tenutaMs={p.tenutaMs}
 	equivalenzaOttava={p.equivalenzaOttava}
+	suonaPrima={p.suonaPrima}
 	durataS={1.5}
 	etichette={p.etichette}
 	colori={p.colori}

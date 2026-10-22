@@ -575,6 +575,7 @@
 	"canta_microfono": "Il microfono serve solo per ascoltarti. Niente viene registrato.",
 	"canta_microfono_adulti": "Per gli adulti: il suono del microfono si analizza solo nel browser, mentre si canta. Non si salva e non si invia a nessuno.",
 	"canta_inizia": "Ascolta e canta",
+	"canta_leggi_inizia": "Leggi e canta",
 	"canta_turni": "A chi tocca",
 	"canta_turno_ascolta": "Ascolta",
 	"canta_turno_canta": "Canta",
@@ -622,5 +623,76 @@
 	"widget_dev_esito": "corretto: {corretto}, item: {item}",
 	"widget_dev_fine": "fine (Avanti)",
 	"widget_dev_ricomincia": "Ricomincia",
-	"dev_attivita_musica": "Attività musicale di esempio"
+	"dev_attivita_musica": "Attività musicale di esempio",
+
+	"pentagramma_guarda_rigo": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "La nota da guardare",
+				"countPlural=other": "Le note da guardare"
+			}
+		}
+	],
+	"pentagramma_posizione": [
+		{
+			"declarations": ["input tipo", "input posizione"],
+			"selectors": ["tipo"],
+			"match": {
+				"tipo=linea": "la {posizione}",
+				"tipo=*": "il {posizione}"
+			}
+		}
+	],
+	"pentagramma_tocca_domanda": "Tocca {dove}",
+	"pentagramma_tocca_giusto": "Sì, è proprio {dove}!",
+	"pentagramma_tocca_toccato": "Hai toccato {dove}.",
+	"pentagramma_tocca_piu_su": "Più su trovi {dove}.",
+	"pentagramma_tocca_piu_giu": "Più giù trovi {dove}.",
+	"pentagramma_tocca_conta": "Conta dal basso con il dito: la prima linea è quella più in basso.",
+	"pentagramma_che_nota_rigo": "La nota da leggere",
+	"pentagramma_che_nota_domanda": "Che nota è?",
+	"pentagramma_che_nota_su": "Questa nota è più in alto: prova un altro nome.",
+	"pentagramma_che_nota_giu": "Questa nota è più in basso: prova un altro nome.",
+	"pentagramma_che_nota_dove": [
+		{
+			"declarations": ["input tipo", "input posizione"],
+			"selectors": ["tipo"],
+			"match": {
+				"tipo=linea": "Questa nota sta sulla {posizione}.",
+				"tipo=spazio": "Questa nota sta nel {posizione}.",
+				"tipo=taglio": "Questa nota sta sul {posizione}.",
+				"tipo=*": "Questa nota sta nello {posizione}."
+			}
+		}
+	],
+	"pentagramma_che_nota_aiuto": "Conta dal basso: sulle linee {linee}; negli spazi {spazi}.",
+	"pentagramma_che_nota_giusta": "Sì, era il {nome}!",
+	"pentagramma_che_nota_nuova": "Ecco una nota nuova: il {nome}.",
+	"pentagramma_che_nota_lette": "Note lette: {count}",
+	"pentagramma_che_nota_in_gioco": "Note in gioco: {note}",
+	"pentagramma_ho_finito": "Ho finito",
+	"pentagramma_nota_di": "Nota {numero} di {totale}",
+	"pentagramma_trovala_domanda": [
+		{
+			"declarations": ["input nome", "input registro"],
+			"selectors": ["registro"],
+			"match": {
+				"registro=alto": "Tocca il {nome} più in alto",
+				"registro=basso": "Tocca il {nome} più in basso",
+				"registro=*": "Tocca il {nome}"
+			}
+		}
+	],
+	"pentagramma_trovala_ascolta": "Ascolta la nota",
+	"pentagramma_leggi_consiglio": "Leggi la nota, immagina il suono, poi cantala piano, senza forzare la voce.",
+	"pentagramma_basta_cosi": "Basta così",
+	"pentagramma_disegno_note_linee": "Le note sulle linee",
+	"pentagramma_disegno_note_spazi": "Le note negli spazi",
+	"pentagramma_disegno_nota_sale": "Una nota che sale sul pentagramma",
+	"pentagramma_disegno_tagli": "Le note con i tagli addizionali",
+	"pentagramma_disegno_semitono": "Una nota e il suo semitono",
+	"pentagramma_disegno_sulla_linea": "sulla linea",
+	"pentagramma_disegno_nello_spazio": "nello spazio"
 }
