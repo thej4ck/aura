@@ -35,14 +35,19 @@ const CROMATICA_SCENDE = [
 	'C4'
 ];
 
-/** Riferimenti alle Indicazioni Nazionali per il curricolo (primo ciclo, Musica), parafrasati. */
+/**
+ * Riferimenti alle Indicazioni Nazionali per il curricolo (primo ciclo, Musica), parafrasati: traguardi
+ * di fine primaria e, dove è scritto, obiettivi di apprendimento.
+ */
 const IN = {
 	altezza: 'Distingue i suoni in base alle loro qualità, come l’altezza: acuto e grave.',
 	voce: 'Esplora le possibilità espressive della propria voce, imparando ad ascoltare sé stesso.',
-	intonazione: 'Esegue con la voce semplici sequenze melodiche, curando l’intonazione.',
+	intonazione:
+		'Esegue con la voce semplici sequenze melodiche, curando l’intonazione (obiettivo di fine primaria).',
 	elementi: 'Riconosce gli elementi di base del linguaggio musicale e li usa nella pratica.',
 	notazione: 'Usa forme di notazione codificata per rappresentare i suoni.',
-	ascolto: 'Ascolta, memorizza e riproduce brevi frasi melodiche.'
+	ascolto:
+		'Articola semplici combinazioni melodiche e le esegue con la voce, imparando ad ascoltare sé stesso e gli altri.'
 };
 
 export const modulo = {
@@ -70,9 +75,10 @@ export const modulo = {
 		],
 		consigliPerAdulti: [
 			'La voce dei bambini è delicata e non va mai forzata: se una nota è troppo alta o troppo bassa, si lascia stare.',
+			'Se una nota è troppo bassa, si può cantare la stessa nota più in alto, un’ottava sopra: il sito la riconosce lo stesso.',
 			'Meglio poco e spesso: qualche minuto al giorno, con una pausa per bere.',
 			'Con il raffreddore o il mal di gola, oggi si ascolta soltanto.',
-			'Cantate con lui, piano: l’esempio conta più delle parole.',
+			'Cantate insieme, piano: l’esempio conta più delle parole.',
 			'Per correggere bastano «un po’ più su» o «un po’ più giù», come fa il sito: mai «sbagliato».'
 		]
 	},
@@ -126,7 +132,7 @@ export const modulo = {
 		{
 			termine: 'Estensione',
 			spiegazione:
-				'Tutte le note che una voce canta comoda, dalla più grave alla più acuta. La zona dove canta meglio si chiama registro.'
+				'Tutte le note che una voce riesce a cantare, dalla più grave alla più acuta. La zona dove canta comoda, senza fatica, si chiama tessitura.'
 		}
 	],
 	competenze: [
@@ -189,7 +195,7 @@ export const modulo = {
 						etichetta: 'Onde del suono: larghe per il grave, fitte per l’acuto',
 						passi: [
 							{ testo: 'Il suono è un’onda che viaggia nell’aria, fino alle tue orecchie.' },
-							{ testo: 'Un suono grave fa onde larghe e lente, come un tamburo grande.' },
+							{ testo: 'Un suono grave fa onde larghe, come un tamburo grande.' },
 							{ testo: 'Un suono acuto fa onde strette e fitte, come un fischietto.' },
 							{ testo: 'Più l’onda è fitta, più il suono è acuto.' }
 						]
@@ -263,7 +269,7 @@ export const modulo = {
 					widget: 'scelta',
 					props: {
 						domanda: 'Un suono acuto fa onde…',
-						opzioni: ['Larghe e lente', 'Strette e fitte'],
+						opzioni: ['Larghe', 'Strette e fitte'],
 						corretta: 1,
 						suggerimento: 'Pensa al fischietto: le sue onde sono vicine vicine.',
 						spiegazione: 'Il suono acuto fa onde strette e fitte.'
@@ -348,7 +354,8 @@ export const modulo = {
 					fase: 'insieme',
 					widget: 'canta-sequenza',
 					titolo: 'Cantiamo insieme',
-					testo: 'Cominciamo dai primi tre gradini. Ascolta, poi canta Do, Re, Mi.',
+					testo:
+						'Cominciamo dai primi tre gradini. Ascolta, poi canta Do, Re, Mi. Se il Do è troppo basso, cantalo più in alto: va bene lo stesso.',
 					props: { note: ['C4', 'D4', 'E4'], etichette: true, colori: true, item: 'do-mi' }
 				},
 				{
@@ -701,7 +708,7 @@ export const modulo = {
 					widget: 'spiegazione',
 					titolo: 'Come si gioca',
 					testo:
-						'Io canto alcune note, tu fai l’eco: le ripeti uguali, una dopo l’altra. Prima note vicine, poi qualche piccolo salto.'
+						'Il sito suona alcune note, tu fai l’eco: le ripeti uguali, una dopo l’altra. Prima note vicine, poi qualche piccolo salto.'
 				},
 				{
 					id: 'insieme',
@@ -810,7 +817,7 @@ export const modulo = {
 						domanda: 'Dal Mi al Fa c’è…',
 						opzioni: ['Un semitono', 'Un tono'],
 						corretta: 0,
-						suggerimento: 'Guarda la tastiera: tra il Mi e il Fa c’è un tasto nero?',
+						suggerimento: 'Pensa alla tastiera: tra il Mi e il Fa c’è un tasto nero?',
 						spiegazione: 'Tra il Mi e il Fa non c’è il tasto nero: è un semitono.'
 					}
 				},
@@ -866,7 +873,8 @@ export const modulo = {
 			id: 'estensione',
 			titolo: 'Fin dove arriva la tua voce',
 			tipo: 'gioco',
-			obiettivo: 'Scopri le note che la tua voce canta comoda, dalla più grave alla più acuta.',
+			obiettivo:
+				'Scopri fin dove arriva la tua voce senza fatica, dalla nota più grave alla più acuta.',
 			riepilogo:
 				'Hai scoperto fin dove arriva la tua voce, in alto e in basso. Cantando con calma, la voce cresce.',
 			minuti: 6,
@@ -896,7 +904,7 @@ export const modulo = {
 					widget: 'estensione',
 					titolo: 'Saliamo e scendiamo',
 					testo:
-						'Canta una nota comoda. Poi ascolta e ripeti le note che salgono, un gradino alla volta.'
+						'Canta una nota comoda. Poi ascolta cinque note, come Do, Mi, Sol, Mi, Do, e ripetile. Ogni volta si parte un pochino più su, poi un pochino più giù.'
 				}
 			]
 		}
