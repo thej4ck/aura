@@ -29,6 +29,8 @@
 		/** tenuta di ogni nota, in ms */
 		tenutaMs: number;
 		equivalenzaOttava: boolean;
+		/** false: le note sono solo scritte, da leggere; il sito le suona solo con «Ascolta» */
+		suonaPrima?: boolean;
 		/** secondi di ogni nota suonata dal sito */
 		durataS: number;
 		etichette: boolean;
@@ -43,6 +45,7 @@
 		rigo,
 		tenutaMs,
 		equivalenzaOttava,
+		suonaPrima = true,
 		durataS,
 		etichette,
 		colori,
@@ -99,7 +102,7 @@
 			if (!vivo) return;
 			errore = ERRORI_MIC[e instanceof ErroreMic ? e.codice : 'non-supportato']();
 			fase = 'senza-microfono';
-			ascolta(); // si canta lo stesso, senza verifica
+			if (suonaPrima) ascolta(); // si canta lo stesso, senza verifica
 			return;
 		}
 		// scheda lasciata mentre si aspettava il permesso: il microfono si chiude subito
@@ -107,7 +110,7 @@
 		microfono = aperto;
 		stato = nuovaSequenza();
 		fase = 'ascolto';
-		ascolta(); // prima il turno del sito, poi quello del bambino
+		if (suonaPrima) ascolta(); // prima il turno del sito, poi quello del bambino
 	}
 
 	function ascoltaFrame(f: FrameMic) {
@@ -222,7 +225,9 @@
 			tolleranzaCents={opzioni.tolleranzaCents}
 			{frame}
 			{equivalenzaOttava}
-			nomeTarget={nomeNota(altezze[corrente], contesto.preferenze.nomiNote)}
+			nomeTarget={suonaPrima
+				? nomeNota(altezze[corrente], contesto.preferenze.nomiNote)
+				: undefined}
 		/>
 	{/if}
 
@@ -240,10 +245,14 @@
 			onclick={principale}
 		>
 			{fase === 'ascolto' || fase === 'riuscita'
-				? m.widget_ascolta_di_nuovo()
+				? suonaPrima
+					? m.widget_ascolta_di_nuovo()
+					: m.widget_ascolta()
 				: fase === 'scaduta'
 					? m.canta_riprova_pulsante()
-					: m.canta_inizia()}
+					: suonaPrima
+						? m.canta_inizia()
+						: m.canta_leggi_inizia()}
 		</Button>
 		{#if finita}
 			<Button

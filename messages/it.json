@@ -575,6 +575,7 @@
 	"canta_microfono": "Il microfono serve solo per ascoltarti. Niente viene registrato.",
 	"canta_microfono_adulti": "Per gli adulti: il suono del microfono si analizza solo nel browser, mentre si canta. Non si salva e non si invia a nessuno.",
 	"canta_inizia": "Ascolta e canta",
+	"canta_leggi_inizia": "Leggi e canta",
 	"canta_turni": "A chi tocca",
 	"canta_turno_ascolta": "Ascolta",
 	"canta_turno_canta": "Canta",
