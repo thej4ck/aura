@@ -740,8 +740,7 @@ export const modulo = {
 					widget: 'staff-tocca',
 					props: {
 						nota: 'A5',
-						domanda: 'Tocca il La sopra il pentagramma',
-						selezionabili: [-2, 12]
+						domanda: 'Tocca il La sopra il pentagramma'
 					}
 				}
 			]
@@ -775,7 +774,7 @@ export const modulo = {
 					props: {
 						nota: 'F5',
 						domanda: 'Tocca il Fa più in alto',
-						selezionabili: [-2, 12],
+						selezionabili: [-2, 11],
 						suggerimento: 'Il Fa più in alto sta sull’ultima linea, la quinta.'
 					}
 				},

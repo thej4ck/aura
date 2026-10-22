@@ -1,5 +1,7 @@
+import * as v from 'valibot';
 import { describe, expect, it } from 'vitest';
 import { creaCasuale } from '#lib/core/casuale.ts';
+import { passo } from '#lib/core/musica/notazione.ts';
 import {
 	ORDINE_NOTE,
 	SCATOLE,
@@ -7,6 +9,7 @@ import {
 	estrai,
 	leggiLeitner,
 	prossimaDaSbloccare,
+	MAX_PASSI_TROVALA,
 	registro,
 	rispondi,
 	sbloccate,
@@ -14,6 +17,7 @@ import {
 	vicina,
 	type StatoLettura
 } from './lettura';
+import { schemaProps as trovala } from './widget/Trovala.svelte';
 
 describe('scatole salvate', () => {
 	it('si parte da Mi, Sol e Si nella prima scatola', () => {
@@ -130,10 +134,27 @@ describe('aiuti', () => {
 		expect(vicina('C', 'A5')).toBe('C5'); // C6 è fuori dal gioco
 	});
 
-	it('quale delle due note con lo stesso nome', () => {
-		const mazzo = ['C4', 'F4', 'C5', 'F5', 'B4'];
-		expect(registro('F5', mazzo)).toBe('alto');
-		expect(registro('C4', mazzo)).toBe('basso');
-		expect(registro('B4', mazzo)).toBeUndefined();
+	it('quale delle due posizioni con lo stesso nome, tra quelle che si possono toccare', () => {
+		const rigo = [-2, 11] as const; // dal Do sotto al Si sopra
+		expect(registro('F5', rigo)).toBe('alto');
+		expect(registro('C4', rigo)).toBe('basso');
+		expect(registro('C5', rigo)).toBe('alto');
+		expect(registro('B5', rigo)).toBe('alto');
+		expect(registro('B4', [-2, 10])).toBeUndefined(); // senza il Si sopra il nome è unico
+	});
+
+	it('«Trovala»: nel rigo di default la domanda distingue sempre i due posti con lo stesso nome', () => {
+		const rigo = v.parse(trovala, {}).selezionabili;
+		expect(rigo).toEqual([-2, 11]); // dal Do sotto al Si sopra: il Do6 sul secondo taglio non c'è
+		expect(v.safeParse(trovala, { selezionabili: [-2, 12] }).success).toBe(false); // tre Do
+		expect(rigo[1] - rigo[0]).toBeLessThanOrEqual(MAX_PASSI_TROVALA);
+		for (const nota of ORDINE_NOTE) {
+			const gemelli = [passo(nota) - 7, passo(nota) + 7].filter(
+				(q) => q >= rigo[0] && q <= rigo[1]
+			);
+			const verso = registro(nota, rigo);
+			if (!gemelli.length) expect(verso).toBeUndefined();
+			else expect(verso).toBe(gemelli[0] > passo(nota) ? 'basso' : 'alto');
+		}
 	});
 });

@@ -106,13 +106,24 @@ export function vicina(lettera: Lettera, altezza: string): string {
 	return candidate.reduce((a, b) => (Math.abs(passo(b) - p) < Math.abs(passo(a) - p) ? b : a));
 }
 
+/** Passi di un'ottava sul rigo: sette posizioni più su c'è la stessa nota. */
+const OTTAVA = 7;
+
 /**
- * "Più in alto" o "più in basso" rispetto alle altre note del mazzo con la stessa lettera, per dire
- * quale toccare. Il mazzo ha al massimo due note per lettera (C4–B5).
+ * "Più in alto" o "più in basso" rispetto all'altra posizione con lo stesso nome tra quelle che si possono
+ * toccare, per dire quale toccare: conta quello che il bambino vede sul rigo, non il mazzo. Con un
+ * intervallo di al massimo MAX_PASSI_TROVALA passi ogni nome sta in uno o due posti.
  */
-export function registro(altezza: string, mazzo: readonly string[]): 'alto' | 'basso' | undefined {
-	const { lettera } = scomponi(altezza);
-	const stesse = mazzo.filter((n) => scomponi(n).lettera === lettera && n !== altezza);
-	if (!stesse.length) return;
-	return stesse.every((n) => passo(n) < passo(altezza)) ? 'alto' : 'basso';
+export function registro(
+	altezza: string,
+	[min, max]: readonly [number, number]
+): 'alto' | 'basso' | undefined {
+	const p = passo(altezza);
+	const sopra = p + OTTAVA <= max;
+	const sotto = p - OTTAVA >= min;
+	if (sopra === sotto) return; // nome unico (in mezzo a due non può capitare: vedi sopra)
+	return sopra ? 'basso' : 'alto';
 }
+
+/** Ampiezza massima (max − min) dei passi toccabili: due posti per nome al massimo, mai tre. */
+export const MAX_PASSI_TROVALA = 2 * OTTAVA - 1;

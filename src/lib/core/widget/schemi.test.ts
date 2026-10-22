@@ -29,7 +29,7 @@ describe('staff-tocca', () => {
 	it('la nota deve stare tra le posizioni da toccare', () => {
 		expect(valido(staffTocca, { nota: 'A5' })).toBe(true);
 		expect(valido(staffTocca, { nota: 'B5' })).toBe(false); // oltre il primo taglio in alto
-		expect(valido(staffTocca, { nota: 'B5', selezionabili: [-2, 12] })).toBe(true);
+		expect(valido(staffTocca, { nota: 'B5', selezionabili: [-2, 11] })).toBe(true);
 		expect(valido(staffTocca, { nota: 'G4', selezionabili: [5, 3] })).toBe(false);
 		expect(valido(staffTocca, { nota: 'G2', chiave: 'basso' })).toBe(true);
 	});

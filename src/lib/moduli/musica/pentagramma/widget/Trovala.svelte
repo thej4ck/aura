@@ -2,7 +2,7 @@
 	import * as v from 'valibot';
 	import { passo } from '#lib/core/musica/notazione.ts';
 	import { schemaAltezza } from '#lib/core/widget/musica.ts';
-	import { ORDINE_NOTE } from '../lettura.ts';
+	import { MAX_PASSI_TROVALA, ORDINE_NOTE } from '../lettura.ts';
 
 	const passoRigo = v.pipe(v.number(), v.integer(), v.minValue(-8), v.maxValue(16));
 	/** Props di `trovala`. */
@@ -12,13 +12,20 @@
 			note: v.optional(v.pipe(v.array(schemaAltezza), v.minLength(2)), [...ORDINE_NOTE]),
 			/** quante note trovare */
 			quante: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(20)), 6),
-			/** passi toccabili: di default dal Do sotto al Si sopra */
+			/**
+			 * passi toccabili: di default dal Do sotto al Si sopra. Al massimo due posti per nome, così
+			 * «più in alto» o «più in basso» basta a dire quale toccare
+			 */
 			selezionabili: v.optional(
 				v.pipe(
 					v.tuple([passoRigo, passoRigo]),
-					v.check(([min, max]) => min < max, 'selezionabili: [min, max]')
+					v.check(([min, max]) => min < max, 'selezionabili: [min, max]'),
+					v.check(
+						([min, max]) => max - min <= MAX_PASSI_TROVALA,
+						'selezionabili: al massimo due posti con lo stesso nome'
+					)
 				),
-				[-2, 12]
+				[-2, 11]
 			)
 		}),
 		v.check(
@@ -52,7 +59,7 @@
 	const domanda = $derived(
 		m.pentagramma_trovala_domanda({
 			nome: nomeNota(nota, contesto.preferenze.nomiNote),
-			registro: registro(nota, p.note) ?? 'unico'
+			registro: registro(nota, p.selezionabili) ?? 'unico'
 		})
 	);
 
