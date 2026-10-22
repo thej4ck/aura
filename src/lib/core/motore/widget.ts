@@ -40,6 +40,7 @@ export type WidgetProps<P = Record<string, unknown>> = {
 export const WIDGET_CORE: Readonly<Record<string, CaricaWidget>> = {
 	spiegazione: () => import('../widget/Spiegazione.svelte'),
 	scelta: () => import('../widget/Scelta.svelte'),
+	'guarda-e-scegli': () => import('../widget/GuardaEScegli.svelte'),
 	animazione: () => import('../widget/Animazione.svelte'),
 	ascolta: () => import('../widget/Ascolta.svelte'),
 	'staff-tocca': () => import('../widget/StaffTocca.svelte'),

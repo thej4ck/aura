@@ -988,7 +988,6 @@ export const modulo = {
 
 export const widget = {
 	'tocca-rigo': () => import('./widget/ToccaRigo.svelte'),
-	'guarda-e-scegli': () => import('./widget/GuardaEScegli.svelte'),
 	'che-nota-e': () => import('./widget/CheNotaE.svelte'),
 	trovala: () => import('./widget/Trovala.svelte'),
 	'leggi-e-canta': () => import('./widget/LeggiECanta.svelte'),

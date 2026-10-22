@@ -1,6 +1,6 @@
 <script lang="ts" module>
 	import * as v from 'valibot';
-	import { schemaAltezza, schemaAspetto, schemaNote } from '#lib/core/widget/musica.ts';
+	import { schemaAltezza, schemaAspetto, schemaNote } from './musica.ts';
 
 	const testo = v.pipe(v.string(), v.trim(), v.nonEmpty());
 	const almenoDue = <T extends v.GenericSchema>(s: T) =>
@@ -38,13 +38,13 @@
 <script lang="ts">
 	// Guarda (e ascolta) le note, poi rispondi: la parte della domanda è il widget core `scelta`.
 	import { m } from '#lib/paraglide/messages.js';
-	import type { Riproduzione } from '#lib/core/audio/synth.ts';
-	import type { WidgetProps } from '#lib/core/motore/widget.ts';
-	import { nomeNota } from '#lib/core/musica/note.ts';
-	import Button from '#lib/core/ui/Button.svelte';
-	import Staff from '#lib/core/ui/Staff.svelte';
-	import { suonaSeguendo } from '#lib/core/widget/musica.ts';
-	import Scelta from '#lib/core/widget/Scelta.svelte';
+	import type { Riproduzione } from '../audio/synth.ts';
+	import type { WidgetProps } from '../motore/widget.ts';
+	import { nomeNota } from '../musica/note.ts';
+	import Button from '../ui/Button.svelte';
+	import Staff from '../ui/Staff.svelte';
+	import { suonaSeguendo } from './musica.ts';
+	import Scelta from './Scelta.svelte';
 
 	let { scheda, props, contesto, onesito, onfine }: WidgetProps = $props();
 
@@ -81,7 +81,7 @@
 <div class="guarda">
 	<Staff
 		rigo={p.note}
-		etichetta={m.pentagramma_guarda_rigo({ count: p.note.note.length })}
+		etichetta={m.widget_guarda_rigo({ count: p.note.note.length })}
 		evidenzia={suona === null ? [] : [suona]}
 		etichette={p.etichette}
 		colori={p.colori}

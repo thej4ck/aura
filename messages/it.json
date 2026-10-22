@@ -606,7 +606,7 @@
 	"widget_dev_fine": "fine (Avanti)",
 	"widget_dev_ricomincia": "Ricomincia",
 	"dev_attivita_musica": "Attività musicale di esempio",
-	"pentagramma_guarda_rigo": [
+	"widget_guarda_rigo": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
