@@ -2,7 +2,6 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"app_nome": "Aura",
 	"home_benvenuto": "Qui si impara un passo alla volta, con calma.",
-
 	"layout_salta": "Vai al contenuto",
 	"layout_navigazione": "Navigazione principale",
 	"layout_home": "Aura, home",
@@ -18,23 +17,19 @@
 	"avviso_errore_salvataggio": "I progressi non si sono salvati. Riprovo da solo tra poco.",
 	"avviso_illeggibili": "Alcuni progressi salvati su questo dispositivo non si aprono con questa versione del sito. Non sono stati cancellati: ricarica la pagina più tardi.",
 	"segnaposto_testo": "Questa pagina è in preparazione.",
-
 	"layout_backup": "È ora di fare un backup",
-
 	"vista_stato_da_iniziare": "Da iniziare",
 	"vista_stato_in_corso": "In corso",
 	"vista_stato_completato": "Completato",
 	"vista_avanzamento": "{completate} attività su {totale} completate",
 	"vista_eta": "{min}–{max} anni",
 	"vista_eta_una": "{eta} anni",
-
 	"percorso_nuova": "Da fare",
 	"percorso_in_corso": "In corso",
 	"percorso_completata": "Fatta",
 	"percorso_consigliata": "Prossimo passo",
 	"percorso_continua": "Continua da qui",
 	"percorso_prerequisiti": "Prima ti può aiutare:",
-
 	"home_titolo": "Ciao!",
 	"home_titolo_nome": "Ciao, {nome}!",
 	"home_ritorno": "Che cosa facciamo oggi?",
@@ -55,7 +50,6 @@
 	"home_finito": "Hai fatto tutto il percorso consigliato! Puoi ripetere un'attività quando vuoi.",
 	"home_vuoto_titolo": "Le prime attività stanno arrivando",
 	"home_vuoto_testo": "Stiamo preparando i primi moduli. Torna a trovarci presto!",
-
 	"moduli_intro": "Scegli che cosa imparare. Puoi partire da dove vuoi.",
 	"moduli_filtri": "Filtri",
 	"moduli_filtro_area": "Area",
@@ -79,11 +73,9 @@
 	"moduli_nessuno": "Nessun modulo con questi filtri.",
 	"moduli_togli_filtri": "Mostra tutti i moduli",
 	"moduli_vuoto": "Non ci sono ancora moduli: i primi stanno arrivando.",
-
 	"area_moduli": "I moduli",
 	"area_percorso": "Il percorso consigliato",
 	"area_percorso_testo": "Un ordine che aiuta, ma puoi partire da dove vuoi.",
-
 	"modulo_torna": "Torna a {area}",
 	"modulo_cosa_imparerai": "Cosa imparerai",
 	"modulo_come_funziona": "Come funziona",
@@ -95,14 +87,11 @@
 	"modulo_traguardi_testo": "Per adulti e insegnanti: i traguardi delle Indicazioni Nazionali per il primo ciclo a cui lavora questo modulo.",
 	"modulo_inizia": "Inizia",
 	"modulo_continua": "Continua",
-
 	"pausa_titolo": "Che ne dici di una pausa?",
 	"pausa_testo": "Stai imparando da un bel po'. Alzati, sgranchisciti e bevi un sorso d'acqua. Poi, se vuoi, si continua.",
 	"pausa_chiudi": "Va bene",
-
 	"genitori_intro": "Come funziona il sito, i progressi e le impostazioni. Alcune azioni chiedono la conferma di un adulto.",
 	"genitori_indice": "In questa pagina",
-
 	"genitori_privacy": "Privacy",
 	"genitori_privacy_intro": "Aura non ha account, cookie, pubblicità o statistiche. Non sappiamo chi lo usa.",
 	"genitori_privacy_dove_titolo": "Cosa resta salvato, e dove",
@@ -115,7 +104,6 @@
 	"genitori_privacy_server": "Il sito è ospitato da Railway. Come per qualunque sito web, i loro sistemi ricevono l'indirizzo IP e la pagina richiesta a ogni visita, e possono conservarli per un periodo limitato nei loro registri tecnici. Il nostro server non tiene registri delle visite e noi non usiamo quei dati.",
 	"genitori_privacy_railway": "Leggi l'informativa di Railway",
 	"genitori_privacy_esterno": "Si apre un altro sito, in una nuova scheda.",
-
 	"genitori_progressi": "Progressi",
 	"genitori_progressi_intro": "I progressi del profilo in uso, modulo per modulo.",
 	"genitori_progressi_vuoto": "Non ci sono ancora moduli da seguire.",
@@ -133,7 +121,6 @@
 	"genitori_livello_competente": "Competente",
 	"genitori_livello_padronanza": "Padronanza",
 	"genitori_livello": "Livello {numero} di 4: {nome}",
-
 	"genitori_profili": "Profili",
 	"genitori_profili_intro": "Ogni bambino può avere il suo profilo, con progressi separati. Il nome resta su questo dispositivo, e nei backup e nel file collegato se li usate: il nome dei file mostra solo l'avatar.",
 	"genitori_profilo_in_uso": "In uso",
@@ -155,7 +142,6 @@
 	"genitori_crea_profilo": "Crea il profilo",
 	"genitori_profilo_creato": "Profilo creato: adesso è quello in uso.",
 	"genitori_profilo_non_valido": "Il nome è troppo lungo: al massimo 40 caratteri.",
-
 	"genitori_backup": "Backup e file",
 	"genitori_backup_intro": "Il backup è un file con tutti i progressi del profilo in uso. Serve per non perderli e per portarli su un altro dispositivo.",
 	"genitori_ultimo_backup": "Ultimo backup: {data}.",
@@ -186,7 +172,6 @@
 	"genitori_scollega": "Scollega il file",
 	"genitori_collegato": "File collegato.",
 	"genitori_scollegato": "File scollegato. Il file resta dove si trova.",
-
 	"genitori_impostazioni": "Impostazioni",
 	"genitori_impostazioni_intro": "Valgono per il profilo in uso. Per cambiarle serve la conferma di un adulto, una volta per visita.",
 	"genitori_impostazioni_lettura": "Leggere e vedere",
@@ -203,13 +188,11 @@
 	"genitori_latenza": "Ritardo dell'audio, in millisecondi",
 	"genitori_latenza_aiuto": "Compensa il ritardo tra suono e microfono di questo dispositivo, per esempio con le cuffie Bluetooth. Di solito va bene 0.",
 	"genitori_impostazione_salvata": "Impostazione salvata.",
-
 	"genitori_voce": "La salute della voce",
 	"genitori_voce_1": "Si canta a voce media, senza gridare: il microfono sente bene anche una voce leggera.",
 	"genitori_voce_2": "Meglio cantare poco alla volta, con delle pause. Un sorso d'acqua aiuta.",
 	"genitori_voce_3": "Le note troppo alte o troppo basse non si forzano mai. Ogni voce ha la sua estensione, e cresce con il tempo.",
 	"genitori_voce_4": "Se la voce è rauca, stanca o fa male, fermatevi e riposate. Se succede spesso, chiedete al pediatra.",
-
 	"genitori_aiutare": "Come aiutare il bambino",
 	"genitori_aiutare_1": "Le prime volte state vicini e fate insieme la parte «Proviamo insieme».",
 	"genitori_aiutare_2": "Bastano 10–15 minuti. Meglio poco e spesso che tanto e di rado.",
@@ -217,7 +200,6 @@
 	"genitori_aiutare_4": "Gli errori fanno parte dell'imparare: il sito non dice mai «sbagliato», suggerisce cosa provare.",
 	"genitori_aiutare_5": "Il percorso è un consiglio, non un obbligo: lasciate che sia il bambino a scegliere.",
 	"genitori_aiutare_6": "Le stelle non si perdono mai. La terza arriva ripassando un'attività in un altro giorno.",
-
 	"genitori_installa": "Installa l'app",
 	"genitori_crediti": "Crediti e licenze",
 	"genitori_crediti_intro": "Aura usa anche lavori di altri, condivisi con licenze libere. Grazie a chi li ha creati.",
@@ -225,7 +207,6 @@
 	"genitori_crediti_atkinson": "Carattere del testo: Atkinson Hyperlegible Next, Copyright © 2020-2024 The Atkinson Hyperlegible Next Project Authors. Licenza SIL Open Font License 1.1.",
 	"genitori_crediti_lucide": "Icone: Lucide, Copyright © Lucide Icons and Contributors, in parte dal progetto Feather, Copyright © Cole Bemis. Licenze ISC e MIT.",
 	"genitori_crediti_licenza": "Leggi la licenza di {opera}",
-
 	"dev_pagine": "Pagine",
 	"dev_pagine_testo": "Le pagine dell'app con il catalogo di prova e i progressi del profilo attivo. I link portano alle pagine vere, che con il catalogo reale possono non esserci.",
 	"dev_pagine_scegli": "Pagina da mostrare",
@@ -233,7 +214,6 @@
 	"dev_pagine_home": "Home",
 	"dev_pagine_area": "Area «Suoni»",
 	"dev_pagine_modulo": "Modulo «Ascolto»",
-
 	"errore_404_titolo": "Questa pagina non c'è",
 	"errore_404_testo": "Forse l'indirizzo è cambiato. Dalla home ritrovi tutto.",
 	"errore_titolo": "Qualcosa non ha funzionato",
@@ -243,14 +223,11 @@
 	"errore_copiati": "Dettagli copiati. Un adulto può incollarli in una segnalazione, se vuole.",
 	"errore_non_copiati": "Non riesco a copiare: i dettagli sono qui sotto, si possono selezionare a mano.",
 	"errore_mostra": "Mostra i dettagli tecnici",
-
 	"pulsante_avanti": "Avanti",
 	"pulsante_indietro": "Indietro",
-
 	"fase_scopri": "Scopri",
 	"fase_insieme": "Proviamo insieme",
 	"fase_prova": "Prova tu",
-
 	"attivita_lezione": "Lezione",
 	"attivita_gioco": "Gioco",
 	"attivita_minuti": [
@@ -271,7 +248,6 @@
 	"attivita_scheda": "Scheda {numero} di {totale}",
 	"attivita_caricamento": "Sto preparando la scheda…",
 	"attivita_widget_errore": "Questa scheda non si è caricata. Puoi andare avanti lo stesso.",
-
 	"riepilogo_completata": "Attività completata",
 	"riepilogo_imparato": "Oggi hai imparato",
 	"riepilogo_prossimo": "Il prossimo passo",
@@ -280,35 +256,28 @@
 	"riepilogo_quasi_testo": "Ancora un po' di pratica nella parte «Prova tu» e ci arrivi.",
 	"riepilogo_riprova": "Riprova «Prova tu»",
 	"riepilogo_home": "Torna alla home",
-
 	"stelle_etichetta": "Stelle: {stelle} su 3",
-
 	"leggi_ascolta": "Ascolta",
 	"leggi_ferma": "Ferma la lettura",
-
 	"scelta_giusta": "Sì, è proprio questa!",
 	"scelta_riprova": "«{opzione}» non è questa. Prova un'altra risposta.",
 	"scelta_provata": "già provata",
-
 	"player_riproduci": "Riproduci",
 	"player_pausa": "Pausa",
 	"player_precedente": "Passo precedente",
 	"player_successivo": "Passo successivo",
 	"player_ricomincia": "Ricomincia",
 	"player_passo": "Passo {numero} di {totale}",
-
 	"gate_titolo": "Questa parte è per gli adulti",
 	"gate_istruzioni": "Scrivi in cifre questo numero:",
 	"gate_etichetta": "Il numero in cifre",
 	"gate_conferma": "Conferma",
 	"gate_annulla": "Annulla",
 	"gate_errore": "Il numero non corrisponde. Eccone un altro: {numero}.",
-
 	"pref_testo_grande": "Testo grande",
 	"pref_contrasto_alto": "Contrasto alto",
 	"pref_riduci_movimento": "Meno movimento",
 	"pref_lettura": "Lettura ad alta voce",
-
 	"dev_titolo": "Vetrina dei componenti",
 	"dev_sottotitolo": "Solo in sviluppo: token, componenti e un'attività di prova per il motore.",
 	"dev_preferenze": "Preferenze di accessibilità",
@@ -331,7 +300,6 @@
 	"dev_player": "Spiegazione animata",
 	"dev_attivita": "Attività di esempio",
 	"dev_disattivato": "Disattivato",
-
 	"notazione_solfeggio": [
 		{
 			"declarations": ["input lettera"],
@@ -521,7 +489,6 @@
 	"pwa_ios": "Su iPhone e iPad: toccate Condividi, poi Aggiungi alla schermata Home.",
 	"pwa_altri": "Se il browser lo permette, cercate nel suo menu la voce Installa oppure Aggiungi alla schermata Home.",
 	"pwa_gia_installata": "L'app è già installata. Bene così!",
-
 	"widget_ascolta": "Ascolta",
 	"widget_ascolta_di_nuovo": "Ascolta di nuovo",
 	"widget_ferma": "Ferma",
@@ -624,7 +591,6 @@
 	"widget_dev_fine": "fine (Avanti)",
 	"widget_dev_ricomincia": "Ricomincia",
 	"dev_attivita_musica": "Attività musicale di esempio",
-
 	"pentagramma_guarda_rigo": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -694,5 +660,46 @@
 	"pentagramma_disegno_tagli": "Le note con i tagli addizionali",
 	"pentagramma_disegno_semitono": "Una nota e il suo semitono",
 	"pentagramma_disegno_sulla_linea": "sulla linea",
-	"pentagramma_disegno_nello_spazio": "nello spazio"
+	"pentagramma_disegno_nello_spazio": "nello spazio",
+	"canto_basta": "Basta così",
+	"canto_giro_di": "Giro {numero} di {totale}",
+	"canto_tastiera": "Tastiera da toccare",
+	"canto_tastiera_rigo": "La nota che hai toccato",
+	"canto_tastiera_toccato": "È il {nome}.",
+	"canto_estensione_salute": "La voce non si forza mai: se fa fatica, fermati con «Basta così».",
+	"canto_estensione_inizia": "Comincia",
+	"canto_estensione_comoda": "Canta un «aaa» tranquillo, su una nota comoda, e tienilo.",
+	"canto_estensione_comoda_valore": "Nota comoda: {valore} per cento",
+	"canto_estensione_rigo": "L’arpeggio da cantare",
+	"canto_estensione_rigo_comoda": "La nota che stai cantando",
+	"canto_estensione_ascolta": "Ascolta l’arpeggio.",
+	"canto_estensione_canta": "Ora canta tu, una nota dopo l’altra.",
+	"canto_estensione_radice": "La tua nota comoda è il {nome}. Ascolta, poi canta.",
+	"canto_estensione_su": "Bene! Ora un gradino più su.",
+	"canto_estensione_giu": "Bene! Ora un gradino più giù.",
+	"canto_estensione_ripeti": "Riproviamo lo stesso gradino, con calma.",
+	"canto_estensione_scendiamo": "In alto ci fermiamo qui. Ora scendiamo.",
+	"canto_estensione_pausa": "Pausa: bevi un sorso d’acqua. Quando vuoi, continuiamo.",
+	"canto_estensione_continua": "Continua",
+	"canto_estensione_risultato": "La tua voce va dal {basso} al {alto}: {count} note, contando anche i tasti neri.",
+	"canto_estensione_crescita": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Si è allargata di {count} nota rispetto all’ultima volta.",
+				"countPlural=other": "Si è allargata di {count} note rispetto all’ultima volta."
+			}
+		}
+	],
+	"canto_estensione_uguale": "È ampia come l’ultima volta.",
+	"canto_estensione_stretta": "Oggi è un po’ più stretta dell’ultima volta: la voce cambia da un giorno all’altro, ed è normale.",
+	"canto_estensione_prima_volta": "È la tua prima misura: la prossima volta vedrai come cresce.",
+	"canto_estensione_nessuno": "Oggi l’arpeggio non è venuto, e va bene così. Riproviamo un altro giorno, con calma.",
+	"canto_estensione_basta": "Va bene così: ci fermiamo qui. Riproviamo quando vuoi.",
+	"canto_estensione_non_sentita": "Non ti ho sentito. Avvicinati al microfono e canta un «aaa» tranquillo.",
+	"canto_estensione_ricomincia": "Ricomincia",
+	"canto_estensione_tastiera": "Le note della tua voce, sulla tastiera",
+	"canto_estensione_rigo_limiti": "La nota più grave e la più acuta della tua voce",
+	"canto_estensione_senza_microfono": "Per scoprire fin dove arriva la voce serve il microfono. Puoi tornare quando vuoi."
 }
