@@ -112,7 +112,7 @@ test('«Le 5 linee e i 4 spazi» da tastiera, fino al riepilogo', async ({ page,
 	await expect(page.getByRole('heading', { name: 'Attività completata' })).toBeFocused();
 	await expect(page.getByRole('img', { name: 'Stelle: 2 su 3' })).toBeVisible();
 	await expect(page.getByText('Il pentagramma ha cinque linee e quattro spazi')).toBeVisible();
-	await expect(page.getByText('La chiave di violino', { exact: true })).toBeVisible(); // prossimo passo
+	await expect(page.getByText('Cosa sono le note', { exact: true })).toBeVisible(); // prossimo passo
 
 	await page.waitForLoadState('networkidle');
 	expect(esterne).toEqual([]);
