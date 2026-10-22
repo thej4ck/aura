@@ -31,3 +31,6 @@ vite.config.ts.timestamp-*
 CLAUDE.local.md
 key
 *.key
+
+# Worktree temporanei degli agenti
+.claude/worktrees/
