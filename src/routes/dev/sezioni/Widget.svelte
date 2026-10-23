@@ -18,12 +18,6 @@
 		{ id: 'staff-tocca', fase: 'prova', widget: 'staff-tocca', props: { nota: 'G4' } },
 		{ id: 'canta-nota', fase: 'prova', widget: 'canta-nota', props: { nota: 'A4' } },
 		{
-			id: 'canta-nota-da-leggere',
-			fase: 'prova',
-			widget: 'canta-nota',
-			props: { nota: 'A4', suonaPrima: false }
-		},
-		{
 			id: 'canta-sequenza',
 			fase: 'prova',
 			widget: 'canta-sequenza',

@@ -14,9 +14,9 @@
 <script lang="ts">
 	// PG3 «Leggi e canta», come nel solfeggio cantato: il sito suona solo la nota di partenza, il Do; il
 	// bambino la canta, poi legge e canta le altre note di una breve melodia, per gradi vicini e piccoli
-	// salti. Ogni melodia è il turno di canto del core (Canto.svelte, `daSuonare: 'partenza'`): misuratore,
-	// esito al primo tentativo, microfono chiuso quando si passa oltre. Sentire tutte le note prima
-	// dell'esito è un aiuto, e l'esito non conta come giusto. «Basta così» è sempre lì: la voce non si forza.
+	// salti. Ogni melodia è il turno di canto del core (Canto.svelte, `lettura`): il Do scritto come nota di
+	// riferimento, misuratore, esito al primo tentativo, microfono chiuso quando si passa oltre. Tutte le
+	// note si sentono solo dopo, per controllarsi. «Basta così» è sempre lì: la voce non si forza.
 	import { m } from '#lib/paraglide/messages.js';
 	import { TENUTA_SEQUENZA_MS } from '#lib/core/audio/costanti.ts';
 	import { creaCasuale } from '#lib/core/casuale.ts';
@@ -55,7 +55,7 @@
 		rigo={{ chiave: 'violino', note: melodia.map((altezza) => ({ altezza })) }}
 		tenutaMs={TENUTA_SEQUENZA_MS}
 		equivalenzaOttava
-		daSuonare="partenza"
+		lettura
 		durataS={1}
 		etichette={p.etichette}
 		colori={p.colori}

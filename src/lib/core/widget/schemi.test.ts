@@ -46,10 +46,4 @@ describe('canto', () => {
 			equivalenzaOttava: true
 		});
 	});
-
-	it('canta-nota suona la nota prima, tranne quando è solo da leggere', () => {
-		expect(v.parse(cantaNota, { nota: 'A4' }).suonaPrima).toBe(true);
-		expect(v.parse(cantaNota, { nota: 'A4', suonaPrima: false }).suonaPrima).toBe(false);
-		expect(valido(cantaNota, { nota: 'A4', suonaPrima: 'no' })).toBe(false);
-	});
 });

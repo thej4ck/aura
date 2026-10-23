@@ -72,29 +72,6 @@ test('canta-nota: il La4 tenuto arriva all’esito giusto, poi il microfono si s
 	expect(await violazioniGravi(page)).toEqual([]);
 });
 
-test('canta-nota da leggere: il sito non la suona; sentirla prima dell’esito è un aiuto', async ({
-	page
-}) => {
-	const microfono = await spiaMicrofono(page);
-	await apriVetrina(page);
-	const w = widget(page, 'canta-nota-da-leggere');
-	const turno = w.getByRole('list', { name: 'A chi tocca' }).locator('[aria-current="step"]');
-
-	// si canta subito, e il misuratore non dice il nome della nota
-	await w.getByRole('button', { name: 'Leggi e canta' }).click();
-	await expect(turno).toHaveText('Canta');
-	await expect(w.getByRole('img', { name: /^Misuratore della voce\./ })).toBeVisible();
-	await expect(w.getByText('Nota da cantare:')).toHaveCount(0);
-
-	// «Ascolta» la fa sentire: il feedback resta incoraggiante, ma l'esito non è giusto
-	await w.getByRole('button', { name: 'Ascolta', exact: true }).click();
-	await expect(w.getByRole('status')).toHaveText('Ce l’hai fatta! Hai tenuto la nota.', {
-		timeout: 20_000
-	});
-	await expect(esiti(page, 'canta-nota-da-leggere')).toHaveText(['corretto: false, item: A4']);
-	expect(await microfono()).toEqual({ aperti: 1, accesi: 0 });
-});
-
 test('canta-nota: lasciando la scheda mentre ascolta, il microfono si spegne', async ({ page }) => {
 	const microfono = await spiaMicrofono(page);
 	await apriVetrina(page);
