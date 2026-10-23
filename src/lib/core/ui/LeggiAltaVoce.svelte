@@ -11,9 +11,11 @@
 		/** preferenza "lettura ad alta voce": senza, il pulsante compare solo se c'è una voce registrata */
 		attivo: boolean;
 		lingua?: string;
+		/** nome del pulsante, se sulla stessa pagina ce n'è più d'uno (es. "Leggi la domanda") */
+		etichetta?: string;
 	};
 
-	let { testo, audio, attivo, lingua = 'it' }: Props = $props();
+	let { testo, audio, attivo, lingua = 'it', etichetta = m.leggi_ascolta() }: Props = $props();
 
 	let disponibile = $state(false);
 	let parlando = $state(false);
@@ -32,7 +34,8 @@
 		};
 	});
 
-	const visibile = $derived(!!audio || (attivo && disponibile));
+	// senza voce registrata serve un testo: una scheda senza titolo né testo non ha niente da leggere
+	const visibile = $derived(!!audio || (attivo && disponibile && !!testo.trim()));
 
 	function smetti() {
 		lettore?.pause();
@@ -75,7 +78,7 @@
 	<Button
 		variante="secondaria"
 		icona={parlando ? 'pausa' : 'volume'}
-		aria-label={parlando ? m.leggi_ferma() : m.leggi_ascolta()}
+		aria-label={parlando ? m.leggi_ferma() : etichetta}
 		onclick={leggi}
 	/>
 {/if}

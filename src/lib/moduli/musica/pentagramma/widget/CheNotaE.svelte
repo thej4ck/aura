@@ -18,6 +18,7 @@
 	import { nomePosizione, passo, posizione } from '#lib/core/musica/notazione.ts';
 	import { progressi } from '#lib/core/store/progressi.svelte.ts';
 	import Avviso from '#lib/core/ui/Avviso.svelte';
+	import Domanda from '#lib/core/ui/Domanda.svelte';
 	import Button from '#lib/core/ui/Button.svelte';
 	import Staff from '#lib/core/ui/Staff.svelte';
 	import {
@@ -30,6 +31,7 @@
 	} from '../lettura.ts';
 
 	let { contesto, onesito, onfine }: WidgetProps = $props();
+	const id = $props.id();
 
 	const MODULO = 'musica.pentagramma';
 	const COLORI: Record<Lettera, string> = {
@@ -140,8 +142,13 @@
 		</div>
 	{/key}
 
-	<fieldset class="nomi">
-		<legend class="domanda">{m.pentagramma_che_nota_domanda()}</legend>
+	<div class="nomi" role="group" aria-labelledby="{id}-domanda">
+		<Domanda
+			testo={m.pentagramma_che_nota_domanda()}
+			poi={[feedback, ...LETTERE.map((l) => nomeNota(`${l}4`, nomi))]}
+			attivo={contesto.preferenze.letturaAltaVoce}
+			id="{id}-domanda"
+		/>
 		<ul>
 			{#each LETTERE as l (l)}
 				{@const provata = provate.includes(l)}
@@ -158,7 +165,7 @@
 				</li>
 			{/each}
 		</ul>
-	</fieldset>
+	</div>
 
 	<Avviso tono={trovata ? 'successo' : 'attenzione'} testo={feedback} />
 
@@ -192,16 +199,9 @@
 		}
 	}
 	.nomi {
-		min-width: 0;
-		margin: 0;
-		padding: 0;
-		border: 0;
-	}
-	.domanda {
-		padding: 0;
-		margin-block-end: var(--spazio-3);
-		font-size: var(--testo-l);
-		font-weight: var(--peso-medio);
+		display: flex;
+		flex-direction: column;
+		gap: var(--spazio-3);
 	}
 	ul {
 		display: grid;

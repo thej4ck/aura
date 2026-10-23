@@ -134,6 +134,19 @@
 		else vaiA(stato.indice + 1);
 	}
 
+	/** il riepilogo da leggere ad alta voce, per chi non legge ancora */
+	function testoRiepilogo(r: NonNullable<typeof risultato>) {
+		if (r.superata)
+			return [
+				`${m.riepilogo_completata()}. ${m.riepilogo_imparato()}: ${attivita.riepilogo}`,
+				r.prossimo && `${m.riepilogo_prossimo()}: ${r.prossimo.titolo}.`
+			]
+				.filter(Boolean)
+				.join(' ');
+		if (r.vuota) return `${m.riepilogo_vuota()}. ${m.riepilogo_vuota_testo()}`;
+		return `${m.riepilogo_quasi()}. ${m.riepilogo_quasi_testo()}`;
+	}
+
 	function concludi() {
 		const esito = valutaVerifica(attivita.schede, esiti, attivita);
 		const vuota = senzaRisposte(esito);
@@ -300,7 +313,10 @@
 		{/if}
 	{:else if risultato}
 		<section class="riepilogo" aria-labelledby="{id}-riepilogo">
-			<h1 class="nome-attivita">{attivita.titolo}</h1>
+			<div class="riga-titolo">
+				<h1 class="nome-attivita">{attivita.titolo}</h1>
+				<LeggiAltaVoce testo={testoRiepilogo(risultato)} attivo={preferenze.letturaAltaVoce} />
+			</div>
 			{#if risultato.superata}
 				<Stelle stelle={risultato.stelle} dimensione="3rem" anima />
 				<h2 id="{id}-riepilogo" tabindex="-1" bind:this={titolo}>{m.riepilogo_completata()}</h2>

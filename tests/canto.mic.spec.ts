@@ -123,8 +123,7 @@ test('cosa sono le note: si toccano solo i tasti bianchi, i neri arrivano più a
 	await avanti.click();
 	for (const titolo of ['Sette note', 'Più grave, più acuto']) {
 		await expect(page.getByRole('heading', { name: titolo })).toBeVisible();
-		// l'altro «Ascolta», se c'è, è la lettura ad alta voce
-		await page.locator('.azioni').getByRole('button', { name: 'Ascolta', exact: true }).click();
+		await page.getByRole('button', { name: 'Ascolta', exact: true }).click();
 		await avanti.click();
 	}
 

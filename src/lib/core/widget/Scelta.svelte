@@ -24,10 +24,11 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import Avviso from '../ui/Avviso.svelte';
 	import Button from '../ui/Button.svelte';
+	import Domanda from '../ui/Domanda.svelte';
 	import Icona from '../ui/Icona.svelte';
 	import type { WidgetProps } from '../motore/widget';
 
-	let { props, onesito, onfine }: WidgetProps = $props();
+	let { props, contesto, onesito, onfine }: WidgetProps = $props();
 
 	const p = $derived(v.parse(schemaProps, props));
 	const id = $props.id();
@@ -56,8 +57,13 @@
 	}
 </script>
 
-<fieldset class="scelta">
-	<legend class="domanda" id="{id}-domanda">{p.domanda}</legend>
+<div class="scelta" role="group" aria-labelledby="{id}-domanda">
+	<Domanda
+		testo={p.domanda}
+		poi={[feedback, ...p.opzioni]}
+		attivo={contesto.preferenze.letturaAltaVoce}
+		id="{id}-domanda"
+	/>
 	<ul class="opzioni">
 		{#each p.opzioni as opzione, i (i)}
 			{@const giusta = trovata && i === p.corretta}
@@ -78,7 +84,7 @@
 			</li>
 		{/each}
 	</ul>
-</fieldset>
+</div>
 
 <Avviso tono={trovata ? 'successo' : 'attenzione'} testo={feedback} />
 
@@ -90,16 +96,9 @@
 
 <style>
 	.scelta {
-		margin: 0;
-		padding: 0;
-		border: 0;
-		min-width: 0;
-	}
-	.domanda {
-		padding: 0;
-		margin-block-end: var(--spazio-4);
-		font-size: var(--testo-l);
-		font-weight: var(--peso-medio);
+		display: flex;
+		flex-direction: column;
+		gap: var(--spazio-4);
 	}
 	.opzioni {
 		display: grid;

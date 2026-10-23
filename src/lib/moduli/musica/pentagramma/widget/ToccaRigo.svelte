@@ -21,9 +21,10 @@
 	import type { WidgetProps } from '#lib/core/motore/widget.ts';
 	import { nomePosizione, suLinea } from '#lib/core/musica/notazione.ts';
 	import Avviso from '#lib/core/ui/Avviso.svelte';
+	import Domanda from '#lib/core/ui/Domanda.svelte';
 	import Button from '#lib/core/ui/Button.svelte';
 
-	let { props, onesito, onfine }: WidgetProps = $props();
+	let { props, contesto, onesito, onfine }: WidgetProps = $props();
 
 	const p = $derived(v.parse(schemaProps, props));
 	const PASSI = [8, 7, 6, 5, 4, 3, 2, 1, 0]; // dall'alto in basso, come si vedono
@@ -73,7 +74,7 @@
 	}
 </script>
 
-<p class="domanda">{domanda}</p>
+<Domanda testo={domanda} poi={[feedback]} attivo={contesto.preferenze.letturaAltaVoce} />
 
 <div class="rigo" role="group" aria-label={domanda}>
 	{#each PASSI as q (q)}
@@ -103,10 +104,6 @@
 {/if}
 
 <style>
-	.domanda {
-		font-size: var(--testo-l);
-		font-weight: var(--peso-medio);
-	}
 	.rigo {
 		display: flex;
 		flex-direction: column;

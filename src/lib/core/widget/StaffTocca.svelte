@@ -46,6 +46,7 @@
 	import { altezzaDaPasso, nomePosizione, posizione } from '../musica/notazione.ts';
 	import Avviso from '../ui/Avviso.svelte';
 	import Button from '../ui/Button.svelte';
+	import Domanda from '../ui/Domanda.svelte';
 	import Staff from '../ui/Staff.svelte';
 
 	let { props, contesto, onesito, onfine }: WidgetProps = $props();
@@ -110,7 +111,7 @@
 	$effect(() => () => riproduzione?.ferma());
 </script>
 
-<p class="domanda">{domanda}</p>
+<Domanda testo={domanda} poi={[feedback]} attivo={contesto.preferenze.letturaAltaVoce} />
 
 <Staff
 	{rigo}
@@ -131,10 +132,6 @@
 {/if}
 
 <style>
-	.domanda {
-		font-size: var(--testo-l);
-		font-weight: var(--peso-medio);
-	}
 	.azioni {
 		display: flex;
 		flex-wrap: wrap;
