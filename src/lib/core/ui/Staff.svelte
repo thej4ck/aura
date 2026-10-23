@@ -27,6 +27,7 @@
 		type Segno
 	} from '#lib/core/musica/notazione.ts';
 	import { m } from '#lib/paraglide/messages.js';
+	import { inVista, scorrevole } from './scorrimento.ts';
 
 	type Props = {
 		rigo: Rigo;
@@ -239,13 +240,28 @@
 		const gruppo = (e.currentTarget as HTMLElement).parentElement;
 		gruppo?.querySelector<HTMLElement>(`[data-passo="${corrente}"]`)?.focus();
 	}
+
+	let contenitore = $state<HTMLElement>();
+	// un rigo lungo su un telefono scorre: la nota evidenziata (es. quella che suona) resta in vista
+	$effect(() => {
+		const i = note.findLast((n) => n.evidenziata)?.i;
+		if (contenitore && i !== undefined)
+			inVista(contenitore, contenitore.querySelector(`[data-nota="${i}"]`));
+	});
 </script>
 
-<div class={['staff', { interattivo, compatto }]} role="group" aria-label={etichetta}>
+<div
+	class={['staff', { interattivo, compatto }]}
+	role="group"
+	aria-label={etichetta}
+	bind:this={contenitore}
+	{@attach scorrevole}
+>
 	<div
 		class="tela"
 		style:--u={v.altezza / S}
 		style:--r={v.altezza / h.minimo}
+		style:--m={h.minimo / S}
 		bind:clientWidth={largoPx}
 		bind:clientHeight={altoPx}
 	>
@@ -362,9 +378,12 @@
 	.staff {
 		/* uno spazio del rigo: le aree di tocco dell'interattivo sono mezzo spazio */
 		--s: 1.5rem;
+		/* lo spazio più piccolo, con i nomi sotto le note ancora leggibili: un rigo più lungo scorre */
+		--s-min: 0.7rem;
 		container-type: inline-size;
 		position: relative;
 		width: 100%;
+		overflow-x: auto;
 	}
 	.compatto {
 		--s: 1rem;
@@ -374,8 +393,12 @@
 	}
 	.tela {
 		position: relative;
-		/* altezza naturale, ridotta se il contenuto minimo non ci sta in larghezza */
-		height: min(calc(var(--u) * var(--s)), calc(100cqw * var(--r)));
+		/* altezza naturale, ridotta se il contenuto minimo non ci sta in larghezza, ma non sotto --s-min */
+		height: max(
+			calc(var(--u) * var(--s-min)),
+			min(calc(var(--u) * var(--s)), calc(100cqw * var(--r)))
+		);
+		min-width: calc(var(--m) * var(--s-min));
 	}
 	svg {
 		display: block;

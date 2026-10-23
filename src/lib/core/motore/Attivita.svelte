@@ -497,6 +497,8 @@
 		flex-direction: column;
 		gap: var(--spazio-5);
 		padding: var(--spazio-5);
+		/* quanto un widget largo (la tastiera) può entrare nel padding, su un telefono */
+		--sborda: var(--spazio-5);
 		border: 1px solid var(--colore-bordo);
 		border-radius: var(--raggio-l);
 		background: var(--colore-superficie);
@@ -505,6 +507,7 @@
 	@media (min-width: 40rem) {
 		.scheda {
 			padding: var(--spazio-6) var(--spazio-7);
+			--sborda: 0px;
 		}
 	}
 	@keyframes entra {

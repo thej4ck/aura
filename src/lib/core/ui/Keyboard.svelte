@@ -4,6 +4,7 @@
 	// Con `onpick` i tasti sono pulsanti (frecce per muoversi, Invio o Spazio per scegliere);
 	// senza è un'immagine con una descrizione. Inizia e finisce sempre su un tasto bianco.
 	// Con `soloBianchi` i tasti neri si vedono ma non si toccano (prima che arrivino diesis e bemolle).
+	// Su un telefono una tastiera lunga scorre: il bordo sfuma e il tasto evidenziato resta in vista.
 	import {
 		altezza,
 		classe,
@@ -13,6 +14,7 @@
 		type NomiNote
 	} from '#lib/core/musica/note.ts';
 	import { m } from '#lib/paraglide/messages.js';
+	import { inVista, scorrevole } from './scorrimento.ts';
 
 	type Props = {
 		/** midi del primo e dell'ultimo tasto */
@@ -118,9 +120,16 @@
 		// i tasti neri non toccabili si saltano (inizio e fine sono sempre bianchi)
 		if (soloBianchi && nero(n)) n += n > tabulabile! ? 1 : -1;
 		corrente = n;
-		const tastiera = (e.currentTarget as HTMLElement).parentElement;
 		tastiera?.querySelector<HTMLElement>(`[data-midi="${corrente}"]`)?.focus();
 	}
+
+	let tastiera = $state<HTMLElement>();
+	// es. la scala che suona: il tasto evidenziato non resta fuori dallo schermo
+	$effect(() => {
+		const n = evidenzia.at(-1);
+		if (tastiera && n !== undefined)
+			inVista(tastiera, tastiera.querySelector(`[data-midi="${n}"]`));
+	});
 </script>
 
 {#snippet contenuto(n: number, bianco: boolean)}
@@ -133,6 +142,8 @@
 	role={onpick ? 'group' : 'img'}
 	aria-label={onpick ? etichetta : descrizione}
 	aria-describedby={onpick && zona ? `${id}-zona` : undefined}
+	bind:this={tastiera}
+	{@attach scorrevole}
 >
 	{#if onpick && testoZona}<span id="{id}-zona" class="sr-only">{testoZona}</span>{/if}
 	<div class="tasti" style:--bianchi={bianchi}>
@@ -171,7 +182,9 @@
 					{@render contenuto(t.midi, !t.nero)}
 				</button>
 			{:else}
-				<span class={classi} style:--x={t.x}>{@render contenuto(t.midi, !t.nero)}</span>
+				<span class={classi} style:--x={t.x} data-midi={t.midi}>
+					{@render contenuto(t.midi, !t.nero)}
+				</span>
 			{/if}
 		{/each}
 	</div>
@@ -194,8 +207,10 @@
 		}
 	}
 	.interattiva {
-		--min-tasto: var(--target);
+		/* 48 px: il tocco minimo; su un telefono usa anche il margine della scheda (--sborda): 7 tasti ci stanno */
+		--min-tasto: 3rem;
 		--altezza-tasti: 9rem;
+		margin-inline: calc(-1 * var(--sborda, 0px));
 	}
 	.tasti {
 		position: relative;

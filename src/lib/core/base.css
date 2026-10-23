@@ -124,6 +124,23 @@ svg {
 	border: 0;
 }
 
+/* contenitori che scorrono in orizzontale (ui/scorrimento.ts): sfuma il bordo oltre cui c'è altro */
+[data-oltre~='inizio'] {
+	mask-image: linear-gradient(to right, transparent, #000 var(--spazio-6));
+}
+[data-oltre~='fine'] {
+	mask-image: linear-gradient(to left, transparent, #000 var(--spazio-6));
+}
+[data-oltre='inizio fine'] {
+	mask-image: linear-gradient(
+		to right,
+		transparent,
+		#000 var(--spazio-6),
+		#000 calc(100% - var(--spazio-6)),
+		transparent
+	);
+}
+
 /* rete di sicurezza: con movimento ridotto nessuna animazione o transizione CSS dura davvero */
 :root[data-riduci-movimento] *,
 :root[data-riduci-movimento] *::before,
