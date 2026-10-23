@@ -6,6 +6,7 @@
 	import type { Rigo } from '#lib/core/contenuti/schema.ts';
 	import type { ContestoWidget, EsitoWidget } from '#lib/core/motore/widget.ts';
 	import Button from '#lib/core/ui/Button.svelte';
+	import { nonPerdereIlFocus } from '#lib/core/ui/focus.ts';
 	import Canto from '#lib/core/widget/Canto.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 
@@ -24,17 +25,22 @@
 	let { giri, contatore, tenutaMs, durataS, contesto, onesito, onfine }: Props = $props();
 
 	let indice = $state(0);
+	let elContatore = $state<HTMLElement>();
 	const giro = $derived(giri[Math.min(indice, giri.length - 1)]);
 
 	function prossimo() {
-		if (indice < giri.length - 1) indice++;
-		else onfine();
+		if (indice < giri.length - 1) {
+			indice++;
+			void nonPerdereIlFocus(elContatore); // il turno di canto ricomincia, con i suoi pulsanti
+		} else onfine();
 	}
 </script>
 
 <div class="serie">
 	<div class="testa">
-		<p class="contatore">{contatore(indice + 1, giri.length)}</p>
+		<p class="contatore" tabindex="-1" bind:this={elContatore}>
+			{contatore(indice + 1, giri.length)}
+		</p>
 		<Button variante="quieta" icona="chiudi" onclick={onfine}>{m.canto_basta()}</Button>
 	</div>
 	{#key indice}

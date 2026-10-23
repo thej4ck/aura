@@ -22,6 +22,7 @@
 	import { creaCasuale } from '#lib/core/casuale.ts';
 	import type { WidgetProps } from '#lib/core/motore/widget.ts';
 	import Button from '#lib/core/ui/Button.svelte';
+	import { nonPerdereIlFocus } from '#lib/core/ui/focus.ts';
 	import Canto from '#lib/core/widget/Canto.svelte';
 	import { melodieDaDo } from '../lettura.ts';
 
@@ -30,16 +31,21 @@
 	const p = $derived(v.parse(schemaProps, props));
 	const melodie = $derived(melodieDaDo(p.quante, creaCasuale(contesto.seed)));
 	let i = $state(0);
+	let contatore = $state<HTMLElement>();
 	const melodia = $derived(melodie[Math.min(i, melodie.length - 1)]);
 
 	function prossima() {
-		if (i < melodie.length - 1) i++;
-		else onfine();
+		if (i < melodie.length - 1) {
+			i++;
+			void nonPerdereIlFocus(contatore); // il turno di canto ricomincia, con i suoi pulsanti
+		} else onfine();
 	}
 </script>
 
 <div class="testa">
-	<p class="conta">{m.pentagramma_melodia_di({ numero: i + 1, totale: melodie.length })}</p>
+	<p class="conta" tabindex="-1" bind:this={contatore}>
+		{m.pentagramma_melodia_di({ numero: i + 1, totale: melodie.length })}
+	</p>
 	<Button variante="quieta" icona="chiudi" onclick={onfine}>{m.pentagramma_basta_cosi()}</Button>
 </div>
 <p class="consiglio">{m.pentagramma_leggi_consiglio()}</p>

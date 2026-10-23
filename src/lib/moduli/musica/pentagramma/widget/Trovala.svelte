@@ -47,6 +47,7 @@
 	import type { WidgetProps } from '#lib/core/motore/widget.ts';
 	import { midi, nomeNota } from '#lib/core/musica/note.ts';
 	import Button from '#lib/core/ui/Button.svelte';
+	import { nonPerdereIlFocus } from '#lib/core/ui/focus.ts';
 	import StaffTocca from '#lib/core/widget/StaffTocca.svelte';
 	import { registro, serie } from '../lettura.ts';
 
@@ -55,6 +56,7 @@
 	const p = $derived(v.parse(schemaProps, props));
 	const note = $derived(serie(p.note, p.quante, creaCasuale(contesto.seed)));
 	let i = $state(0);
+	let contatore = $state<HTMLElement>();
 	const nota = $derived(note[i]);
 	const domanda = $derived(
 		m.pentagramma_trovala_domanda({
@@ -73,13 +75,17 @@
 
 	function prossima() {
 		suono?.ferma();
-		if (i < note.length - 1) i++;
-		else onfine();
+		if (i < note.length - 1) {
+			i++;
+			void nonPerdereIlFocus(contatore); // «Avanti» sparisce con la nota trovata
+		} else onfine();
 	}
 </script>
 
 <div class="testa">
-	<p class="conta">{m.pentagramma_nota_di({ numero: i + 1, totale: note.length })}</p>
+	<p class="conta" tabindex="-1" bind:this={contatore}>
+		{m.pentagramma_nota_di({ numero: i + 1, totale: note.length })}
+	</p>
 	<Button variante="secondaria" icona="volume" onclick={ascolta}>
 		{m.pentagramma_trovala_ascolta()}
 	</Button>
