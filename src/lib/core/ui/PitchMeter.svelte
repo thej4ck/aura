@@ -7,6 +7,7 @@
 
 <script lang="ts">
 	import { prefersReducedMotion } from 'svelte/motion';
+	import { BUCO_VOCE_MS } from '#lib/core/audio/costanti.ts';
 	import { centsTra, distanzaCents } from '#lib/core/audio/frequenze.ts';
 	import type { FrameMic } from '#lib/core/audio/mic.ts';
 	import { progressi } from '#lib/core/store/progressi.svelte.ts';
@@ -180,18 +181,19 @@
 			};
 			g.lineCap = 'round';
 			g.lineJoin = 'round';
-			let prima: { x: number; y: number; c: number; nota: number } | null = null;
+			let prima: { t: number; x: number; y: number; c: number; nota: number } | null = null;
 			for (const p of scia) {
-				if (p.freq === null) {
-					chiudiTratto();
-					prima = null;
-					continue;
-				}
+				if (p.freq === null) continue;
 				const c = p.c;
-				const punto = { x: x(p.t), y: y(c), c, nota: p.nota };
+				const punto = { t: p.t, x: x(p.t), y: y(c), c, nota: p.nota };
 				const dentro = Math.abs(c) <= tol;
-				// un salto grande (es. d'ottava) o una nota nuova interrompono la linea invece di tracciare una verticale
-				const unito = prima && prima.nota === p.nota && Math.abs(c - prima.c) <= 300;
+				// un buco breve (respiro, frame persi) si attraversa; uno lungo, un salto grande (es. d'ottava)
+				// o una nota nuova interrompono la linea invece di tracciare una verticale
+				const unito =
+					prima &&
+					p.t - prima.t <= BUCO_VOCE_MS / 1000 &&
+					prima.nota === p.nota &&
+					Math.abs(c - prima.c) <= 300;
 				if (unito && tratto === dentro) g.lineTo(punto.x, punto.y);
 				else {
 					chiudiTratto();

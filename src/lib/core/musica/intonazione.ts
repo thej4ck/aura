@@ -3,6 +3,7 @@
 // comoda". Ogni funzione `avanza*` prende lo stato e un frame e restituisce lo stato nuovo, senza
 // toccare quello vecchio. Il tempo è quello dei frame (clock audio, in secondi), mai l'orologio di sistema.
 import {
+	BUCO_VOCE_MS,
 	CALO_TENUTA,
 	COPERTURA_NOTA_COMODA,
 	FINESTRA_NOTA_COMODA_MS
@@ -36,8 +37,13 @@ export type OpzioniTenuta = {
 };
 
 export type StatoTenuta = {
-	/** 0-1: cresce in zona, cala lentamente fuori zona e in silenzio, mai di colpo a zero */
+	/**
+	 * 0-1: cresce in zona, cala lentamente fuori zona e in silenzio, mai di colpo a zero. In un buco
+	 * breve della voce (meno di BUCO_VOCE_MS: un respiro, una consonante) aspetta
+	 */
 	progresso: number;
+	/** secondi senza voce dall'ultimo frame con la voce (0 se c'era) */
+	bucoS: number;
 	/** cent dalla nota dell'ultimo frame (positivo = troppo alto); null senza voce */
 	cents: number | null;
 	inZona: boolean;
@@ -49,6 +55,7 @@ export type StatoTenuta = {
 
 export const nuovaTenuta = (): StatoTenuta => ({
 	progresso: 0,
+	bucoS: 0,
 	cents: null,
 	inZona: false,
 	riuscita: false,
@@ -58,18 +65,20 @@ export const nuovaTenuta = (): StatoTenuta => ({
 export function avanzaTenuta(s: StatoTenuta, f: FrameVoce, o: OpzioniTenuta): StatoTenuta {
 	if (s.riuscita) return s;
 	// sta suonando il sito: è il turno di ascoltare, il progresso aspetta
-	if (f.silenziato) return { ...s, cents: null, inZona: false, t: f.t };
+	if (f.silenziato) return { ...s, bucoS: 0, cents: null, inZona: false, t: f.t };
 	const cents =
 		f.freq === null
 			? null
 			: distanzaCents(f.freq, o.target, { equivalenzaOttava: o.equivalenzaOttava });
 	const inZona = cents !== null && Math.abs(cents) <= o.tolleranzaCents;
-	const quota = (passoS(s.t, f.t) * 1000) / o.obiettivoMs;
-	const progresso = Math.min(
-		1,
-		Math.max(0, s.progresso + (inZona ? quota : -quota * (o.calo ?? CALO_TENUTA)))
-	);
-	return { progresso, cents, inZona, riuscita: progresso >= 1, t: f.t };
+	const passo = passoS(s.t, f.t);
+	const bucoS = f.freq === null ? s.bucoS + passo : 0;
+	// del passo in silenzio cala solo la parte oltre il buco breve
+	const buco = BUCO_VOCE_MS / 1000;
+	const calante = f.freq === null ? Math.max(0, bucoS - buco) - Math.max(0, s.bucoS - buco) : passo;
+	const quota = (1000 / o.obiettivoMs) * (inZona ? passo : -calante * (o.calo ?? CALO_TENUTA));
+	const progresso = Math.min(1, Math.max(0, s.progresso + quota));
+	return { progresso, bucoS, cents, inZona, riuscita: progresso >= 1, t: f.t };
 }
 
 // --- Sequenza di note in ordine -----------------------------------------------------------------

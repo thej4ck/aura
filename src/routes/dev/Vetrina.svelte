@@ -4,6 +4,7 @@
 	import { catalogoEsempio } from '#lib/core/contenuti/__fixtures__/esempio/catalogo.ts';
 	import CinqueLinee from '#lib/core/contenuti/__fixtures__/esempio/linee/CinqueLinee.svelte';
 	import Attivita from '#lib/core/motore/Attivita.svelte';
+	import ProvaMicrofono from '#lib/core/pagine/genitori/ProvaMicrofono.svelte';
 	import { progressi } from '#lib/core/store/progressi.svelte.ts';
 	import type { Preferenze } from '#lib/core/store/schema-progressi.ts';
 	import Avviso from '#lib/core/ui/Avviso.svelte';
@@ -197,6 +198,12 @@
 
 	<Notazione />
 	<SezioneAudio />
+
+	<!-- la stessa diagnostica della pagina per i genitori -->
+	<section aria-labelledby="sez-microfono">
+		<h2 id="sez-microfono">{m.mic_titolo()}</h2>
+		<ProvaMicrofono />
+	</section>
 
 	<section aria-labelledby="sez-attivita" class="sezione-attivita">
 		<h2 id="sez-attivita">{m.dev_attivita()}</h2>

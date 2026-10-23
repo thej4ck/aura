@@ -1,5 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
-import { WAV_MIC } from './tests/setup-mic';
+import { WAV_MIC, WAV_VOCE } from './tests/setup-mic';
+
+/** Chromium legge il WAV come se fosse il microfono e accetta il permesso da solo */
+const microfonoFinto = (wav: string) => ({
+	args: [
+		'--use-fake-ui-for-media-stream',
+		'--use-fake-device-for-media-stream',
+		`--use-file-for-fake-audio-capture=${wav}`
+	]
+});
 
 // porte dedicate e strictPort: mai riusare per sbaglio il server di un altro progetto
 const porta = 4319; // build di produzione (vite preview)
@@ -18,7 +27,7 @@ export default defineConfig({
 	projects: [
 		{
 			name: 'chromium',
-			testIgnore: ['**/*.dev.spec.ts', '**/*.mic.spec.ts'],
+			testIgnore: ['**/*.dev.spec.ts', '**/*.mic.spec.ts', '**/*.voce.spec.ts'],
 			use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${porta}` }
 		},
 		{
@@ -29,20 +38,24 @@ export default defineConfig({
 			use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${portaDev}` }
 		},
 		{
-			// microfono finto: Chromium legge il WAV come se fosse la voce e accetta il permesso da solo
+			// microfono finto con una nota pulita
 			name: 'mic',
 			testMatch: '**/*.mic.spec.ts',
 			expect: { timeout: 10_000 },
 			use: {
 				...devices['Desktop Chrome'],
 				baseURL: `http://localhost:${portaDev}`,
-				launchOptions: {
-					args: [
-						'--use-fake-ui-for-media-stream',
-						'--use-fake-device-for-media-stream',
-						`--use-file-for-fake-audio-capture=${WAV_MIC}`
-					]
-				}
+				launchOptions: microfonoFinto(WAV_MIC)
+			}
+		},
+		{
+			// microfono finto con una voce cantata realistica, sulla build di produzione
+			name: 'voce',
+			testMatch: '**/*.voce.spec.ts',
+			use: {
+				...devices['Desktop Chrome'],
+				baseURL: `http://localhost:${porta}`,
+				launchOptions: microfonoFinto(WAV_VOCE)
 			}
 		}
 	],

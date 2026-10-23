@@ -1,16 +1,26 @@
 // Riconoscimento dell'altezza con YIN (de Cheveigné e Kawahara, 2002). Puro: niente Web Audio, si
 // prova con segnali sintetici. Il microfono (mic.ts) gli passa un frame alla volta.
-import { FREQ_MAX, FREQ_MIN, GATE_RMS, MEDIANA, SOGLIA_YIN } from './costanti.ts';
+import {
+	FREQ_MAX,
+	FREQ_MIN,
+	GATE_RMS,
+	MARGINE_GATE,
+	MEDIANA,
+	RISALITA_RUMORE_DB_S,
+	SOGLIA_YIN,
+	SOGLIA_YIN_RIPIEGO
+} from './costanti.ts';
 
 export type Altezza = {
 	freq: number;
-	/** 0-1: quanto il frame è periodico (1 − CMNDF nel minimo scelto) */
+	/** 0-1: quanto il frame è periodico (1 − CMNDF nel minimo scelto); sotto 1 − SOGLIA_YIN è un ripiego */
 	chiarezza: number;
 	rms: number;
 };
 
 export type OpzioniAltezza = {
 	soglia?: number;
+	ripiego?: number;
 	gateRms?: number;
 	freqMin?: number;
 	freqMax?: number;
@@ -22,7 +32,10 @@ export function calcolaRms(buffer: Float32Array): number {
 	return Math.sqrt(somma / buffer.length);
 }
 
-/** Altezza del frame, o null se è silenzio, se non è abbastanza periodico o se è fuori intervallo. */
+/**
+ * Altezza del frame, o null se è sotto il gate, se non è abbastanza periodico (il CMNDF non scende mai
+ * sotto `ripiego`) o se è fuori intervallo.
+ */
 export function rilevaAltezza(
 	buffer: Float32Array,
 	sampleRate: number,
@@ -30,6 +43,7 @@ export function rilevaAltezza(
 ): Altezza | null {
 	const {
 		soglia = SOGLIA_YIN,
+		ripiego = SOGLIA_YIN_RIPIEGO,
 		gateRms = GATE_RMS,
 		freqMin = FREQ_MIN,
 		freqMax = FREQ_MAX
@@ -68,7 +82,13 @@ export function rilevaAltezza(
 			break;
 		}
 	}
-	if (tau < 0) return null;
+	// ripiego: nessun lag sotto soglia, allora il minimo globale, se è ancora abbastanza periodico
+	if (tau < 0) {
+		let minimo = 2;
+		for (let t = 3; t < tauMax; t++) if (d[t] < d[minimo]) minimo = t;
+		if (d[minimo] >= ripiego) return null;
+		tau = minimo;
+	}
 
 	// 4. interpolazione parabolica attorno al minimo: precisione sotto il campione
 	const [a, b, c] = [d[tau - 1], d[tau], d[tau + 1]];
@@ -81,7 +101,9 @@ export function rilevaAltezza(
 
 /**
  * Mediana mobile delle frequenze sugli ultimi `n` frame: toglie i salti isolati (un'ottava sbagliata,
- * una consonante). Un frame senza altezza dà null subito, e nella finestra non conta.
+ * una consonante) e regge i buchi brevi. Dà una frequenza quando più di metà dei frame della finestra
+ * ne hanno una (3 su 5): un frame vuoto in mezzo alla voce non rompe la scia, uno isolato nel silenzio
+ * non diventa una nota.
  */
 export class Mediana {
 	readonly n: number;
@@ -94,8 +116,8 @@ export class Mediana {
 	aggiungi(freq: number | null): number | null {
 		this.#valori.push(freq);
 		if (this.#valori.length > this.n) this.#valori.shift();
-		if (freq === null) return null;
 		const ordinati = this.#valori.filter((v) => v !== null).sort((x, y) => x - y);
+		if (2 * ordinati.length <= this.#valori.length) return null;
 		// con un numero pari di valori si prende quello sotto: sempre una frequenza davvero sentita
 		// (la media tra 440 e 880 sarebbe una quinta che nessuno ha cantato)
 		return ordinati[(ordinati.length - 1) >> 1];
@@ -103,5 +125,25 @@ export class Mediana {
 
 	azzera(): void {
 		this.#valori = [];
+	}
+}
+
+/**
+ * Rumore di fondo (RMS) stimato dai frame senza nota, per il gate adattivo (vedi MARGINE_GATE): scende
+ * subito al livello più basso sentito e risale piano. I frame con la nota non lo toccano: se lo
+ * alzassero, una voce tenuta finirebbe sotto la sua stessa soglia.
+ */
+export class RumoreDiFondo {
+	/** si parte con il gate al minimo assoluto */
+	rms = GATE_RMS / MARGINE_GATE;
+
+	get gate(): number {
+		return Math.max(GATE_RMS, this.rms * MARGINE_GATE);
+	}
+
+	/** un frame senza nota, durato `dt` secondi */
+	aggiorna(rms: number, dt: number): void {
+		// mai sotto −80 dBFS: dallo zero digitale non risalirebbe più
+		this.rms = Math.max(1e-4, Math.min(rms, this.rms * 10 ** ((RISALITA_RUMORE_DB_S * dt) / 20)));
 	}
 }

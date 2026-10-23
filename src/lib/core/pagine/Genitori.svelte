@@ -16,6 +16,7 @@
 	import Impostazioni from './genitori/Impostazioni.svelte';
 	import Profili from './genitori/Profili.svelte';
 	import Progressi from './genitori/Progressi.svelte';
+	import ProvaMicrofono from './genitori/ProvaMicrofono.svelte';
 
 	type Props = { catalogo?: Catalogo };
 	let { catalogo = catalogoReale }: Props = $props();
@@ -43,6 +44,7 @@
 		['backup', m.genitori_backup],
 		['impostazioni', m.genitori_impostazioni],
 		['voce', m.genitori_voce],
+		['microfono', m.mic_titolo],
 		['aiutare', m.genitori_aiutare],
 		['installa', m.genitori_installa],
 		['crediti', m.genitori_crediti]
@@ -142,6 +144,11 @@
 		<ul class="consigli">
 			{#each VOCE as testo, i (i)}<li>{testo()}</li>{/each}
 		</ul>
+	</section>
+
+	<section id="microfono" aria-labelledby="titolo-microfono">
+		<h2 id="titolo-microfono">{m.mic_titolo()}</h2>
+		<ProvaMicrofono />
 	</section>
 
 	<section id="aiutare" aria-labelledby="titolo-aiutare">
