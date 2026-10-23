@@ -1,7 +1,8 @@
 <script lang="ts">
-	// Pagina per i genitori: privacy, progressi, profili, backup e file, impostazioni, voce, come aiutare,
-	// installazione, crediti e licenze.
+	// Pagina per i genitori, in cinque schede: progressi e profili, impostazioni, backup e app, consigli,
+	// privacy e licenze.
 	// Le azioni delicate (importa, elimina, collega/scollega, impostazioni, link esterni) passano da GateAdulti.
+	import { page } from '$app/state';
 	import { asset, resolve } from '$app/paths';
 	import type { AssetPath } from '$app/types';
 	import { m } from '#lib/paraglide/messages.js';
@@ -38,19 +39,20 @@
 		azione?.(); // subito, nello stesso gesto: serve ai picker dei file e alle finestre nuove
 	}
 
-	const SEZIONI: [string, () => string][] = [
-		['privacy', m.genitori_privacy],
-		['progressi', m.genitori_progressi],
-		['profili', m.genitori_profili],
-		['backup', m.genitori_backup],
-		['impostazioni', m.genitori_impostazioni],
-		['voce', m.genitori_voce],
-		['microfono', m.mic_titolo],
-		['aiutare', m.genitori_aiutare],
-		['installa', m.genitori_installa],
-		['segnalazioni', m.informazioni_segnalazioni],
-		['crediti', m.genitori_crediti]
+	// La scheda aperta è l'hash dell'indirizzo: resta con il ricaricamento e i link la aprono (#backup, #crediti…).
+	// Nessun elemento ha l'id di una scheda, così cliccarla non fa scorrere la pagina; le altre sezioni
+	// tengono il loro id e un link porta proprio lì.
+	const SCHEDE = [
+		{ id: 'progressi', titolo: m.genitori_scheda_progressi, sezioni: ['profili'] },
+		{ id: 'impostazioni', titolo: m.genitori_impostazioni, sezioni: ['microfono'] },
+		{ id: 'backup', titolo: m.genitori_scheda_backup, sezioni: ['installa'] },
+		{ id: 'consigli', titolo: m.genitori_scheda_consigli, sezioni: ['aiutare', 'voce'] },
+		{ id: 'privacy', titolo: m.genitori_scheda_privacy, sezioni: ['segnalazioni', 'crediti'] }
 	];
+	const ancora = $derived(decodeURIComponent(page.url.hash.slice(1)));
+	const scheda = $derived(
+		SCHEDE.find((s) => s.id === ancora || s.sezioni.includes(ancora)) ?? SCHEDE[0]
+	);
 	const VOCE = [m.genitori_voce_1, m.genitori_voce_2, m.genitori_voce_3, m.genitori_voce_4];
 	const AIUTARE = [
 		m.genitori_aiutare_1,
@@ -94,102 +96,106 @@
 		</Avviso>
 	{/if}
 
-	<nav class="indice" aria-label={m.genitori_indice()}>
+	<nav class="schede" aria-label={m.genitori_indice()}>
 		<ul>
-			{#each SEZIONI as [ancora, titolo] (ancora)}
-				<li><a href="#{ancora}">{titolo()}</a></li>
+			{#each SCHEDE as s (s.id)}
+				<li>
+					<a href="#{s.id}" aria-current={s === scheda ? 'true' : undefined}>{s.titolo()}</a>
+				</li>
 			{/each}
 		</ul>
 	</nav>
 
-	<section id="privacy" aria-labelledby="titolo-privacy">
-		<h2 id="titolo-privacy">{m.genitori_privacy()}</h2>
-		<p class="lead">{m.genitori_privacy_intro()}</p>
-		<div class="griglia">
-			{#each PRIVACY as [titolo, testo] (titolo)}
-				<div class="blocco">
-					<h3>{titolo()}</h3>
-					<p>{testo()}</p>
-				</div>
-			{/each}
-		</div>
-		<div class="esterno">
-			<Button variante="secondaria" icona="lucchetto" onclick={() => conGate(apriRailway)}>
-				{m.genitori_privacy_railway()}
-			</Button>
-			<p class="tenue">{m.genitori_privacy_esterno()}</p>
-		</div>
-	</section>
+	{#if scheda.id === 'progressi'}
+		<section aria-labelledby="titolo-progressi">
+			<h2 id="titolo-progressi">{m.genitori_progressi()}</h2>
+			<Progressi {catalogo} />
+		</section>
 
-	<section id="progressi" aria-labelledby="titolo-progressi">
-		<h2 id="titolo-progressi">{m.genitori_progressi()}</h2>
-		<Progressi {catalogo} />
-	</section>
+		<section id="profili" aria-labelledby="titolo-profili">
+			<h2 id="titolo-profili">{m.genitori_profili()}</h2>
+			<Profili {conGate} />
+		</section>
+	{:else if scheda.id === 'impostazioni'}
+		<section aria-labelledby="titolo-impostazioni">
+			<h2 id="titolo-impostazioni">{m.genitori_impostazioni()}</h2>
+			<Impostazioni {conGate} />
+		</section>
 
-	<section id="profili" aria-labelledby="titolo-profili">
-		<h2 id="titolo-profili">{m.genitori_profili()}</h2>
-		<Profili {conGate} />
-	</section>
+		<section id="microfono" aria-labelledby="titolo-microfono">
+			<h2 id="titolo-microfono">{m.mic_titolo()}</h2>
+			<ProvaMicrofono />
+		</section>
+	{:else if scheda.id === 'backup'}
+		<section aria-labelledby="titolo-backup">
+			<h2 id="titolo-backup">{m.genitori_backup()}</h2>
+			<Backup {conGate} />
+		</section>
 
-	<section id="backup" aria-labelledby="titolo-backup">
-		<h2 id="titolo-backup">{m.genitori_backup()}</h2>
-		<Backup {conGate} />
-	</section>
+		<section id="installa" aria-labelledby="titolo-installa">
+			<h2 id="titolo-installa">{m.genitori_installa()}</h2>
+			<InstallaApp />
+		</section>
+	{:else if scheda.id === 'consigli'}
+		<section id="aiutare" aria-labelledby="titolo-aiutare">
+			<h2 id="titolo-aiutare">{m.genitori_aiutare()}</h2>
+			<ul class="consigli">
+				{#each AIUTARE as testo, i (i)}<li>{testo()}</li>{/each}
+			</ul>
+		</section>
 
-	<section id="impostazioni" aria-labelledby="titolo-impostazioni">
-		<h2 id="titolo-impostazioni">{m.genitori_impostazioni()}</h2>
-		<Impostazioni {conGate} />
-	</section>
+		<section id="voce" aria-labelledby="titolo-voce">
+			<h2 id="titolo-voce">{m.genitori_voce()}</h2>
+			<ul class="consigli">
+				{#each VOCE as testo, i (i)}<li>{testo()}</li>{/each}
+			</ul>
+		</section>
+	{:else}
+		<section aria-labelledby="titolo-privacy">
+			<h2 id="titolo-privacy">{m.genitori_privacy()}</h2>
+			<p class="lead">{m.genitori_privacy_intro()}</p>
+			<div class="griglia">
+				{#each PRIVACY as [titolo, testo] (titolo)}
+					<div class="blocco">
+						<h3>{titolo()}</h3>
+						<p>{testo()}</p>
+					</div>
+				{/each}
+			</div>
+			<div class="esterno">
+				<Button variante="secondaria" icona="lucchetto" onclick={() => conGate(apriRailway)}>
+					{m.genitori_privacy_railway()}
+				</Button>
+				<p class="tenue">{m.genitori_privacy_esterno()}</p>
+			</div>
+		</section>
 
-	<section id="voce" aria-labelledby="titolo-voce">
-		<h2 id="titolo-voce">{m.genitori_voce()}</h2>
-		<ul class="consigli">
-			{#each VOCE as testo, i (i)}<li>{testo()}</li>{/each}
-		</ul>
-	</section>
+		<section id="segnalazioni" aria-labelledby="titolo-segnalazioni">
+			<h2 id="titolo-segnalazioni">{m.informazioni_segnalazioni()}</h2>
+			<p class="lead">{m.genitori_segnala_testo()}</p>
+			<div><SegnalaProblema variante="secondaria" /></div>
+		</section>
 
-	<section id="microfono" aria-labelledby="titolo-microfono">
-		<h2 id="titolo-microfono">{m.mic_titolo()}</h2>
-		<ProvaMicrofono />
-	</section>
-
-	<section id="aiutare" aria-labelledby="titolo-aiutare">
-		<h2 id="titolo-aiutare">{m.genitori_aiutare()}</h2>
-		<ul class="consigli">
-			{#each AIUTARE as testo, i (i)}<li>{testo()}</li>{/each}
-		</ul>
-	</section>
-
-	<section id="installa" aria-labelledby="titolo-installa">
-		<h2 id="titolo-installa">{m.genitori_installa()}</h2>
-		<InstallaApp />
-	</section>
-
-	<section id="segnalazioni" aria-labelledby="titolo-segnalazioni">
-		<h2 id="titolo-segnalazioni">{m.informazioni_segnalazioni()}</h2>
-		<p class="lead">{m.genitori_segnala_testo()}</p>
-		<div><SegnalaProblema variante="secondaria" /></div>
-	</section>
-
-	<section id="crediti" aria-labelledby="titolo-crediti">
-		<h2 id="titolo-crediti">{m.genitori_crediti()}</h2>
-		<p class="lead">{m.genitori_crediti_intro()}</p>
-		<ul class="crediti">
-			{#each CREDITI as [testo, opera, licenza] (licenza)}
-				<li>
-					<p>{testo()}</p>
-					<!-- un file, non una pagina: senza reload il router lo prenderebbe per /[area]/[modulo] -->
-					<a class="vai" href={asset(licenza)} data-sveltekit-reload>
-						{m.genitori_crediti_licenza({ opera })}
-					</a>
-				</li>
-			{/each}
-		</ul>
-		<p>
-			{m.genitori_informazioni()}
-			<a class="vai" href={resolve('/informazioni')}>{m.layout_informazioni()}</a>.
-		</p>
-	</section>
+		<section id="crediti" aria-labelledby="titolo-crediti">
+			<h2 id="titolo-crediti">{m.genitori_crediti()}</h2>
+			<p class="lead">{m.genitori_crediti_intro()}</p>
+			<ul class="crediti">
+				{#each CREDITI as [testo, opera, licenza] (licenza)}
+					<li>
+						<p>{testo()}</p>
+						<!-- un file, non una pagina: senza reload il router lo prenderebbe per /[area]/[modulo] -->
+						<a class="vai" href={asset(licenza)} data-sveltekit-reload>
+							{m.genitori_crediti_licenza({ opera })}
+						</a>
+					</li>
+				{/each}
+			</ul>
+			<p>
+				{m.genitori_informazioni()}
+				<a class="vai" href={resolve('/informazioni')}>{m.layout_informazioni()}</a>.
+			</p>
+		</section>
+	{/if}
 </div>
 
 <GateAdulti
@@ -222,14 +228,14 @@
 		font-size: var(--testo-s);
 	}
 
-	.indice ul {
+	.schede ul {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--spazio-2);
 		padding: 0;
 		list-style: none;
 	}
-	.indice a {
+	.schede a {
 		display: inline-flex;
 		align-items: center;
 		min-height: var(--target);
@@ -241,8 +247,14 @@
 		font-weight: var(--peso-medio);
 		text-decoration: none;
 	}
-	.indice a:hover {
+	.schede a:hover {
 		border-color: var(--colore-accento);
+	}
+	/* la scheda aperta è piena, le altre solo bordate: non conta solo il colore */
+	.schede a[aria-current='true'] {
+		border-color: var(--colore-accento);
+		background: var(--colore-accento);
+		color: var(--colore-su-accento);
 	}
 
 	section {

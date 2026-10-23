@@ -50,6 +50,7 @@ test('l’invito a installare arriva nella home e si ritrova in /genitori', asyn
 		.getByRole('navigation', { name: 'Navigazione principale' })
 		.getByRole('link', { name: 'Per i genitori' })
 		.click();
+	await page.getByRole('link', { name: 'Backup e app' }).click();
 	await expect(page.getByRole('heading', { name: "Installa l'app" })).toBeVisible();
 	await expect(page.getByRole('button', { name: "Installa l'app" })).toBeVisible();
 });

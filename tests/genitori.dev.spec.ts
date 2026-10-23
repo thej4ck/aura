@@ -25,7 +25,7 @@ const statoProfilo = (page: Page) =>
 	}, STORE);
 
 test('backup: si scarica un file .kgz e la data dell’ultimo backup compare', async ({ page }) => {
-	await apri(page, '/genitori');
+	await apri(page, '/genitori#backup');
 	await expect(page.getByText('Non avete ancora fatto un backup.')).toBeVisible();
 	const scaricato = page.waitForEvent('download');
 	await page.getByRole('button', { name: 'Scarica il backup' }).click();
@@ -43,7 +43,7 @@ test('backup: esporta, elimina il profilo, importa di nuovo: progressi identici'
 	baseURL
 }, info) => {
 	const { esterne, errori } = sorveglia(page, baseURL!);
-	await apri(page, '/genitori');
+	await apri(page, '/genitori#backup');
 	await page.evaluate(async (u) => {
 		const { progressi } = await import(/* @vite-ignore */ u);
 		progressi.aggiornaAttivita('esempio.linee.cinque-linee', { stato: 'in_corso', scheda: 2 });
@@ -59,6 +59,7 @@ test('backup: esporta, elimina il profilo, importa di nuovo: progressi identici'
 	await (await scaricato).saveAs(percorso);
 
 	// eliminare è protetto: il profilo sparisce e al suo posto ne nasce uno nuovo, vuoto
+	await page.getByRole('link', { name: 'Progressi e profili' }).click();
 	await page.getByRole('button', { name: 'Elimina il profilo Ada' }).click();
 	await superaGate(page);
 	await expect(page.getByText('Profilo eliminato.')).toBeVisible();
@@ -68,6 +69,7 @@ test('backup: esporta, elimina il profilo, importa di nuovo: progressi identici'
 	expect(dopo.scheda).toBeUndefined();
 
 	// importare è protetto: superato il controllo si apre subito la scelta del file
+	await page.getByRole('link', { name: 'Backup e app' }).click();
 	const scelta = page.waitForEvent('filechooser');
 	await page.getByRole('button', { name: 'Importa un backup' }).click();
 	await superaGate(page);
@@ -86,7 +88,7 @@ test('backup: esporta, elimina il profilo, importa di nuovo: progressi identici'
 test('controllo adulti: annullato, non si apre nessun file e non si elimina niente', async ({
 	page
 }) => {
-	await apri(page, '/genitori');
+	await apri(page, '/genitori#backup');
 	let scelte = 0;
 	page.on('filechooser', () => scelte++);
 	const dialog = page.getByRole('dialog', { name: 'Questa parte è per gli adulti' });
@@ -98,6 +100,7 @@ test('controllo adulti: annullato, non si apre nessun file e non si elimina nien
 	await expect(dialog).toBeHidden();
 
 	const { id } = await statoProfilo(page);
+	await page.getByRole('link', { name: 'Progressi e profili' }).click();
 	await page.getByRole('button', { name: /^Elimina il profilo/ }).click();
 	await page.keyboard.press('Escape');
 	await expect(dialog).toBeHidden();
@@ -108,7 +111,7 @@ test('controllo adulti: annullato, non si apre nessun file e non si elimina nien
 test('impostazioni: dopo il controllo si riflettono sugli attributi di <html> e restano', async ({
 	page
 }) => {
-	await apri(page, '/genitori');
+	await apri(page, '/genitori#impostazioni');
 	const html = page.locator('html');
 	const testoGrande = page.getByRole('checkbox', { name: 'Testo grande' });
 
@@ -132,7 +135,7 @@ test('impostazioni: dopo il controllo si riflettono sugli attributi di <html> e 
 	await expect(page.getByRole('radio', { name: 'C, D, E' })).toBeChecked();
 
 	await page.waitForTimeout(800); // salvataggio debounced (400 ms) su IndexedDB
-	await apri(page, '/genitori');
+	await apri(page, '/genitori#impostazioni');
 	await expect(html).toHaveAttribute('data-testo-grande');
 	await expect(html).toHaveAttribute('data-contrasto-alto');
 	await expect(page.getByRole('radio', { name: 'C, D, E' })).toBeChecked();
@@ -236,4 +239,35 @@ test('profili: dopo «Usa questo profilo» o un’eliminazione il fuoco va sul p
 	await expect(inUso).toBeFocused();
 	// senza nome: l'avatar una volta sola, accanto a «Senza nome»
 	await expect(inUso.locator('.nome')).toHaveText('Senza nome');
+});
+
+test('schede: una alla volta, l’indirizzo le ricorda e i vecchi link aprono quella giusta', async ({
+	page
+}) => {
+	await apri(page, '/genitori');
+	const schede = page.getByRole('navigation', { name: 'Sezioni della pagina' });
+	const titolo = (nome: string) => page.getByRole('heading', { level: 2, name: nome });
+	await expect(schede.getByRole('link', { name: 'Progressi e profili' })).toHaveAttribute(
+		'aria-current',
+		'true'
+	);
+	await expect(titolo('Profili')).toBeVisible();
+	await expect(titolo('Come aiutare il bambino')).toHaveCount(0);
+
+	// la scheda cambia senza far scorrere la pagina, e resta dopo il ricaricamento
+	await schede.getByRole('link', { name: 'Consigli' }).click();
+	await expect(page).toHaveURL(/\/genitori#consigli$/);
+	await expect(titolo('Come aiutare il bambino')).toBeVisible();
+	await expect(titolo('Profili')).toHaveCount(0);
+	expect(await page.evaluate(() => scrollY)).toBe(0);
+	await page.reload();
+	await expect(titolo('La salute della voce')).toBeVisible();
+
+	// le ancore delle sezioni di prima aprono la loro scheda
+	await apri(page, '/genitori#installa');
+	await expect(schede.getByRole('link', { name: 'Backup e app' })).toHaveAttribute(
+		'aria-current',
+		'true'
+	);
+	await expect(titolo("Installa l'app")).toBeInViewport();
 });

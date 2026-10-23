@@ -37,6 +37,7 @@ test('chi fa Aura, licenze, segnalazioni e avvertenze', async ({ page }) => {
 
 	await main.getByRole('link', { name: 'Crediti e licenze', exact: true }).click();
 	await expect(page).toHaveURL(/\/genitori#crediti$/);
+	await expect(page.getByRole('heading', { level: 2, name: 'Crediti e licenze' })).toBeInViewport();
 });
 
 test('ci si arriva dal piè di pagina e dalla pagina per i genitori', async ({ page }) => {
@@ -46,7 +47,7 @@ test('ci si arriva dal piè di pagina e dalla pagina per i genitori', async ({ p
 	await piede.getByRole('link', { name: 'Informazioni' }).click();
 	await expect(page.getByRole('heading', { level: 1, name: 'Informazioni' })).toBeVisible();
 
-	await apri(page, '/genitori');
+	await apri(page, '/genitori#privacy');
 	await page.getByRole('main').getByRole('link', { name: 'Informazioni' }).click();
 	await expect(page).toHaveURL(/\/informazioni$/);
 });

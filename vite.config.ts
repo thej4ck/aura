@@ -25,6 +25,13 @@ export default defineConfig({
 			version: process.env.RAILWAY_GIT_COMMIT_SHA
 				? { name: process.env.RAILWAY_GIT_COMMIT_SHA.slice(0, 7) }
 				: undefined,
+			prerender: {
+				// /genitori mostra una scheda alla volta scelta dall'hash: nell'HTML prerenderizzato c'è solo
+				// la prima. I link alle altre schede e alle loro sezioni li controlla tests/genitori.dev.spec.ts
+				handleMissingId: ({ path, message }) => {
+					if (path !== '/genitori') throw new Error(message);
+				}
+			},
 			csp: {
 				mode: 'hash',
 				directives: {

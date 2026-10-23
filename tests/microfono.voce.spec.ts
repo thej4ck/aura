@@ -15,7 +15,7 @@ test('genitori, «Prova il microfono»: solo numeri, e più del 95% dei frame ha
 	baseURL
 }) => {
 	const { esterne, errori } = sorveglia(page, baseURL!);
-	await apri(page, '/genitori');
+	await apri(page, '/genitori#microfono');
 	const sezione = page.getByRole('region', { name: 'Prova il microfono' });
 	await sezione.getByRole('button', { name: 'Apri il microfono' }).click();
 

@@ -24,7 +24,11 @@ test('la build contiene le pagine principali', () => {
 });
 
 for (const colorScheme of ['light', 'dark'] as const) {
-	for (const percorso of elenco) {
+	// /genitori mostra una scheda alla volta: anche le altre quattro
+	for (const percorso of [
+		...elenco,
+		...['impostazioni', 'backup', 'consigli', 'privacy'].map((s) => `/genitori#${s}`)
+	]) {
 		test(`tema ${colorScheme} ${percorso}: niente terzi, errori o violazioni a11y gravi`, async ({
 			page,
 			baseURL
@@ -65,7 +69,7 @@ test('/dev in produzione non esiste: pagina 404 amichevole, accessibile e senza 
 });
 
 test('crediti: il link alla licenza apre il testo, non una pagina dell’app', async ({ page }) => {
-	await page.goto('/genitori');
+	await page.goto('/genitori#crediti');
 	await expect(page.getByRole('img', { name: /Profilo attivo/ })).toBeVisible(); // pagina idratata
 	await page.getByRole('link', { name: 'Leggi la licenza di Bravura' }).click();
 	await expect(page).toHaveURL(/\/licenze\/bravura-ofl\.txt$/);
