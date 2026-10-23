@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { BUCO_VOCE_MS, CALO_TENUTA } from '#lib/core/audio/costanti.ts';
 import { freqDaMidi } from '#lib/core/audio/frequenze.ts';
 import {
 	MAX_PASSO_S,
@@ -68,11 +69,34 @@ describe('tenuta di una nota', () => {
 		expect(fuori.progresso).toBeCloseTo(0.5 - 1 / 6, 1);
 		expect(fuori).toMatchObject({ inZona: false, riuscita: false });
 		expect(fuori.cents).toBeCloseTo(200, 5);
-		expect(zitto.progresso).toBeCloseTo(fuori.progresso, 5);
+		// in silenzio uguale, ma i primi BUCO_VOCE_MS non contano: 0,7 s di calo
+		const buco = BUCO_VOCE_MS / 1000;
+		expect(zitto.progresso).toBeCloseTo(fuori.progresso + (buco * CALO_TENUTA) / 3, 5);
 		expect(zitto.cents).toBeNull();
 		// e si riprende da lì
 		const ripresa = tieni(frasi([440, 1.5], [cents(LA4, 200), 1], [440, 2])).at(-1)!;
 		expect(ripresa.progresso).toBeGreaterThan(0.95);
+	});
+
+	it('un buco breve nella voce (respiro, frame persi) non fa calare il progresso', () => {
+		const prima = tieni(frame(440, 1.5)).at(-1)!;
+		const buco = tieni(frasi([440, 1.5], [null, 0.25])).at(-1)!;
+		expect(buco).toMatchObject({ progresso: prima.progresso, cents: null, inZona: false });
+		// tanti buchi brevi: la tenuta arriva lo stesso, contando solo il tempo con la voce
+		const aTratti = tieni(
+			frasi(
+				...Array.from({ length: 12 }, (): [number | null, number][] => [
+					[440, 0.3],
+					[null, 0.2]
+				]).flat()
+			)
+		);
+		const riuscita = aTratti.find((s) => s.riuscita)!;
+		expect(riuscita.t).toBeGreaterThan(4.9);
+		expect(riuscita.t).toBeLessThan(5.1);
+		// dopo la voce si riparte da zero: un buco nuovo ha di nuovo i suoi 300 ms
+		const due = tieni(frasi([440, 1.5], [null, 0.2], [440, 0.1], [null, 0.2])).at(-1)!;
+		expect(due.progresso).toBeCloseTo(prima.progresso + 0.1 / 3, 2);
 	});
 
 	it('il progresso non scende sotto zero', () => {
