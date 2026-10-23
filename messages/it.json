@@ -732,5 +732,45 @@
 	"canto_estensione_ricomincia": "Ricomincia",
 	"canto_estensione_tastiera": "Le note della tua voce, sulla tastiera",
 	"canto_estensione_rigo_limiti": "La nota più grave e la più acuta della tua voce",
-	"canto_estensione_senza_microfono": "Per scoprire fin dove arriva la voce serve il microfono. Puoi tornare quando vuoi."
+	"canto_estensione_senza_microfono": "Per scoprire fin dove arriva la voce serve il microfono. Puoi tornare quando vuoi.",
+	"mic_titolo": "Prova il microfono",
+	"mic_intro": "Per capire se il microfono sente bene la voce: aprilo, canta o tieni una nota e guarda i numeri. Non si registra e non si salva niente: i numeri restano su questa pagina e spariscono quando chiudi il microfono.",
+	"mic_apri": "Apri il microfono",
+	"mic_chiudi": "Chiudi il microfono",
+	"mic_livello": "Livello",
+	"mic_livello_valore": "{rms} RMS, {dbfs}",
+	"mic_dbfs": "{valore} dBFS",
+	"mic_hz": "{valore} Hz",
+	"mic_rumore": "Rumore di fondo stimato",
+	"mic_soglia": "Soglia del volume",
+	"mic_chiarezza": "Chiarezza (da 0 a 1)",
+	"mic_nota": "Frequenza e nota",
+	"mic_frequenza_nota": "{hz} Hz, {nota} ({cents} cent)",
+	"mic_nessuna": "nessuna",
+	"mic_validi": "Misure con la voce (ultimi {secondi} secondi)",
+	"mic_vuoti": "Misure senza voce, e perché",
+	"mic_vuoto_gate": "sotto la soglia del volume: {valore}",
+	"mic_vuoto_aperiodico": "suono poco regolare: {valore}",
+	"mic_vuoto_silenziato": "in pausa mentre suona il sito: {valore}",
+	"mic_vuoto_ritardi": [
+		{
+			"declarations": ["input count", "input ms", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "pagina in ritardo: {count} volta ({ms} ms)",
+				"countPlural=other": "pagina in ritardo: {count} volte ({ms} ms)"
+			}
+		}
+	],
+	"mic_campionamento": "Frequenza di campionamento",
+	"mic_cattura": "Modalità di cattura",
+	"mic_cattura_raf": "AnalyserNode, circa 30 misure al secondo",
+	"mic_eco": "Cancellazione dell'eco",
+	"mic_riduzione": "Riduzione del rumore",
+	"mic_volume_auto": "Volume automatico",
+	"mic_si": "sì",
+	"mic_no": "no",
+	"mic_non_indicato": "non indicato dal browser",
+	"mic_filtri_accesi": "Il browser tiene accesi alcuni filtri per le chiamate ({filtri}): possono abbassare o spegnere le note tenute. Prova con un altro browser.",
+	"mic_consiglio_windows": "Se la voce sparisce dopo qualche secondo di nota tenuta, può essere il computer che riduce il rumore per conto suo. Su Windows apri Impostazioni › Sistema › Audio, scegli il microfono e disattiva «Miglioramenti audio»; se ci sono, spegni anche gli «Effetti di Windows Studio»."
 }
