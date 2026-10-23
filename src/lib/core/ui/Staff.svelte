@@ -36,6 +36,11 @@
 		onpick?: (scelta: { passo: number; altezza: string }) => void;
 		/** note evidenziate: indici in `rigo.note` o altezze esatte ('G4') */
 		evidenzia?: readonly (number | string)[];
+		/**
+		 * note di riferimento (indici in `rigo.note`), es. la nota di partenza da cui si legge una melodia:
+		 * più piccole e in grigio, come le note guida, e dette ai lettori di schermo
+		 */
+		riferimento?: readonly number[];
 		/** teste colorate con i colori delle note */
 		colori?: boolean;
 		/** nomi visibili sotto le note */
@@ -54,6 +59,7 @@
 		interattivo = false,
 		onpick,
 		evidenzia = [],
+		riferimento = [],
 		colori = false,
 		etichette = false,
 		nomiNote = 'solfeggio',
@@ -69,6 +75,7 @@
 	const LINEE = [0, 2, 4, 6, 8];
 	const ANELLO_RY = 1.05; // semiasse verticale dell'anello di evidenziazione, in spazi
 	const ANELLO = ANELLO_RY * 2 + 0.3; // quanto sporge l'anello dal centro della nota, in passi
+	const RIFERIMENTO = 0.7; // le teste delle note di riferimento, come quelle delle note guida
 	const CHIAVI = {
 		violino: { glifo: GLIFI.chiaveViolino, passo: 2 },
 		basso: { glifo: GLIFI.chiaveBasso, passo: 6 }
@@ -106,7 +113,8 @@
 			testa: nota.durata === '1' ? GLIFI.testaSemibreve : GLIFI.testaPiena,
 			segno: segniNote[i],
 			colore: COLORI[scomponi(nota.altezza).lettera],
-			evidenziata: evidenzia.some((e) => e === i || e === nota.altezza)
+			evidenziata: evidenzia.some((e) => e === i || e === nota.altezza),
+			riferimento: riferimento.includes(i)
 		}));
 	});
 
@@ -189,6 +197,7 @@
 						segno: m.notazione_segno({ segno: n.segno })
 					})
 				: posizione;
+		if (n.riferimento) d = m.notazione_riferimento({ descrizione: d });
 		if (n.evidenziata) d = m.notazione_evidenziata({ descrizione: d });
 		return m.notazione_nota({ numero: n.i + 1, totale: note.length, descrizione: d });
 	}
@@ -269,12 +278,13 @@
 
 			{#each note as n (n.i)}
 				{@const cx = centro(n.i)}
-				{@const x0 = cx - (n.testa.larghezza * S) / 2}
+				{@const scala = n.riferimento ? RIFERIMENTO : 1}
+				{@const x0 = cx - (n.testa.larghezza * S * scala) / 2}
 				{#each tagli(n.passo) as t (t)}
 					<line
 						class="taglio"
 						x1={x0 - 0.4 * S}
-						x2={x0 + (n.testa.larghezza + 0.4) * S}
+						x2={x0 + (n.testa.larghezza * scala + 0.4) * S}
 						y1={y(t)}
 						y2={y(t)}
 					/>
@@ -287,9 +297,10 @@
 					/>
 				{/if}
 				<path
-					class={[colori && `nota-${n.colore}`]}
+					class={[colori && `nota-${n.colore}`, { riferimento: n.riferimento }]}
+					data-nota={n.i}
 					d={n.testa.d}
-					transform="translate({x0} {y(n.passo)}) scale({S})"
+					transform="translate({x0} {y(n.passo)}) scale({S * scala})"
 				/>
 				{#if n.evidenziata}
 					<ellipse
@@ -428,6 +439,10 @@
 	}
 	.nota-si {
 		fill: var(--nota-si);
+	}
+	/* dopo i colori delle note: la nota di riferimento resta grigia anche con `colori` */
+	path.riferimento {
+		fill: var(--colore-testo-tenue);
 	}
 	.tocchi {
 		position: absolute;

@@ -444,6 +444,7 @@
 	"notazione_con_segno": "{descrizione}, con il {segno}",
 	"notazione_nome_e_posizione": "{nome}, {posizione}",
 	"notazione_evidenziata": "{descrizione}, evidenziata",
+	"notazione_riferimento": "{descrizione}, nota di riferimento",
 	"notazione_scegli": "Scegli una linea o uno spazio",
 	"notazione_tastiera": "Tastiera",
 	"notazione_tasto": "{nome} {ottava}",
