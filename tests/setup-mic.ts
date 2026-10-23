@@ -1,18 +1,24 @@
-// globalSetup di Playwright: il WAV del microfono finto si genera a ogni esecuzione, niente binari nel repo.
+// globalSetup di Playwright: i WAV del microfono finto si generano a ogni esecuzione, niente binari nel repo.
 // Poi una prima visita al server di sviluppo, che compila al primo accesso: senza, i primi test in parallelo
 // aspettano l'idratazione di /dev più a lungo del timeout.
 import { chromium, type FullConfig } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { generaWav } from '../scripts/genera-wav.mjs';
+import { generaVoce, generaWav } from '../scripts/genera-wav.mjs';
 
 /** un La4 con armoniche, letto da Chromium come se fosse il microfono (progetto "mic") */
 export const WAV_MIC = fileURLToPath(new URL('../test-results/mic/la440.wav', import.meta.url));
+/**
+ * un La4 cantato da una voce vera, bassa (RMS 0,006 ≈ −44 dBFS, ±6 dB), con vibrato, jitter, shimmer e
+ * respiro, senza mai smettere (progetto "voce")
+ */
+export const WAV_VOCE = fileURLToPath(new URL('../test-results/mic/voce-la4.wav', import.meta.url));
 
 export default async function setup(config: FullConfig) {
 	mkdirSync(dirname(WAV_MIC), { recursive: true });
 	writeFileSync(WAV_MIC, generaWav(440, 5));
+	writeFileSync(WAV_VOCE, generaVoce({ freq: 440, rms: 0.006, secondi: 12 }));
 
 	// i webServer sono già partiti: si scaldano la vetrina e una pagina di attività
 	const dev = config.projects.find((p) => p.name === 'dev')?.use.baseURL;

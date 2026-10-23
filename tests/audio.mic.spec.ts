@@ -43,3 +43,20 @@ test('il microfono sente il La4 a ~440 Hz, e non ascolta mentre suona il sito', 
 	expect(errori).toEqual([]);
 	expect(await violazioniGravi(page)).toEqual([]);
 });
+
+test('la diagnostica del microfono in /dev: il La4 pulito dà la nota in ogni misura', async ({
+	page,
+	baseURL
+}) => {
+	const { esterne, errori } = sorveglia(page, baseURL!);
+	await page.goto('/dev');
+	await expect(page.getByRole('img', { name: /Profilo attivo/ })).toBeVisible(); // pagina idratata
+	const sezione = page.getByRole('region', { name: 'Prova il microfono' });
+	await sezione.getByRole('button', { name: 'Apri il microfono' }).click();
+	await expect(sezione.getByRole('definition').filter({ hasText: 'La4' })).toBeVisible();
+	await expect(sezione.getByTestId('mic-validi')).toHaveText('100%');
+	await sezione.getByRole('button', { name: 'Chiudi il microfono' }).click();
+	await expect(sezione.getByTestId('mic-validi')).toBeHidden();
+	expect(esterne).toEqual([]);
+	expect(errori).toEqual([]);
+});
