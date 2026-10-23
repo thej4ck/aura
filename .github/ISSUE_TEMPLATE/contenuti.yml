@@ -1,0 +1,40 @@
+# Gli id dei campi sono le chiavi della query string che il sito precompila (src/lib/core/segnalazione.ts)
+name: Errore nei contenuti
+description: Un errore in una lezione o in un gioco (testi, note, suoni, immagini).
+title: '[Contenuti] '
+labels: [contenuti]
+body:
+  - type: markdown
+    attributes:
+      value: La segnalazione è pubblica, non scrivete dati personali (nomi, età, scuola, foto).
+  - type: textarea
+    id: descrizione
+    attributes:
+      label: Che cosa non va?
+      description: Per esempio un testo sbagliato, una nota che non corrisponde, un suono che manca.
+    validations:
+      required: true
+  - type: textarea
+    id: correzione
+    attributes:
+      label: Come dovrebbe essere?
+  - type: input
+    id: pagina
+    attributes:
+      label: Pagina
+  - type: input
+    id: attivita
+    attributes:
+      label: Attività
+  - type: input
+    id: scheda
+    attributes:
+      label: Scheda
+  - type: input
+    id: versione
+    attributes:
+      label: Versione del sito
+  - type: input
+    id: ambiente
+    attributes:
+      label: Browser e sistema

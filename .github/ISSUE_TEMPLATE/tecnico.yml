@@ -1,0 +1,40 @@
+# Gli id dei campi sono le chiavi della query string che il sito precompila (src/lib/core/segnalazione.ts)
+name: Qualcosa che non funziona
+description: Un problema tecnico (audio, microfono, salvataggi, pagine che non si aprono).
+title: '[Problema] '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: La segnalazione è pubblica, non scrivete dati personali (nomi, età, scuola, foto).
+  - type: textarea
+    id: descrizione
+    attributes:
+      label: Che cosa è successo?
+    validations:
+      required: true
+  - type: textarea
+    id: passi
+    attributes:
+      label: Come si ripete?
+      description: I passi per farlo succedere di nuovo, se li conoscete. Se il sito ha mostrato un errore, incollate qui i dettagli copiati con «Copia i dettagli per un adulto».
+  - type: input
+    id: pagina
+    attributes:
+      label: Pagina
+  - type: input
+    id: attivita
+    attributes:
+      label: Attività
+  - type: input
+    id: scheda
+    attributes:
+      label: Scheda
+  - type: input
+    id: versione
+    attributes:
+      label: Versione del sito
+  - type: input
+    id: ambiente
+    attributes:
+      label: Browser e sistema

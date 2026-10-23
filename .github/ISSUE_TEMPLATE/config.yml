@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Problema di sicurezza o di privacy
+    url: https://github.com/thej4ck/aura/security/advisories/new
+    about: Segnalatelo in privato, non in una issue pubblica (vedi SECURITY.md).

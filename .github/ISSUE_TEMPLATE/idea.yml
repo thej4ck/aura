@@ -1,0 +1,27 @@
+# Gli id dei campi sono le chiavi della query string che il sito precompila (src/lib/core/segnalazione.ts)
+name: Idea o suggerimento
+description: Una lezione, un gioco o un miglioramento che vorreste vedere.
+title: '[Idea] '
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: La segnalazione è pubblica, non scrivete dati personali (nomi, età, scuola, foto).
+  - type: textarea
+    id: descrizione
+    attributes:
+      label: La vostra idea
+    validations:
+      required: true
+  - type: textarea
+    id: perche
+    attributes:
+      label: A che cosa servirebbe?
+  - type: input
+    id: pagina
+    attributes:
+      label: Pagina
+  - type: input
+    id: versione
+    attributes:
+      label: Versione del sito
