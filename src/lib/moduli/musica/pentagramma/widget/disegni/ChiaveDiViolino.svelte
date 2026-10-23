@@ -1,11 +1,13 @@
 <script lang="ts">
 	// La chiave di violino si disegna attorno alla seconda linea, la linea del Sol.
 	// Passi: 0 le cinque linee, 1 la seconda linea si illumina, 2 la chiave si disegna, 3 il ricciolo
-	// avvolge la seconda linea, 4 sulla seconda linea c'è il Sol.
+	// avvolge la seconda linea, 4 sulla seconda linea c'è il Sol. Dal ricciolo in poi si sente il Sol4, e
+	// la sua linea si ingrossa mentre suona.
 	import { GLIFI } from '#lib/core/musica/glifi.ts';
 	import { nomeNota } from '#lib/core/musica/note.ts';
 	import { progressi } from '#lib/core/store/progressi.svelte.ts';
 	import type { StatoDisegno } from '#lib/core/ui/PlayerPassi.svelte';
+	import { suonoDisegno } from '#lib/core/widget/suono.svelte.ts';
 	import { ingresso } from './ingresso.svelte.ts';
 
 	let stato: Partial<StatoDisegno> = $props();
@@ -22,12 +24,18 @@
 	const passo = $derived(stato.passo ?? 4);
 	const anima = ingresso(() => stato);
 	const sol = $derived(nomeNota('G4', progressi.doc?.preferenze.nomiNote ?? 'solfeggio'));
+	const suono = suonoDisegno(
+		() => ({ passo, inRiproduzione: stato.inRiproduzione }),
+		(p) => (p >= 3 ? ['G4'] : []),
+		1.2
+	);
 </script>
 
 <svg class={['disegno', { fermo: !stato.inRiproduzione }]} viewBox="0 0 320 140" aria-hidden="true">
 	{#each [0, 2, 4, 6, 8] as p (p)}
 		<line
 			class={['linea', { sol: p === 2 && passo >= 1, entra: anima.passo === 0 }]}
+			data-suona={p === 2 ? suono.midi : undefined}
 			x1="8"
 			x2="292"
 			y1={y(p)}
@@ -80,6 +88,10 @@
 	.linea.sol {
 		stroke: var(--colore-accento);
 		stroke-width: 4;
+	}
+	/* il Sol che suona: la sua linea si ingrossa (non solo il colore) */
+	.linea[data-suona] {
+		stroke-width: 7;
 	}
 	.numero {
 		fill: var(--colore-accento-forte);

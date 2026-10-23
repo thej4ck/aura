@@ -27,7 +27,7 @@ export const schemaAspetto = {
 };
 
 /** Silenzio tra due note suonate in fila, in secondi. */
-const PAUSA_S = 0.15;
+export const PAUSA_S = 0.15;
 
 /**
  * Suona le altezze una dopo l'altra, ognuna per `durataS`, e chiama `onnota(i)` con la nota che sta
