@@ -10,6 +10,8 @@
 		Permissions-Policy "microphone=(self), camera=(), geolocation=()"
 		Referrer-Policy no-referrer
 		X-Content-Type-Options nosniff
+		# il TLS lo termina il proxy di Railway: il sito è sempre in https. Niente preload né sottodomini
+		Strict-Transport-Security "max-age=31536000"
 		-Server
 		# tutto ciò che non ha l'hash nel nome si rivalida sempre (HTML, service worker, manifest)
 		?Cache-Control "no-cache"
