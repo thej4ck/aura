@@ -154,7 +154,7 @@ export const modulo = {
 		},
 		{
 			id: 'intervalli',
-			titolo: 'I salti',
+			titolo: 'Gli intervalli',
 			descrizione: 'Riconosce e canta prima, seconda e terza.',
 			prerequisiti: ['scala']
 		},
@@ -555,7 +555,7 @@ export const modulo = {
 		},
 		{
 			id: 'i-salti',
-			titolo: 'I salti',
+			titolo: 'Gli intervalli',
 			tipo: 'lezione',
 			obiettivo: 'Scopri prima, seconda e terza: ascolta due note e ripetile.',
 			riepilogo:
@@ -757,7 +757,7 @@ export const modulo = {
 					titolo: 'Semitono e tono',
 					props: {
 						componente: 'semitoni',
-						etichetta: 'Un’ottava di tastiera, dal Do al Do, con i salti di semitono e di tono',
+						etichetta: 'Un’ottava di tastiera, dal Do al Do, con i passi di semitono e di tono',
 						passi: [
 							{ testo: 'Tra il Do e il Re c’è un tasto nero.' },
 							{ testo: 'Da un tasto al tasto vicino c’è un semitono: dal Do al tasto nero.' },
