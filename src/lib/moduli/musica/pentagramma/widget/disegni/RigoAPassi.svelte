@@ -14,13 +14,12 @@
 <script lang="ts">
 	// Base dei disegni animati fatti con lo Staff (e la Keyboard) del core: un fotogramma per passo.
 	// Entrando in un passo (in riproduzione o con i pulsanti dei passi) suona le sue note, evidenziate sul
-	// rigo mentre suonano: ogni nota che suona si vede. All'apertura non suona niente.
-	import type { Riproduzione } from '#lib/core/audio/synth.ts';
+	// rigo e sulla tastiera mentre suonano: ogni nota che suona si vede (vedi core/widget/suono.svelte.ts).
 	import type { StatoDisegno } from '#lib/core/ui/PlayerPassi.svelte';
 	import Keyboard from '#lib/core/ui/Keyboard.svelte';
 	import Staff from '#lib/core/ui/Staff.svelte';
 	import { progressi } from '#lib/core/store/progressi.svelte.ts';
-	import { suonaSeguendo } from '#lib/core/widget/musica.ts';
+	import { suonoDisegno } from '#lib/core/widget/suono.svelte.ts';
 	import { ingresso } from './ingresso.svelte.ts';
 
 	type Props = Partial<StatoDisegno> & {
@@ -48,39 +47,21 @@
 	const anima = ingresso(() => stato);
 	const nomiNote = $derived(progressi.doc?.preferenze.nomiNote ?? 'solfeggio');
 
-	let suono: Riproduzione | undefined;
-	let suonaOra = $state<number | null>(null);
-	let ultimo: number | undefined;
-	let suonava = false;
+	const indici = (p: number) => fotogrammi[p].suona ?? fotogrammi[p].evidenzia ?? [];
+	const suono = suonoDisegno(
+		() => ({ passo, inRiproduzione: stato.inRiproduzione }),
+		(p) => indici(p).map((i) => fotogrammi[p].note[i])
+	);
 
-	$effect(() => {
-		const p = passo;
-		const inRiproduzione = !!stato.inRiproduzione;
-		const entra = ultimo !== undefined && p !== ultimo;
-		const parte = inRiproduzione && !suonava;
-		ultimo = p;
-		suonava = inRiproduzione;
-		if (!entra && !parte) return;
-		const fot = fotogrammi[p];
-		const indici = fot.suona ?? fot.evidenzia ?? [];
-		suono?.ferma();
-		suono = indici.length
-			? suonaSeguendo(
-					indici.map((i) => fot.note[i]),
-					0.7,
-					(i) => (suonaOra = i === null ? null : indici[i])
-				)
-			: undefined;
-	});
-	$effect(() => () => suono?.ferma());
-
-	const evidenzia = $derived(suonaOra === null ? (f.evidenzia ?? []) : [suonaOra]);
-	const tasti = $derived(f.tasti ?? []);
+	const evidenzia = $derived(
+		suono.nota === null ? (f.evidenzia ?? []) : [indici(passo)[suono.nota]]
+	);
+	const tasti = $derived(suono.midi === null ? (f.tasti ?? []) : [suono.midi]);
 </script>
 
 <div class={['disegno', { fermo: !stato.inRiproduzione }]}>
 	{#key passo}
-		<div class={['fotogramma', { entra: anima.passo === passo }]}>
+		<div class={['fotogramma', { entra: anima.passo === passo }]} data-suona={suono.midi}>
 			<Staff
 				rigo={{ chiave: 'violino', note: f.note.map((altezza) => ({ altezza })) }}
 				{etichetta}
