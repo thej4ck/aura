@@ -299,7 +299,8 @@ export const modulo = {
 			riepilogo:
 				'La scala va un gradino alla volta: sale dal Do al Do più acuto, poi scende fino al Do.',
 			minuti: 6,
-			allena: ['scala', 'intonazione'],
+			// non 'intonazione': senza microfono la lezione si supera con le sole domande; la misurano i giochi
+			allena: ['scala'],
 			prerequisiti: ['cosa-sono-le-note'],
 			traguardi: [IN.intonazione, IN.voce],
 			schede: [
@@ -454,7 +455,8 @@ export const modulo = {
 			riepilogo:
 				'Do, Re e Mi sono note vicine: per andare dall’una all’altra si sale o si scende di un gradino.',
 			minuti: 5,
-			allena: ['scala', 'intonazione'],
+			// non 'intonazione': senza microfono la lezione si supera con le sole domande; la misurano i giochi
+			allena: ['scala'],
 			prerequisiti: ['una-alla-volta'],
 			traguardi: [IN.intonazione, IN.elementi],
 			schede: [
@@ -559,7 +561,8 @@ export const modulo = {
 			riepilogo:
 				'Prima: la stessa nota due volte. Seconda: il gradino vicino, per grado congiunto. Terza: un salto che scavalca un gradino.',
 			minuti: 6,
-			allena: ['intervalli', 'intonazione'],
+			// non 'intonazione': senza microfono la lezione si supera con le sole domande; la misurano i giochi
+			allena: ['intervalli'],
 			prerequisiti: ['su-e-giu'],
 			traguardi: [IN.intonazione, IN.elementi],
 			schede: [

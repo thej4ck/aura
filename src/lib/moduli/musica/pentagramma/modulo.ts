@@ -491,7 +491,8 @@ export const modulo = {
 			riepilogo:
 				'Hai letto le note sul pentagramma. Quelle che ti sembrano difficili tornano più spesso, finché diventano facili.',
 			minuti: 5,
-			allena: ['note-linee', 'note-spazi', 'lettura', 'musica.canto.nomi-note'],
+			// non 'note-spazi': si comincia con le sole note sulle linee (Mi, Sol, Si)
+			allena: ['note-linee', 'lettura', 'musica.canto.nomi-note'],
 			prerequisiti: ['note-linee-spazi'],
 			traguardi: [NOTAZIONE, ELEMENTI],
 			schede: [
