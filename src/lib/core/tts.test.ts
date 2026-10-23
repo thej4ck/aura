@@ -59,6 +59,46 @@ describe('tts', () => {
 		expect(s.cancel).toHaveBeenCalled();
 	});
 
+	it('si chiude anche se onend non arriva mai: quando la sintesi smette di parlare', async () => {
+		vi.useFakeTimers();
+		try {
+			const { s } = sintesiFinta([locale]);
+			const stato = { speaking: true, pending: false };
+			Object.defineProperties(s, {
+				speaking: { get: () => stato.speaking },
+				pending: { get: () => stato.pending }
+			});
+			s.speak = () => {}; // nessun evento, come quando Chrome perde la frase
+			let finita = false;
+			const lettura = parla('Ciao!', 'it').then(() => (finita = true));
+			await vi.advanceTimersByTimeAsync(1_000);
+			expect(finita).toBe(false); // sta ancora parlando
+			stato.speaking = false;
+			await vi.advanceTimersByTimeAsync(600);
+			await lettura;
+			expect(finita).toBe(true);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it('si chiude comunque dopo il limite, anche se la sintesi dice di parlare per sempre', async () => {
+		vi.useFakeTimers();
+		try {
+			const { s } = sintesiFinta([locale]);
+			Object.defineProperty(s, 'speaking', { get: () => true });
+			s.speak = () => {};
+			let finita = false;
+			void parla('Ciao!', 'it').then(() => (finita = true));
+			await vi.advanceTimersByTimeAsync(4_000);
+			expect(finita).toBe(false);
+			await vi.advanceTimersByTimeAsync(2_000); // 5 s + 5 caratteri × 120 ms
+			expect(finita).toBe(true);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
 	it('aspetta il caricamento delle voci', async () => {
 		const { s } = sintesiFinta([]);
 		const voci: Voce[] = [];

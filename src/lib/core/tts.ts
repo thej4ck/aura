@@ -43,10 +43,32 @@ export function parla(testo: string, lingua: string): Promise<void> {
 		u.voice = voce;
 		u.lang = voce.lang;
 		u.rate = 0.9; // un po' più lenta, per i bambini
-		u.onend = u.onerror = () => ok();
+		// Chrome a volte non manda onend (frase raccolta dal GC, cancel da un'altra lettura): senza fine
+		// la lettura terrebbe il microfono in pausa. Si chiude anche quando la sintesi non parla più,
+		// o al più tardi dopo una stima generosa della durata.
+		let finita = false;
+		const fine = () => {
+			if (finita) return;
+			finita = true;
+			clearInterval(controllo);
+			clearTimeout(limite);
+			if (inLettura === u) inLettura = undefined;
+			ok();
+		};
+		// i timer prima di speak: una sintesi può chiamare onend subito, dentro speak
+		const controllo = setInterval(() => {
+			if (!s.speaking && !s.pending) fine();
+		}, CONTROLLO_MS);
+		const limite = setTimeout(fine, Math.min(LIMITE_MAX_MS, 5_000 + testo.length * 120));
+		u.onend = u.onerror = fine;
+		inLettura = u; // un riferimento vivo: senza, Chrome può perdere la frase e i suoi eventi
 		s.speak(u);
 	});
 }
+
+const CONTROLLO_MS = 500;
+const LIMITE_MAX_MS = 60_000;
+let inLettura: SpeechSynthesisUtterance | undefined;
 
 export function ferma(): void {
 	sintesi()?.cancel();
