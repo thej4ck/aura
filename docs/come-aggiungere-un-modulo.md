@@ -199,6 +199,39 @@ Si anima con CSS o con la Web Animations API (`elemento.animate(...)`), mai con 
 
 Colori dai token (`var(--colore-testo)`, `var(--nota-sol)`, …): così il disegno segue tema chiaro, scuro e contrasto alto.
 
+### Il suono dei disegni
+
+Ogni animazione o illustrazione che mostra note o altezze le fa **sentire**, in sincrono, ed è l'audio a guidare la grafica: il disegno usa `suonoDisegno` (`src/lib/core/widget/suono.svelte.ts`) e prende da lì la nota che suona, così evidenziazione e movimento non si sfasano mai dal suono. Il comportamento è uguale per tutti: suona entrando in un passo (in riproduzione o con i pulsanti dei passi) e premendo play; la pausa, il cambio di passo e l'uscita dalla scheda lo fermano subito; all'apertura tace; il movimento ridotto toglie il movimento, non il suono. Come illustrazione di `spiegazione` il disegno resta fermo e muto finché non si preme «Ascolta», che compare da solo sotto i disegni che hanno un suono.
+
+```svelte
+<script lang="ts">
+	import type { StatoDisegno } from '#lib/core/ui/PlayerPassi.svelte';
+	import { suonoDisegno } from '#lib/core/widget/suono.svelte.ts';
+
+	let { passo = 2, inRiproduzione = false }: Partial<StatoDisegno> = $props();
+	const NOTE = [['C4'], ['C4', 'E4'], ['C4', 'E4', 'G4']]; // le note di ogni passo, in ordine
+	// passo mostrato e riproduzione, le note di un passo, i secondi di ogni nota
+	const suono = suonoDisegno(
+		() => ({ passo, inRiproduzione }),
+		(p) => NOTE[p],
+		0.6
+	);
+</script>
+
+{#each NOTE[passo], i (i)}
+	<!-- la nota che suona ha un segno oltre al colore, e data-suona con il suo midi -->
+	<circle
+		class={{ suona: i === suono.nota }}
+		data-suona={i === suono.nota ? suono.midi : undefined}
+		cx={40 + i * 60}
+		cy="50"
+		r="12"
+	/>
+{/each}
+```
+
+`suono.nota` è l'indice della nota che suona (null in silenzio) e `suono.midi` la sua altezza; per un movimento continuo, come la pallina di `canto/widget/Scala.svelte`, `suono.tempo` dà i secondi dall'inizio sul clock audio (la nota i parte a `i × suono.ritmo`). I disegni fatti con lo Staff partono da `pentagramma/widget/disegni/RigoAPassi.svelte`, che fa già tutto. `tests/animazioni.dev.spec.ts` apre ogni animazione e ogni illustrazione dei moduli, preme play o «Ascolta» e controlla che le note si sentano e che l'evidenziazione (`data-suona`) le segua. Un disegno che non mostra note né altezze resta muto, ma va aggiunto con il motivo all'elenco `MUTI` di quel test.
+
 ## 8. Immagini
 
 Prima scelta: SVG (componenti del modulo o file `.svg`). Le immagini raster generate con l'AI solo se aggiungono valore didattico, solo in sviluppo e con il file sidecar `<nome>.json` (prompt, modello, data, condizioni d'uso): le regole sono in `CLAUDE.md`.
