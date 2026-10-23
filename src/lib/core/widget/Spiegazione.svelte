@@ -21,10 +21,14 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import Button from '../ui/Button.svelte';
 	import type { WidgetProps } from '../motore/widget';
+	import { riceviSuono, type SuonoDisegno } from './suono.svelte.ts';
 
 	let { props, contesto, onfine }: WidgetProps = $props();
 
 	const { illustrazione } = $derived(v.parse(schemaProps, props));
+	// un disegno che mostra note le fa sentire: compare «Ascolta» (all'apertura tace)
+	let suono = $state.raw<SuonoDisegno>();
+	riceviSuono((s) => (suono = s));
 </script>
 
 {#if illustrazione}
@@ -46,6 +50,17 @@
 {/if}
 
 <div class="azioni">
+	{#if suono}
+		{@const suona = suono.nota !== null}
+		<Button
+			dimensione="l"
+			variante="secondaria"
+			icona={suona ? 'pausa' : 'volume'}
+			onclick={suono.ascolta}
+		>
+			{suona ? m.widget_ferma() : m.widget_ascolta()}
+		</Button>
+	{/if}
 	<Button dimensione="l" onclick={onfine}>{m.pulsante_avanti()}</Button>
 </div>
 
@@ -70,5 +85,7 @@
 	}
 	.azioni {
 		display: flex;
+		flex-wrap: wrap;
+		gap: var(--spazio-3);
 	}
 </style>
