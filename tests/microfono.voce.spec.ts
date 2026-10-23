@@ -20,7 +20,9 @@ test('genitori, «Prova il microfono»: solo numeri, e più del 95% dei frame ha
 	await sezione.getByRole('button', { name: 'Apri il microfono' }).click();
 
 	const numero = (testo: string) => sezione.getByRole('definition').filter({ hasText: testo });
-	await expect(numero('48.000 Hz')).toBeVisible();
+	// il campionamento dipende dall'uscita audio: sui runner della CI non è sempre 48.000 Hz
+	const campionamento = sezione.locator('dt', { hasText: 'Frequenza di campionamento' });
+	await expect(campionamento.locator('+ dd')).toHaveText(/^\d{2}\.\d{3} Hz$/);
 	await expect(sezione.getByText('AnalyserNode', { exact: false })).toBeVisible();
 	// i filtri per le chiamate sono spenti davvero, e il suggerimento non serve
 	await expect(sezione.getByRole('definition').filter({ hasText: /^no$/ })).toHaveCount(3);
