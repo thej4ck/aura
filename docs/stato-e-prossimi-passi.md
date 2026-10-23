@@ -24,20 +24,9 @@ Documento di passaggio tra una sessione di lavoro e la successiva. Va aggiornato
 
 ## Prossimi passi, in ordine
 
-0. **Dipendenze, PR di Dependabot aperte**:
-   - #3 bump di `@vitest/mocker`/`vitest` alla 4.1.12: chiude 2 alert di sicurezza medi, solo in sviluppo. Va unita dopo la CI verde.
-   - #1 `vitest` 5: aggiornamento major, da valutare con calma.
-   - #2 `@types/node` 26: da chiudere, il progetto usa Node 24. Conviene configurare Dependabot per ignorare i major di `@types/node` oltre la versione di Node in uso.
+0. **Dipendenze**: #3 (vitest 4.1.12) unita, #2 chiusa con Dependabot che ora ignora i major di `@types/node`. Resta #1, `vitest` 5: aggiornamento major, CI verde, da valutare con calma.
 
-1. **Segnalazioni su GitHub facili per un adulto e difficili per un bambino** (richiesta dell'utente):
-   - Pulsante «Segnala un problema»: discreto nelle attività (header o riepilogo), nel piè di pagina, in /informazioni e in /genitori. Dietro GateAdulti; GitHub richiede comunque un account.
-   - Issue forms in `.github/ISSUE_TEMPLATE/`: errore nei contenuti, problema tecnico, idea; `config.yml` con il link alla segnalazione privata delle vulnerabilità.
-   - Precompilazione via query string (`/issues/new?template=…&title=…&<id-campo>=…`):
-     - pagina e attività (id qualificato), numero della scheda;
-     - versione del sito (commit della build);
-     - browser e sistema in forma riassunta.
-   - Mai dati personali né progressi.
-   - Prima di aprire GitHub l'adulto vede un'anteprima di cosa verrà inviato.
+1. **Segnalazioni su GitHub**: fatte. Pulsante «Segnala un problema» (`src/lib/core/ui/SegnalaProblema.svelte`) nel piè di pagina, nelle schede delle attività, in /informazioni e in /genitori. È dietro GateAdulti, mostra l'anteprima e apre le issue forms di `.github/ISSUE_TEMPLATE/` precompilate da `src/lib/core/segnalazione.ts`. La versione è il commit della build, passato da Railway (`ARG RAILWAY_GIT_COMMIT_SHA` nel Dockerfile). Da verificare in produzione: che la versione mostri il commit e che GitHub precompili davvero i campi.
 2. **Rileggere i testi legali** di /informazioni (avvertenze, «così com'è», servizi di terzi) e decidere se aggiungere un contatto email.
 3. **Prove su dispositivi veri** con bambini veri: checklist in `docs/prove-su-dispositivi.md`.
    - iPhone/iPad: modalità audio 'playback', sblocco dell'audio, microfono.
