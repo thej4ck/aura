@@ -2,7 +2,7 @@
 	// Pagina per i genitori: privacy, progressi, profili, backup e file, impostazioni, voce, come aiutare,
 	// installazione, crediti e licenze.
 	// Le azioni delicate (importa, elimina, collega/scollega, impostazioni, link esterni) passano da GateAdulti.
-	import { asset } from '$app/paths';
+	import { asset, resolve } from '$app/paths';
 	import type { AssetPath } from '$app/types';
 	import { m } from '#lib/paraglide/messages.js';
 	import { catalogo as catalogoReale, type Catalogo } from '../contenuti/registry';
@@ -170,6 +170,10 @@
 				</li>
 			{/each}
 		</ul>
+		<p>
+			{m.genitori_informazioni()}
+			<a class="vai" href={resolve('/informazioni')}>{m.layout_informazioni()}</a>.
+		</p>
 	</section>
 </div>
 

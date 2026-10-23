@@ -133,6 +133,8 @@
 <footer class="piede">
 	<p>{m.layout_privacy()}</p>
 	<a href={resolve('/genitori')}>{m.layout_privacy_link()}</a>
+	<p>{m.layout_autore()}</p>
+	<a href={resolve('/informazioni')}>{m.layout_informazioni()}</a>
 	{#if backup}
 		<a class="backup" href="{resolve('/genitori')}#backup">
 			<Icona nome="info" />
