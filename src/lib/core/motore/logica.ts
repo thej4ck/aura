@@ -4,8 +4,10 @@ import type { Attivita, Fase } from '../contenuti/schema';
 import type { Esito } from '../padronanza';
 import type { ProssimoPasso } from '../percorso';
 
-/** Rapporto minimo corretti/totali nella fase di verifica per superarla. */
-export const SOGLIA_SUPERATA = 0.8;
+/** Rapporto minimo corretti/totali nella fase di verifica per superarla: 3 su 4 e 4 su 5 bastano. */
+export const SOGLIA_SUPERATA = 0.75;
+/** Risposte minime perché un gioco conti, se l'attività non dice `risposteMinime`. */
+export const RISPOSTE_MINIME_GIOCO = 3;
 /** L'unica fase che conta per la padronanza (Scopri → Proviamo insieme → Prova tu). */
 export const FASE_VERIFICA: Fase = 'prova';
 
@@ -62,17 +64,20 @@ export function conteggioProva(
  * Esito della verifica, a fine attività: superata se corretti/totali ≥ SOGLIA_SUPERATA nella fase "prova".
  * Senza esiti di prova (nessuna scheda prova, o schede che non valutano) una lezione è superata arrivando
  * in fondo, con `risposte: 0`: non c'è niente da misurare, quindi niente padronanza e al massimo una stella.
- * Un gioco invece valuta sempre: finito senza nessuna risposta («Ho finito» o «Basta così» subito, niente
- * microfono) non è superato, e non è nemmeno un tentativo da rivedere (vedi `senzaRisposte`).
+ * Un gioco invece misura solo con almeno `risposteMinime` risposte (di default RISPOSTE_MINIME_GIOCO):
+ * lasciato prima («Ho finito» o «Basta così» presto, niente microfono) non è superato e non è nemmeno un
+ * tentativo da rivedere (vedi `senzaRisposte`), così una risposta sola non alza la padronanza.
  */
 export function valutaVerifica(
 	schede: readonly ConFase[],
 	esiti: readonly EsitoRegistrato[],
-	tipo: TipoAttivita = 'lezione'
+	{ tipo = 'lezione', risposteMinime }: { tipo?: TipoAttivita; risposteMinime?: number } = {}
 ): Esito {
 	const { corretti, totali } = conteggioProva(schede, esiti);
+	const minime = risposteMinime ?? (tipo === 'gioco' ? RISPOSTE_MINIME_GIOCO : 0);
+	if (totali === 0 || totali < minime) return { superata: minime === 0, errori: 0, risposte: 0 };
 	return {
-		superata: totali === 0 ? tipo !== 'gioco' : corretti / totali >= SOGLIA_SUPERATA,
+		superata: corretti / totali >= SOGLIA_SUPERATA,
 		errori: totali - corretti,
 		risposte: totali
 	};

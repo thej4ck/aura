@@ -64,6 +64,8 @@ export const SchemaAttivita = v.object({
 	minuti: v.pipe(v.number(), v.integer(), v.minValue(1)),
 	/** competenze allenate */
 	allena: v.array(riferimento),
+	/** risposte "prova" minime perché conti (giochi: di default 3, vedi motore/logica.ts) */
+	risposteMinime: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
 	/** attività consigliate prima di questa (suggerimento, mai blocco) */
 	prerequisiti: v.optional(v.array(riferimento), []),
 	/** traguardi delle Indicazioni Nazionali */

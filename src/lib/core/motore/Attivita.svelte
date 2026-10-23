@@ -135,7 +135,7 @@
 	}
 
 	function concludi() {
-		const esito = valutaVerifica(attivita.schede, esiti, attivita.tipo);
+		const esito = valutaVerifica(attivita.schede, esiti, attivita);
 		const vuota = senzaRisposte(esito);
 		const oggi = new Date();
 		let stelle = 0;

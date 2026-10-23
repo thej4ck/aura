@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { AttivitaCatalogo } from '../contenuti/registry';
 import type { Fase } from '../contenuti/schema';
 import {
+	RISPOSTE_MINIME_GIOCO,
 	SOGLIA_SUPERATA,
 	avanzamentoSchede,
 	conteggioProva,
@@ -103,6 +104,11 @@ describe('verifica', () => {
 		});
 	});
 
+	it('con quattro domande ne basta sbagliare una sola per superarla, con tre no', () => {
+		expect(valutaVerifica(tipica, esiti(false, true, true, true)).superata).toBe(true);
+		expect(valutaVerifica(tipica, esiti(false, true, true)).superata).toBe(false);
+	});
+
 	it('gli errori nelle fasi guidate non contano', () => {
 		const guidati: EsitoRegistrato[] = [{ scheda: 2, corretto: false }, ...esiti(true)];
 		expect(valutaVerifica(tipica, guidati)).toEqual({ superata: true, errori: 0, risposte: 1 });
@@ -118,17 +124,31 @@ describe('verifica', () => {
 		expect(senzaRisposte(valutaVerifica(tipica, []))).toBe(false);
 	});
 
-	it('un gioco finito senza nessuna risposta non è superato, e non conta come tentativo', () => {
-		const vuoto = valutaVerifica(tipica, [{ scheda: 2, corretto: true }], 'gioco');
+	it(`un gioco conta solo con almeno ${RISPOSTE_MINIME_GIOCO} risposte: prima non è superato, né un tentativo`, () => {
+		const gioco = { tipo: 'gioco' } as const;
+		const vuoto = valutaVerifica(tipica, [{ scheda: 2, corretto: true }], gioco);
 		expect(vuoto).toEqual({ superata: false, errori: 0, risposte: 0 });
 		expect(senzaRisposte(vuoto)).toBe(true);
-		// basta una risposta perché il gioco valga come una verifica qualsiasi
-		expect(valutaVerifica(tipica, esiti(true), 'gioco')).toEqual({
+		// una risposta sola, anche giusta, non alza la padronanza
+		const presto = valutaVerifica(tipica, esiti(true, true), gioco);
+		expect(presto).toEqual({ superata: false, errori: 0, risposte: 0 });
+		expect(senzaRisposte(presto)).toBe(true);
+		expect(valutaVerifica(tipica, esiti(true, true, true), gioco)).toEqual({
+			superata: true,
+			errori: 0,
+			risposte: 3
+		});
+		expect(senzaRisposte(valutaVerifica(tipica, esiti(false, false, true), gioco))).toBe(false);
+	});
+
+	it('un gioco che misura tutto in una risposta (risposteMinime: 1) conta con quella', () => {
+		const misura = { tipo: 'gioco', risposteMinime: 1 } as const;
+		expect(valutaVerifica(tipica, esiti(true), misura)).toEqual({
 			superata: true,
 			errori: 0,
 			risposte: 1
 		});
-		expect(senzaRisposte(valutaVerifica(tipica, esiti(false), 'gioco'))).toBe(false);
+		expect(senzaRisposte(valutaVerifica(tipica, [], misura))).toBe(true);
 	});
 });
 

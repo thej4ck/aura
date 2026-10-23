@@ -879,6 +879,8 @@ export const modulo = {
 				'Hai scoperto fin dove arriva la tua voce, in alto e in basso. Cantando con calma, la voce cresce.',
 			minuti: 6,
 			allena: ['intonazione'],
+			// una prova intera è già la misura
+			risposteMinime: 1,
 			prerequisiti: ['tieni-la-nota'],
 			traguardi: [IN.voce, IN.intonazione],
 			schede: [

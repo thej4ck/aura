@@ -38,7 +38,7 @@ async function apri(page: Page, attivita: string, titolo: string) {
 	await page.getByRole('button', { name: 'Inizia' }).click();
 }
 
-test('tieni-la-nota: il La4 tenuto arriva all’esito giusto e la verifica è superata', async ({
+test('tieni-la-nota: il La4 tenuto arriva all’esito giusto; una nota sola non basta a misurare', async ({
 	page,
 	baseURL
 }) => {
@@ -71,13 +71,14 @@ test('tieni-la-nota: il La4 tenuto arriva all’esito giusto e la verifica è su
 	expect(await accesi()).toBe(0);
 	expect(await violazioniGravi(page)).toEqual([]);
 
-	// la nota dopo è un Fa: ci si ferma qui, le note non cantate non contano
+	// la nota dopo è un Fa: «Avanti» sparisce con il giro, e il focus va al contatore, non si perde
 	await avanti.click();
-	await expect(page.getByText('Nota 2 di 3', { exact: true })).toBeVisible();
+	await expect(page.getByText('Nota 2 di 3', { exact: true })).toBeFocused();
+	// ci si ferma qui: una nota sola non misura ancora niente, e il gioco aspetta
 	await page.getByRole('button', { name: 'Basta così' }).click();
 
-	await expect(page.getByRole('heading', { name: 'Attività completata' })).toBeFocused();
-	await expect(page.getByRole('img', { name: 'Stelle: 2 su 3' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Per oggi va bene così' })).toBeFocused();
+	await expect(page.getByRole('button', { name: 'Torna al gioco' })).toBeVisible();
 	expect(await accesi()).toBe(0);
 	expect(esterne).toEqual([]);
 	expect(errori).toEqual([]);
