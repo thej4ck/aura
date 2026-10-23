@@ -139,6 +139,9 @@ test('«Che nota è?»: otto giuste di fila sbloccano il Re, che resta nei progr
 	const nota = page.getByRole('group', { name: 'La nota da leggere' }).getByRole('listitem');
 	const nomi = page.getByRole('group', { name: 'Che nota è?' });
 	const inGioco = page.getByText(/^Note in gioco:/);
+	/** trovata: il nome giusto, poi dove sta la nota dopo (per chi non vede il rigo) */
+	const giusta = (nome: string) =>
+		new RegExp(`^\\s*Sì, era il ${nome}! La prossima è (sulla|nel|sul|nello) .+\\.\\s*$`);
 
 	const leggi = async () => {
 		const testo = (await nota.textContent())!;
@@ -165,12 +168,14 @@ test('«Che nota è?»: otto giuste di fila sbloccano il Re, che resta nei progr
 	await expect(stato).toContainText('prova un altro nome');
 	await expect(nomi.getByRole('button', { name: `${sbagliato} (già provata)` })).toBeVisible();
 	await nomi.getByRole('button', { name: prima, exact: true }).click();
-	await expect(stato).toHaveText(`Sì, era il ${prima}!`);
+	await expect(stato).toHaveText(giusta(prima));
+	const dove = /: (.+)$/.exec((await nota.textContent())!)![1];
+	await expect(stato).toContainText(`${dove}.`);
 
 	for (let i = 0; i < 8; i++) {
 		const nome = await leggi();
 		await nomi.getByRole('button', { name: nome, exact: true }).click();
-		if (i < 7) await expect(stato).toHaveText(`Sì, era il ${nome}!`);
+		if (i < 7) await expect(stato).toHaveText(giusta(nome));
 	}
 	// la nota nuova arriva subito, con il suo nome scritto sotto
 	await expect(stato).toContainText('Ecco una nota nuova: il Re. Il Re sta sulla quarta linea.');
@@ -178,7 +183,7 @@ test('«Che nota è?»: otto giuste di fila sbloccano il Re, che resta nei progr
 	await expect(inGioco).toHaveText('Note in gioco: Mi, Sol, Si, Re');
 	await expect(page.getByText('Note lette: 9')).toBeVisible();
 	await nomi.getByRole('button', { name: 'Re', exact: true }).click();
-	await expect(stato).toHaveText('Sì, era il Re!');
+	await expect(stato).toHaveText(giusta('Re'));
 	expect(await axe(page)).toEqual([]);
 
 	// «Ho finito» porta al riepilogo: 8 giuste su 9 al primo tentativo (il Re presentato non conta)

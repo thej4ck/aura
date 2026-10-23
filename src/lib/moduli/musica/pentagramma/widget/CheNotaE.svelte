@@ -125,6 +125,9 @@
 		} else {
 			nota = estrai(stato.leitner, r, nota);
 			nuova = false;
+			// dove sta la nota nuova, senza svelarne il nome: chi non vede il rigo sa dove guardare
+			const q = passo(nota);
+			feedback += ` ${m.pentagramma_che_nota_prossima({ tipo: tipo(q), posizione: nomePosizione(q) })}`;
 		}
 	}
 </script>

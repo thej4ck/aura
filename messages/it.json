@@ -652,6 +652,18 @@
 	],
 	"pentagramma_che_nota_aiuto": "Conta dal basso: sulle linee {linee}; negli spazi {spazi}.",
 	"pentagramma_che_nota_giusta": "Sì, era il {nome}!",
+	"pentagramma_che_nota_prossima": [
+		{
+			"declarations": ["input tipo", "input posizione"],
+			"selectors": ["tipo"],
+			"match": {
+				"tipo=linea": "La prossima è sulla {posizione}.",
+				"tipo=spazio": "La prossima è nel {posizione}.",
+				"tipo=taglio": "La prossima è sul {posizione}.",
+				"tipo=*": "La prossima è nello {posizione}."
+			}
+		}
+	],
 	"pentagramma_che_nota_nuova": "Ecco una nota nuova: il {nome}.",
 	"pentagramma_che_nota_lette": "Note lette: {count}",
 	"pentagramma_che_nota_in_gioco": "Note in gioco: {note}",
