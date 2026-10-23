@@ -24,6 +24,11 @@ Documento di passaggio tra una sessione di lavoro e la successiva. Va aggiornato
 
 ## Prossimi passi, in ordine
 
+0. **Dipendenze, PR di Dependabot aperte**:
+   - #3 bump di `@vitest/mocker`/`vitest` alla 4.1.12: chiude 2 alert di sicurezza medi, solo in sviluppo. Va unita dopo la CI verde.
+   - #1 `vitest` 5: aggiornamento major, da valutare con calma.
+   - #2 `@types/node` 26: da chiudere, il progetto usa Node 24. Conviene configurare Dependabot per ignorare i major di `@types/node` oltre la versione di Node in uso.
+
 1. **Segnalazioni su GitHub facili per un adulto e difficili per un bambino** (richiesta dell'utente):
    - Pulsante «Segnala un problema»: discreto nelle attività (header o riepilogo), nel piè di pagina, in /informazioni e in /genitori. Dietro GateAdulti; GitHub richiede comunque un account.
    - Issue forms in `.github/ISSUE_TEMPLATE/`: errore nei contenuti, problema tecnico, idea; `config.yml` con il link alla segnalazione privata delle vulnerabilità.
