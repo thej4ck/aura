@@ -971,7 +971,7 @@ export const modulo = {
 					widget: 'spiegazione',
 					titolo: 'Come si gioca',
 					testo:
-						'Vedi alcune note scritte, ma ne senti solo una: il Do, la nota di partenza. Canta il Do, poi leggi le altre note e cantale, una dopo l’altra. Canta piano: la voce non si forza mai. Puoi fermarti quando vuoi con «Basta così».'
+						'Vedi alcune note scritte, ma ne senti solo una: il Do, la nota di partenza. È la prima nota, più piccola e grigia. Canta il Do, poi leggi le altre note e cantale, una dopo l’altra. Canta piano: la voce non si forza mai. Puoi fermarti quando vuoi con «Basta così».'
 				},
 				{
 					id: 'insieme-ascolta',

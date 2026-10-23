@@ -195,6 +195,7 @@
 		{rigo}
 		etichetta={m.canta_rigo({ count: altezze.length })}
 		evidenzia={suona !== null ? [suona] : fase === 'ascolto' ? [corrente] : []}
+		riferimento={lettura ? [0] : []}
 		{etichette}
 		{colori}
 		nomiNote={contesto.preferenze.nomiNote}
