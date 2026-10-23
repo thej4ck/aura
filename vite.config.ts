@@ -20,6 +20,11 @@ export default defineConfig({
 				precompress: true,
 				strict: true
 			}),
+			// il commit della build (Railway lo passa come ARG nel Dockerfile): finisce nelle segnalazioni
+			// e nel nome della cache del service worker. Altrove resta il default di SvelteKit (un timestamp)
+			version: process.env.RAILWAY_GIT_COMMIT_SHA
+				? { name: process.env.RAILWAY_GIT_COMMIT_SHA.slice(0, 7) }
+				: undefined,
 			csp: {
 				mode: 'hash',
 				directives: {

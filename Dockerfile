@@ -5,6 +5,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+# fornita da Railway: diventa la versione del sito (vite.config.ts)
+ARG RAILWAY_GIT_COMMIT_SHA
 RUN npm run build
 
 FROM caddy:2-alpine
