@@ -8,6 +8,9 @@ updates:
       # i tipi seguono la versione di Node in uso (24): il major si alza a mano insieme a Node
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
+      # svelte-check dichiara il major di TypeScript che supporta: si sale insieme a lui
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
     schedule:

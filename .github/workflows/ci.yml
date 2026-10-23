@@ -9,9 +9,15 @@ on:
 permissions:
   contents: read
 
+# un nuovo push sullo stesso ramo rende inutile il run precedente
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  ci:
+  controlli:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -22,13 +28,35 @@ jobs:
       - run: npm run lint
       - run: npm run check
       - run: npm test
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1/3, 2/3, 3/3]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
       - id: cache-pw
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+      # niente --with-deps: il runner ha già Chrome con le sue librerie, e apt-get a volte resta appeso per minuti
       - if: steps.cache-pw.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
-      - if: steps.cache-pw.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
-      - run: npm run test:e2e
+        run: npx playwright install chromium
+      - run: npm run test:e2e -- --shard=${{ matrix.shard }}
+
+  # il controllo obbligatorio su main si chiama «ci»: passa solo se passano tutti gli altri
+  ci:
+    if: always()
+    needs: [controlli, e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - run: test "${{ needs.controlli.result }}" = success && test "${{ needs.e2e.result }}" = success
