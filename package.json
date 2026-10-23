@@ -14,10 +14,13 @@
 		"check": "npm run i18n && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "npm run i18n && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"i18n": "paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide --strategy globalVariable baseLocale --emit-ts-declarations --silent",
-		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write .",
+		"lint": "prettier --check --cache . && eslint --cache --cache-location node_modules/.cache/eslint/ .",
+		"format": "prettier --write --cache .",
 		"test": "vitest run",
-		"test:e2e": "playwright test"
+		"test:changed": "vitest run --changed",
+		"test:e2e": "playwright test",
+		"test:e2e:changed": "playwright test --only-changed",
+		"verifica": "npm run lint && npm run check && npm test && npm run build && npm run test:e2e"
 	},
 	"dependencies": {
 		"@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",

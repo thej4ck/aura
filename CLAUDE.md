@@ -17,7 +17,14 @@ Piattaforma didattica gratuita per bambini, a moduli (oggi area Musica: Pentagra
 - `npm run dev` · `npm run build` · `npm run preview`
 - `npm run lint` · `npm run check` · `npm run test` (Vitest) · `npm run test:e2e` (Playwright)
 - Container (in locale c'è podman, non docker): `podman build -t aura .` → `podman run --rm -e PORT=8080 -p 8080:8080 aura`
-- Prima di ogni commit: lint, check, test e build verdi.
+- `npm run verifica` = la suite completa (lint, check, vitest, build, e2e): circa 4 minuti.
+
+## Test e verifiche (tempi)
+
+- **Durante lo sviluppo** si lanciano solo i controlli mirati: `npm run test:changed` (Vitest sui file toccati), `npx vitest run <percorso>`, `npm run test:e2e:changed` o `npx playwright test tests/<modulo>*`, più `npm run check` se cambiano tipi o componenti.
+- **La suite completa (`npm run verifica`) si lancia UNA volta sullo stato finale**, prima di consegnare o pushare. La CI la ripete su ogni push.
+- **Non si riverifica ogni commit uno per uno** (worktree per commit, check ripetuti): moltiplica i tempi per il numero di commit. Si fa solo se l'utente lo chiede esplicitamente.
+- Ogni modulo ha i suoi test (`tests/<modulo>.*.spec.ts`, `src/lib/moduli/**/*.test.ts`), così si possono lanciare da soli.
 
 ## Git
 
