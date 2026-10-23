@@ -4,6 +4,10 @@ Una piattaforma didattica gratuita e pubblica, a moduli, per bambini dai 6 ai 10
 Si impara per aree (oggi la musica, domani matematica, fisica e scienze) e, dentro ogni area, per moduli brevi e guidati.
 La prima area è la **Musica**, con i moduli **Pentagramma** e **Canto**.
 
+Aura è sviluppato e messo a disposizione gratuitamente da [Nicola Mondinelli](https://www.backuppati.it/about), senza pubblicità e senza scopo di lucro.
+Errori nei contenuti, problemi e idee si segnalano nelle [Issues](https://github.com/thej4ck/aura/issues); le vulnerabilità in privato, come spiega [SECURITY.md](SECURITY.md).
+Il sito ha una pagina `/informazioni` con le stesse cose e le avvertenze d’uso.
+
 ## Principi
 
 - **Zero dati personali.** Nessun account, nessun cookie, nessuna analytics, nessuna telemetria, nessuna richiesta verso terzi.
@@ -79,7 +83,7 @@ In sviluppo, `/dev` mostra token, componenti e un'attività di esempio che usa i
 
 ## Licenze
 
-- Codice: [MIT](LICENSE).
+- Codice: [MIT](LICENSE), © 2026 Nicola Mondinelli.
 - Contenuti didattici in `src/lib/moduli/**`: [CC BY-SA 4.0](LICENSE-CONTENUTI.md).
 - Font Atkinson Hyperlegible Next: SIL Open Font License 1.1 ([`static/licenze/atkinson-hyperlegible-next-ofl.txt`](static/licenze/atkinson-hyperlegible-next-ofl.txt)).
 - Icone dell'interfaccia (`src/lib/core/ui/Icona.svelte`): path SVG da [Lucide](https://lucide.dev), licenza ISC (© Lucide Contributors; parte da Feather, © Cole Bemis, MIT): [`static/licenze/lucide-isc.txt`](static/licenze/lucide-isc.txt).

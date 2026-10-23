@@ -20,7 +20,7 @@ function pagine(): string[] {
 const elenco = pagine();
 
 test('la build contiene le pagine principali', () => {
-	expect(elenco).toEqual(expect.arrayContaining(['/', '/moduli', '/genitori']));
+	expect(elenco).toEqual(expect.arrayContaining(['/', '/moduli', '/genitori', '/informazioni']));
 });
 
 for (const colorScheme of ['light', 'dark'] as const) {
