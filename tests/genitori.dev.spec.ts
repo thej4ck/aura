@@ -1,26 +1,14 @@
 // Pagina per i genitori e pagine della shell (solo server di sviluppo: /dev ha il catalogo di prova).
 import { expect, test, type Page } from '@playwright/test';
-import { numeroInLettere } from '../src/lib/core/numeri';
+import { superaGate } from './gate';
 import { sorveglia, violazioniGravi } from './sorveglianza';
 
 test.setTimeout(90_000); // la prima visita al server di sviluppo compila al volo
 
 const STORE = '/src/lib/core/store/progressi.svelte.ts';
-const NUMERI = new Map(Array.from({ length: 900 }, (_, i) => [numeroInLettere(i + 100), i + 100]));
-
 async function apri(page: Page, percorso: string) {
 	await page.goto(percorso);
 	await expect(page.getByRole('img', { name: /Profilo attivo/ })).toBeVisible(); // pagina idratata
-}
-
-/** Supera il controllo per gli adulti: il numero è scritto in lettere, si risponde in cifre. */
-async function superaGate(page: Page) {
-	const dialog = page.getByRole('dialog', { name: 'Questa parte è per gli adulti' });
-	await expect(dialog).toBeVisible();
-	const lettere = (await dialog.locator('.numero').textContent())!.trim();
-	await dialog.getByLabel('Il numero in cifre').fill(String(NUMERI.get(lettere)));
-	await dialog.getByRole('button', { name: 'Conferma' }).click();
-	await expect(dialog).toBeHidden();
 }
 
 /** Stato del profilo attivo, letto dallo store dell'app (stesso modulo servito da vite). */

@@ -19,6 +19,7 @@
 	import Card from '../ui/Card.svelte';
 	import Icona, { type NomeIcona } from '../ui/Icona.svelte';
 	import LeggiAltaVoce from '../ui/LeggiAltaVoce.svelte';
+	import SegnalaProblema from '../ui/SegnalaProblema.svelte';
 	import Stelle from '../ui/Stelle.svelte';
 	import {
 		avanzamentoSchede,
@@ -304,13 +305,16 @@
 			</section>
 		{/key}
 
-		{#if !stato.prima}
-			<div class="indietro">
+		<div class="piede-scheda">
+			{#if !stato.prima}
 				<Button variante="quieta" icona="freccia-sinistra" onclick={() => vaiA(stato.indice - 1)}>
 					{m.pulsante_indietro()}
 				</Button>
+			{/if}
+			<div class="segnala">
+				<SegnalaProblema attivita={attivita.id} scheda="{stato.indice + 1}/{stato.totale}" />
 			</div>
-		{/if}
+		</div>
 	{:else if risultato}
 		<section class="riepilogo" aria-labelledby="{id}-riepilogo">
 			<div class="riga-titolo">
@@ -553,8 +557,14 @@
 		color: var(--colore-testo-tenue);
 	}
 
-	.indietro {
+	/* «Segnala» resta a destra, lontano dai controlli del bambino, anche senza «Indietro» */
+	.piede-scheda {
 		display: flex;
+		flex-wrap: wrap;
+		gap: var(--spazio-3);
+	}
+	.segnala {
+		margin-inline-start: auto;
 	}
 
 	.riepilogo h2 {

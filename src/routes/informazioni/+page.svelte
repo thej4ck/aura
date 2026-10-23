@@ -3,11 +3,11 @@
 	// I link verso altri siti passano da GateAdulti, come nella pagina per i genitori.
 	import { resolve } from '$app/paths';
 	import { m } from '#lib/paraglide/messages.js';
+	import { REPO as CODICE } from '#lib/core/segnalazione.ts';
 	import GateAdulti from '#lib/core/ui/GateAdulti.svelte';
+	import SegnalaProblema from '#lib/core/ui/SegnalaProblema.svelte';
 
 	const AUTORE = 'https://www.backuppati.it/about';
-	const CODICE = 'https://github.com/thej4ck/aura';
-	const ISSUES = `${CODICE}/issues`;
 	const VULNERABILITA = `${CODICE}/security/advisories/new`;
 	/** il testo del link è l'indirizzo, senza protocollo né www: l'adulto vede dove va */
 	const breve = (url: string) => url.replace(/^https:\/\/(www\.)?/, '');
@@ -110,7 +110,7 @@
 	<section id="segnalazioni" aria-labelledby="titolo-segnalazioni">
 		<h2 id="titolo-segnalazioni">{m.informazioni_segnalazioni()}</h2>
 		<p class="testo">{m.informazioni_segnalazioni_testo()}</p>
-		<p>{@render esterno(ISSUES)}</p>
+		<div><SegnalaProblema variante="secondaria" /></div>
 		<p class="testo tenue">{m.informazioni_segnalazioni_account()}</p>
 		<div class="blocco sicurezza">
 			<h3>{m.informazioni_sicurezza()}</h3>

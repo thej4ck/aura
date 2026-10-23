@@ -1,29 +1,16 @@
 // Pagina «Informazioni» (build di produzione): contenuti chiave, link dal piè di pagina e da /genitori,
 // link esterni dietro il controllo per gli adulti. Axe in chiaro e scuro: home.spec.ts, come ogni pagina.
 import { expect, test, type Page } from '@playwright/test';
-import { numeroInLettere } from '../src/lib/core/numeri';
-
-const NUMERI = new Map(Array.from({ length: 900 }, (_, i) => [numeroInLettere(i + 100), i + 100]));
+import { superaGate } from './gate';
 
 async function apri(page: Page, percorso: string) {
 	await page.goto(percorso);
 	await expect(page.getByRole('img', { name: /Profilo attivo/ })).toBeVisible(); // pagina idratata
 }
 
-// ponytail: copia di quella in genitori.dev.spec.ts; un modulo comune se servirà a un terzo file
-async function superaGate(page: Page) {
-	const dialog = page.getByRole('dialog', { name: 'Questa parte è per gli adulti' });
-	await expect(dialog).toBeVisible();
-	const lettere = (await dialog.locator('.numero').textContent())!.trim();
-	await dialog.getByLabel('Il numero in cifre').fill(String(NUMERI.get(lettere)));
-	await dialog.getByRole('button', { name: 'Conferma' }).click();
-	await expect(dialog).toBeHidden();
-}
-
 const ESTERNI = {
 	'backuppati.it/about': 'https://www.backuppati.it/about',
 	'github.com/thej4ck/aura': 'https://github.com/thej4ck/aura',
-	'github.com/thej4ck/aura/issues': 'https://github.com/thej4ck/aura/issues',
 	'Segnala una vulnerabilità in privato': 'https://github.com/thej4ck/aura/security/advisories/new'
 };
 

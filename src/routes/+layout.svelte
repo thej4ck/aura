@@ -11,6 +11,7 @@
 	import Avviso from '#lib/core/ui/Avviso.svelte';
 	import Icona from '#lib/core/ui/Icona.svelte';
 	import PausaGentile from '#lib/core/ui/PausaGentile.svelte';
+	import SegnalaProblema from '#lib/core/ui/SegnalaProblema.svelte';
 	import { serveBackup } from '#lib/core/vista/genitori.ts';
 	import type { LayoutProps } from './$types';
 
@@ -135,6 +136,7 @@
 	<a href={resolve('/genitori')}>{m.layout_privacy_link()}</a>
 	<p>{m.layout_autore()}</p>
 	<a href={resolve('/informazioni')}>{m.layout_informazioni()}</a>
+	<SegnalaProblema />
 	{#if backup}
 		<a class="backup" href="{resolve('/genitori')}#backup">
 			<Icona nome="info" />

@@ -11,6 +11,7 @@
 	import Button from '../ui/Button.svelte';
 	import GateAdulti from '../ui/GateAdulti.svelte';
 	import InstallaApp from '../ui/InstallaApp.svelte';
+	import SegnalaProblema from '../ui/SegnalaProblema.svelte';
 	import { serveBackup } from '../vista/genitori';
 	import Backup from './genitori/Backup.svelte';
 	import Impostazioni from './genitori/Impostazioni.svelte';
@@ -47,6 +48,7 @@
 		['microfono', m.mic_titolo],
 		['aiutare', m.genitori_aiutare],
 		['installa', m.genitori_installa],
+		['segnalazioni', m.informazioni_segnalazioni],
 		['crediti', m.genitori_crediti]
 	];
 	const VOCE = [m.genitori_voce_1, m.genitori_voce_2, m.genitori_voce_3, m.genitori_voce_4];
@@ -161,6 +163,12 @@
 	<section id="installa" aria-labelledby="titolo-installa">
 		<h2 id="titolo-installa">{m.genitori_installa()}</h2>
 		<InstallaApp />
+	</section>
+
+	<section id="segnalazioni" aria-labelledby="titolo-segnalazioni">
+		<h2 id="titolo-segnalazioni">{m.informazioni_segnalazioni()}</h2>
+		<p class="lead">{m.genitori_segnala_testo()}</p>
+		<div><SegnalaProblema variante="secondaria" /></div>
 	</section>
 
 	<section id="crediti" aria-labelledby="titolo-crediti">
