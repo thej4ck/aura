@@ -1,12 +1,15 @@
-import { readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import { sorveglia, violazioniGravi } from './sorveglianza';
 
 /**
  * Tutte le pagine prerenderizzate (build/**\/*.html tranne la 404), così le pagine generate dai contenuti
- * (moduli, attività) entrano nei controlli da sole. Si legge dentro il test: la build la fa il webServer.
+ * (moduli, attività) entrano nei controlli da sole. Si legge alla raccolta dei test, per farne un test
+ * per pagina che Playwright esegue in parallelo: la build va fatta prima (`npm run test:e2e` la fa).
  */
 function pagine(): string[] {
+	if (!existsSync('build'))
+		throw new Error('Manca build/: lancia `npm run test:e2e`, che fa la build');
 	return readdirSync('build', { recursive: true, encoding: 'utf8' })
 		.map((f) => f.replaceAll('\\', '/'))
 		.filter((f) => f.endsWith('.html') && f !== '404.html')
@@ -14,32 +17,31 @@ function pagine(): string[] {
 		.sort();
 }
 
+const elenco = pagine();
+
+test('la build contiene le pagine principali', () => {
+	expect(elenco).toEqual(expect.arrayContaining(['/', '/moduli', '/genitori']));
+});
+
 for (const colorScheme of ['light', 'dark'] as const) {
-	test(`tema ${colorScheme}: ogni pagina senza richieste a terzi, errori o violazioni a11y gravi`, async ({
-		page,
-		baseURL
-	}) => {
-		const elenco = pagine();
-		expect(elenco).toEqual(expect.arrayContaining(['/', '/moduli', '/genitori']));
-		test.setTimeout(30_000 + elenco.length * 10_000);
-		await page.emulateMedia({ colorScheme });
-		const { esterne, errori } = sorveglia(page, baseURL!);
+	for (const percorso of elenco) {
+		test(`tema ${colorScheme} ${percorso}: niente terzi, errori o violazioni a11y gravi`, async ({
+			page,
+			baseURL
+		}) => {
+			await page.emulateMedia({ colorScheme });
+			const { esterne, errori } = sorveglia(page, baseURL!);
+			await page.goto(percorso);
+			await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+			// il profilo si carica da IndexedDB: l'avatar compare nell'header
+			await expect(page.getByRole('img', { name: /Profilo attivo/ })).toBeVisible();
+			await page.waitForLoadState('networkidle');
 
-		for (const percorso of elenco) {
-			await test.step(percorso, async () => {
-				esterne.length = errori.length = 0;
-				await page.goto(percorso);
-				await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-				// il profilo si carica da IndexedDB: l'avatar compare nell'header
-				await expect(page.getByRole('img', { name: /Profilo attivo/ })).toBeVisible();
-				await page.waitForLoadState('networkidle');
-
-				expect(esterne, percorso).toEqual([]);
-				expect(errori, percorso).toEqual([]);
-				expect(await violazioniGravi(page), percorso).toEqual([]);
-			});
-		}
-	});
+			expect(esterne).toEqual([]);
+			expect(errori).toEqual([]);
+			expect(await violazioniGravi(page)).toEqual([]);
+		});
+	}
 }
 
 test('/dev in produzione non esiste: pagina 404 amichevole, accessibile e senza terzi', async ({

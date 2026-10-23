@@ -22,7 +22,6 @@ jobs:
       - run: npm run lint
       - run: npm run check
       - run: npm test
-      - run: npm run build
       - id: cache-pw
         uses: actions/cache@v4
         with:

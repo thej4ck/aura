@@ -18,9 +18,9 @@
 		"format": "prettier --write --cache .",
 		"test": "vitest run",
 		"test:changed": "vitest run --changed",
-		"test:e2e": "playwright test",
+		"test:e2e": "npm run build && playwright test",
 		"test:e2e:changed": "playwright test --only-changed",
-		"verifica": "npm run lint && npm run check && npm test && npm run build && npm run test:e2e"
+		"verifica": "npm run lint && npm run check && npm test && npm run test:e2e"
 	},
 	"dependencies": {
 		"@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
