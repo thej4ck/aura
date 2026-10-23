@@ -1,8 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { creaCasuale } from '../casuale.ts';
-import { FFT, GATE_RMS, PASSA_BASSO_HZ, TOLLERANZE_CENTS } from './costanti.ts';
+import {
+	FFT,
+	GATE_RMS,
+	MARGINE_GATE,
+	PASSA_BASSO_HZ,
+	RISALITA_RUMORE_DB_S,
+	SOGLIA_YIN,
+	SOGLIA_YIN_RIPIEGO,
+	TOLLERANZE_CENTS
+} from './costanti.ts';
 import { centsTra, midiDaFreq } from './frequenze.ts';
-import { Mediana, calcolaRms, rilevaAltezza } from './pitch.ts';
+import { Mediana, RumoreDiFondo, calcolaRms, rilevaAltezza } from './pitch.ts';
 
 const SR = 48_000;
 
@@ -16,6 +25,23 @@ const sinusoide =
 		ampiezza * Math.sin(2 * Math.PI * f);
 const dente = (f: number) => 0.5 * (2 * (f - Math.floor(f + 0.5)));
 const triangolare = (f: number) => 0.5 * (4 * Math.abs(f - Math.floor(f + 0.5)) - 1);
+
+/**
+ * Il frame che YIN riceve dal microfono: lo stesso biquad passa-basso del BiquadFilterNode di mic.ts
+ * (Q = 1/√2), senza l'avvio del filtro, poi un campione su due. `x` è lungo almeno 2 FFT.
+ */
+function comeIlMicrofono(x: Float32Array) {
+	const w = (2 * Math.PI * PASSA_BASSO_HZ) / SR;
+	const al = Math.sin(w) / Math.SQRT2;
+	const [b0, b1, a1, a2] = [(1 - Math.cos(w)) / 2, 1 - Math.cos(w), -2 * Math.cos(w), 1 - al];
+	const y = new Float32Array(x.length);
+	for (let i = 0; i < x.length; i++) {
+		const [x1, x2, y1, y2] = [x[i - 1] ?? 0, x[i - 2] ?? 0, y[i - 1] ?? 0, y[i - 2] ?? 0];
+		y[i] = (b0 * x[i] + b1 * x1 + b0 * x2 - a1 * y1 - a2 * y2) / (1 + al);
+	}
+	const fine = y.subarray(x.length - FFT);
+	return Float32Array.from({ length: FFT / 2 }, (_, i) => fine[2 * i]);
+}
 
 /** errore in cent rispetto alla frequenza vera (Infinity se non riconosce niente) */
 function errore(buffer: Float32Array, freq: number, sr = SR) {
@@ -55,29 +81,40 @@ describe('rilevaAltezza (YIN)', () => {
 	});
 
 	it('rumore forte (SNR 5 dB): con il passa-basso e metà dei campioni, come nel microfono', () => {
-		// lo stesso biquad passa-basso del BiquadFilterNode di mic.ts (Q = 1/√2), poi un campione su due
-		const w = (2 * Math.PI * PASSA_BASSO_HZ) / SR;
-		const al = Math.sin(w) / Math.SQRT2;
-		const [b0, b1, a1, a2] = [(1 - Math.cos(w)) / 2, 1 - Math.cos(w), -2 * Math.cos(w), 1 - al];
-		const filtra = (x: Float32Array) => {
-			const y = new Float32Array(x.length);
-			for (let i = 0; i < x.length; i++) {
-				const [x1, x2, y1, y2] = [x[i - 1] ?? 0, x[i - 2] ?? 0, y[i - 1] ?? 0, y[i - 2] ?? 0];
-				y[i] = (b0 * x[i] + b1 * x1 + b0 * x2 - a1 * y1 - a2 * y2) / (1 + al);
-			}
-			return y.subarray(x.length - FFT); // senza l'avvio del filtro
-		};
 		const r = creaCasuale(11);
 		const ampiezza = 0.4;
 		const k = ((ampiezza / Math.SQRT2) * Math.sqrt(3)) / 10 ** (5 / 20); // RMS del rumore: −5 dB
 		for (const f of [220, 440, 880]) {
 			const sporco = segnale(f, sinusoide(ampiezza), 2 * FFT).map((x) => x + (2 * r() - 1) * k);
-			// senza filtro il rumore copre la periodicità: per YIN il bambino sarebbe muto
-			expect(rilevaAltezza(sporco.subarray(FFT), SR), `${f} Hz senza filtro`).toBeNull();
-			const filtrato = filtra(sporco);
-			const dimezzato = Float32Array.from({ length: FFT / 2 }, (_, i) => filtrato[2 * i]);
+			// senza filtro il rumore copre la periodicità: al massimo un ripiego incerto (spesso un'ottava sotto)
+			const senza = rilevaAltezza(sporco.subarray(FFT), SR);
+			expect(senza?.chiarezza ?? 0, `${f} Hz senza filtro`).toBeLessThan(1 - SOGLIA_YIN);
 			// un frame solo, con tanto rumore: sotto la tolleranza più stretta (la mediana fa il resto)
-			expect(errore(dimezzato, f, SR / 2), `${f} Hz`).toBeLessThan(TOLLERANZE_CENTS.preciso);
+			expect(errore(comeIlMicrofono(sporco), f, SR / 2), `${f} Hz`).toBeLessThan(
+				TOLLERANZE_CENTS.preciso
+			);
+		}
+	});
+
+	it('ripiego: un frame poco periodico (CMNDF tra 0,15 e 0,35) dà la nota, con la chiarezza bassa', () => {
+		// dente di sega a 220 Hz con il rumore a −6 dB, a 24 kHz come il frame dimezzato del microfono
+		for (const seme of [1, 2, 3]) {
+			const r = creaCasuale(seme);
+			const k = 0.5 * 10 ** (-6 / 20); // RMS: dente 0,5/√3, rumore uniforme k/√3
+			const frame = segnale(220, dente, FFT / 2, SR / 2).map((x) => x + (2 * r() - 1) * k);
+			expect(rilevaAltezza(frame, SR / 2, { ripiego: SOGLIA_YIN }), 'senza ripiego').toBeNull();
+			const a = rilevaAltezza(frame, SR / 2)!;
+			expect(Math.abs(centsTra(a.freq, midiDaFreq(220)))).toBeLessThan(TOLLERANZE_CENTS.preciso);
+			expect(a.chiarezza).toBeGreaterThan(1 - SOGLIA_YIN_RIPIEGO);
+			expect(a.chiarezza).toBeLessThan(1 - SOGLIA_YIN);
+		}
+	});
+
+	it('rumore passato dal passa-basso come nel microfono: mai una nota, neanche con il ripiego', () => {
+		for (let seme = 1; seme <= 50; seme++) {
+			const r = creaCasuale(seme);
+			const rumore = Float32Array.from({ length: 2 * FFT }, () => r() - 0.5);
+			expect(rilevaAltezza(comeIlMicrofono(rumore), SR / 2), `seme ${seme}`).toBeNull();
 		}
 	});
 
@@ -138,12 +175,48 @@ describe('Mediana', () => {
 		expect(pari.aggiungi(880)).toBe(440);
 	});
 
-	it('un frame senza altezza dà null e nella finestra non conta', () => {
+	it('regge i buchi brevi: dà una nota finché più di metà della finestra ne ha una', () => {
+		const m = new Mediana(5);
+		const uscite = [440, 441, 439, null, null, 440, null, null, null, 442].map((f) =>
+			m.aggiungi(f)
+		);
+		// due frame vuoti in mezzo alla voce passano; tre no, e un frame isolato nel silenzio non è una nota
+		expect(uscite).toEqual([440, 440, 440, 440, 440, 440, null, null, null, null]);
+	});
+
+	it('i frame vuoti nella finestra non entrano nella mediana; azzera() riparte da capo', () => {
 		const m = new Mediana(3);
 		m.aggiungi(440);
-		expect(m.aggiungi(null)).toBeNull();
+		expect(m.aggiungi(null)).toBeNull(); // uno su due: non basta
 		expect(m.aggiungi(450)).toBe(440);
 		m.azzera();
 		expect(m.aggiungi(300)).toBe(300);
+	});
+});
+
+describe('RumoreDiFondo (gate adattivo)', () => {
+	const DT = 1 / 30;
+
+	it('parte dal minimo assoluto, sale piano con il rumore e scende subito', () => {
+		const r = new RumoreDiFondo();
+		expect(r.gate).toBe(GATE_RMS);
+		// una ventola a −40 dBFS: in un secondo la stima sale di RISALITA_RUMORE_DB_S, non di colpo
+		for (let i = 0; i < 30; i++) r.aggiorna(0.01, DT);
+		expect(20 * Math.log10(r.rms / (GATE_RMS / MARGINE_GATE))).toBeCloseTo(RISALITA_RUMORE_DB_S, 1);
+		for (let i = 0; i < 300; i++) r.aggiorna(0.01, DT);
+		expect(r.rms).toBeCloseTo(0.01, 6);
+		expect(r.gate).toBeCloseTo(0.01 * MARGINE_GATE, 6);
+		// la ventola si spegne
+		r.aggiorna(0.0002, DT);
+		expect(r.gate).toBe(GATE_RMS);
+	});
+
+	it('una tosse non alza la soglia, e dallo zero digitale la stima risale', () => {
+		const r = new RumoreDiFondo();
+		for (let i = 0; i < 9; i++) r.aggiorna(0.2, DT); // 300 ms
+		expect(r.gate).toBeLessThan(1.5 * GATE_RMS);
+		r.aggiorna(0, DT);
+		for (let i = 0; i < 600; i++) r.aggiorna(0.01, DT);
+		expect(r.rms).toBeCloseTo(0.01, 6);
 	});
 });

@@ -128,6 +128,44 @@ describe('apriMicrofono', () => {
 		expect(audio.riproduzioneAttiva()).toBe(false);
 	});
 
+	it('gate adattivo: una voce bassa si sente nel silenzio, ma deve stare sopra il rumore di fondo', async () => {
+		const frame: FrameMic[] = [];
+		const m = await mic.apriMicrofono({ onframe: (f) => frame.push(f) });
+		const c = audio.contesto() as unknown as ContestoFinto;
+		let ms = 0;
+		const secondi = (s: number) => {
+			for (let k = 0; k < s * 30; k++) {
+				c.currentTime += 1 / 30;
+				giro((ms += 1000 / 30));
+			}
+			return frame.at(-1)!;
+		};
+		// −50 dBFS: il vecchio gate fisso (−40 dBFS) non l'avrebbe mai sentita
+		segnale = (i) => 0.0045 * Math.sin((2 * Math.PI * 440 * i) / 48_000);
+		expect(secondi(0.5).freq).toBeCloseTo(440, 0);
+		// una ventola (rumore a −34 dBFS): la stima del rumore sale piano, la soglia con lei
+		let seme = 1;
+		const rumore = Float32Array.from(
+			{ length: 2048 },
+			() => ((seme = (seme * 16807) % 2147483647) / 2147483647 - 0.5) * 0.07
+		);
+		segnale = (i) => rumore[i];
+		expect(secondi(1)).toMatchObject({ freq: null, motivo: 'aperiodico' });
+		const f = secondi(6);
+		expect(f.rumore).toBeCloseTo(f.rms, 3);
+		expect(f.gate).toBeCloseTo(2 * f.rms, 3);
+		// la stessa voce di prima adesso è sotto la soglia; una voce più forte del rumore passa
+		segnale = (i) => 0.0045 * Math.sin((2 * Math.PI * 440 * i) / 48_000);
+		expect(secondi(0.5)).toMatchObject({ freq: null, motivo: 'gate' });
+		segnale = (i) => 0.08 * Math.sin((2 * Math.PI * 440 * i) / 48_000);
+		const voce = secondi(0.5);
+		expect(voce.freq).toBeCloseTo(440, 0);
+		expect(voce.motivo).toBeUndefined();
+		// i frame con la nota non alzano la stima del rumore
+		expect(secondi(5).rumore).toBeCloseTo(f.rumore, 6);
+		expect(m).toMatchObject({ sampleRate: 48_000, cattura: 'raf', impostazioni: {} });
+	});
+
 	it('scheda nascosta o pagina lasciata: il microfono si chiude da solo e lo dice', async () => {
 		const onchiuso = vi.fn();
 		await mic.apriMicrofono({ onframe: () => {}, onchiuso });
