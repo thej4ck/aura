@@ -11,8 +11,9 @@
 	// tastiera, salvato in 'musica.canto'.estensione e confrontato con la prova precedente.
 	// La voce non si forza mai: «Basta così» è sempre in vista e finisce subito, con quello che c'è.
 	// Il microfono è aperto solo mentre si canta (chiuso nella pausa); se lo chiude il browser (scheda
-	// nascosta, pagina lasciata) si torna all'inizio senza salvare. Un esito solo, alla fine: giusto se
-	// almeno un arpeggio è riuscito.
+	// nascosta, pagina lasciata) si torna all'inizio senza salvare. È una misura solo la prova arrivata in
+	// fondo con almeno un arpeggio riuscito: si salva, si confronta con la precedente ed è l'unico esito
+	// (giusto). Fermata prima con «Basta così», mostra le note raggiunte, ma non si salva e non conta.
 	import { TOLLERANZE_CENTS } from '#lib/core/audio/costanti.ts';
 	import { sblocca } from '#lib/core/audio/contesto.ts';
 	import { ErroreMic, apriMicrofono, type FrameMic, type Microfono } from '#lib/core/audio/mic.ts';
@@ -22,6 +23,7 @@
 	import { progressi } from '#lib/core/store/progressi.svelte.ts';
 	import Avviso from '#lib/core/ui/Avviso.svelte';
 	import Button from '#lib/core/ui/Button.svelte';
+	import { nonPerdereIlFocus } from '#lib/core/ui/focus.ts';
 	import Icona from '#lib/core/ui/Icona.svelte';
 	import Keyboard from '#lib/core/ui/Keyboard.svelte';
 	import PitchMeter from '#lib/core/ui/PitchMeter.svelte';
@@ -58,9 +60,14 @@
 	let riproduzione = $state.raw<Riproduzione>();
 	let suona = $state<number | null>(null);
 	let errore = $state('');
-	/** il risultato appena salvato e quanto è cresciuto (null alla prima prova) */
-	let esito = $state.raw<{ basso: number; alto: number; crescita: number | null } | null>(null);
+	/**
+	 * le note raggiunte; `crescita` solo per una misura salvata: quanto è cresciuta (null alla prima),
+	 * undefined per una prova fermata prima, che non si confronta
+	 */
+	let esito = $state.raw<{ basso: number; alto: number; crescita?: number | null } | null>(null);
 	let microfono: Microfono | undefined;
+	/** il messaggio: il focus ci va quando il pulsante premuto sparisce (Comincia, Continua, Basta così) */
+	let messaggio = $state<HTMLElement>();
 	/** cresce a ogni apertura: un'apertura superata da «Basta così» o dall'uscita si chiude subito */
 	let tentativo = 0;
 	let emesso = false;
@@ -111,6 +118,7 @@
 		esito = null;
 		vista = 'permesso';
 		if (await apri()) vista = 'gioco';
+		void nonPerdereIlFocus(messaggio);
 	}
 
 	async function continua() {
@@ -118,6 +126,7 @@
 		if (!microfono && !(await apri())) return;
 		stato = riprendi(stato);
 		suonaArpeggio();
+		void nonPerdereIlFocus(messaggio);
 	}
 
 	function suonaArpeggio() {
@@ -159,19 +168,23 @@
 	function concludi() {
 		chiudiMicrofono();
 		riproduzione?.ferma();
+		void nonPerdereIlFocus(messaggio);
 		const r = risultato(stato);
-		if (r) {
-			const prove = leggiEstensioni(progressi.doc?.dati[ID_DATI]);
-			const ultima = prove.at(-1);
-			if (progressi.doc) {
-				const nuova = { data: new Date().toISOString(), ...r };
-				progressi.aggiornaDati(ID_DATI, { estensione: aggiungiEstensione(prove, nuova) });
-			}
-			esito = { ...r, crescita: ultima ? crescita(ultima, r) : null };
+		if (!r) return;
+		if (stato.motivo !== 'finita') {
+			esito = r; // una prova a metà: non è la misura della voce
+			return;
 		}
-		if (emesso || stato.conclusi === 0) return;
-		emesso = true; // conta la prima prova; poi si rifà quanto si vuole
-		onesito({ corretto: r !== null, item: 'estensione', dettagli: r ?? undefined });
+		const prove = leggiEstensioni(progressi.doc?.dati[ID_DATI]);
+		const ultima = prove.at(-1);
+		if (progressi.doc) {
+			const nuova = { data: new Date().toISOString(), ...r };
+			progressi.aggiornaDati(ID_DATI, { estensione: aggiungiEstensione(prove, nuova) });
+		}
+		esito = { ...r, crescita: ultima ? crescita(ultima, r) : null };
+		if (emesso) return;
+		emesso = true; // conta la prima misura; poi si rifà quanto si vuole
+		onesito({ corretto: true, item: 'estensione', dettagli: r });
 	}
 
 	function bastaCosi() {
@@ -211,6 +224,11 @@
 		if (stato.fase !== 'fine') return '';
 		if (esito) {
 			const [basso, alto] = limitiScritti(esito);
+			if (esito.crescita === undefined)
+				return m.canto_estensione_fin_qui({
+					basso: nomeConOttava(basso),
+					alto: nomeConOttava(alto)
+				});
 			return [
 				m.canto_estensione_risultato({
 					basso: nomeConOttava(basso),
@@ -315,10 +333,12 @@
 		/>
 	{/if}
 
-	<Avviso
-		tono={stato.fase === 'fine' && esito ? 'successo' : 'info'}
-		testo={stato.fase === 'fine' ? fine : feedback}
-	/>
+	<div tabindex="-1" bind:this={messaggio}>
+		<Avviso
+			tono={stato.fase === 'fine' && esito?.crescita !== undefined ? 'successo' : 'info'}
+			testo={stato.fase === 'fine' ? fine : feedback}
+		/>
+	</div>
 
 	<div class="azioni">
 		{#if vista === 'pronto' || vista === 'permesso'}

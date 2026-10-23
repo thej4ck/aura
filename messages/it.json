@@ -713,6 +713,7 @@
 	"canto_estensione_prima_volta": "È la tua prima misura: la prossima volta vedrai come cresce.",
 	"canto_estensione_nessuno": "Oggi l’arpeggio non è venuto, e va bene così. Riproviamo un altro giorno, con calma.",
 	"canto_estensione_basta": "Va bene così: ci fermiamo qui. Riproviamo quando vuoi.",
+	"canto_estensione_fin_qui": "Va bene così: ci fermiamo qui. Fin qui la tua voce è arrivata dal {basso} al {alto}. La misura intera la facciamo un’altra volta, quando vuoi.",
 	"canto_estensione_non_sentita": "Non ti ho sentito. Avvicinati al microfono e canta un «aaa» tranquillo.",
 	"canto_estensione_ricomincia": "Ricomincia",
 	"canto_estensione_tastiera": "Le note della tua voce, sulla tastiera",
