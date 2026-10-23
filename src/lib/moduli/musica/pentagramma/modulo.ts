@@ -20,7 +20,7 @@ export const modulo = {
 	titolo: 'Pentagramma',
 	descrizione: 'Leggere le note scritte sulle cinque linee, al tuo ritmo.',
 	icona: '🎼',
-	stato: 'bozza',
+	stato: 'pubblicata',
 	introduzione: {
 		cosaImparerai: [
 			'Come sono fatti il pentagramma e la chiave di violino.',

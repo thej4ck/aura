@@ -57,7 +57,7 @@ export const modulo = {
 	titolo: 'Canto',
 	descrizione: 'Cantare intonati, a turni: prima ascolti, poi canti tu.',
 	icona: '🎤',
-	stato: 'bozza',
+	stato: 'pubblicata',
 	introduzione: {
 		cosaImparerai: [
 			'Le sette note e i loro nomi.',
