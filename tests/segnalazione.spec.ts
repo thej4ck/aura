@@ -28,7 +28,9 @@ test('dal piè di pagina: controllo, anteprima, poi la issue form scelta', async
 }) => {
 	await apri(page, '/informazioni');
 	const anteprima = page.getByRole('dialog', { name: 'Segnala un problema' });
-	const pulsante = page.getByRole('contentinfo').getByRole('button', { name: 'Segnala un problema' });
+	const pulsante = page
+		.getByRole('contentinfo')
+		.getByRole('button', { name: 'Segnala un problema' });
 
 	// annullare l'anteprima: non si apre niente
 	await pulsante.click();
