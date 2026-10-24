@@ -1,7 +1,10 @@
 // Microfono → frame di altezza, tutto dentro la pagina: l'audio non si registra, non si salva e non
-// esce mai dal browser (e la CSP vieta comunque le connessioni verso altri siti).
+// esce mai dal browser (e la CSP vieta comunque le connessioni verso altri siti). Se non si apre, nelle
+// statistiche anonime va solo il codice dell'errore con browser e sistema in breve.
 import { FFT, FPS_MIC, PASSA_BASSO_HZ } from './costanti.ts';
 import { contesto, riproduzioneAttiva, usa } from './contesto.ts';
+import { ambienteBreve } from '../segnalazione.ts';
+import { conta } from '../statistiche.ts';
 import { Mediana, RumoreDiFondo, calcolaRms, rilevaAltezza } from './pitch.ts';
 
 export type FrameMic = {
@@ -52,6 +55,12 @@ export type MotivoChiusura = 'nascosta' | 'pagina-lasciata';
 
 const INTERVALLO_MS = 1000 / FPS_MIC;
 
+/** l'errore da lanciare, contato nelle statistiche anonime */
+function errore(codice: CodiceErroreMic, opzioni?: ErrorOptions): ErroreMic {
+	conta('mic', { v: codice, b: ambienteBreve(globalThis.navigator?.userAgent ?? '') });
+	return new ErroreMic(codice, opzioni);
+}
+
 function codiceDa(e: unknown): CodiceErroreMic {
 	const { name, message } = (e ?? {}) as { name?: string; message?: string };
 	switch (name) {
@@ -98,9 +107,9 @@ export async function apriMicrofono({
 	onchiuso?: (motivo: MotivoChiusura) => void;
 	latenzaMs?: number;
 }): Promise<Microfono> {
-	if (globalThis.isSecureContext === false) throw new ErroreMic('contesto-non-sicuro');
+	if (globalThis.isSecureContext === false) throw errore('contesto-non-sicuro');
 	if (typeof AudioContext === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-		throw new ErroreMic('non-supportato');
+		throw errore('non-supportato');
 	}
 	const c = contesto();
 	// prima di getUserMedia: su iOS la sessione audio passa ad ascoltare e suonare insieme
@@ -113,7 +122,7 @@ export async function apriMicrofono({
 		});
 	} catch (e) {
 		rilascia();
-		throw new ErroreMic(codiceDa(e), { cause: e });
+		throw errore(codiceDa(e), { cause: e });
 	}
 
 	let sorgente: MediaStreamAudioSourceNode;
@@ -125,7 +134,7 @@ export async function apriMicrofono({
 		// mai lasciare acceso il microfono (e la sua spia) se non lo si può usare
 		for (const traccia of stream.getTracks()) traccia.stop();
 		rilascia();
-		throw new ErroreMic('non-supportato', { cause: e });
+		throw errore('non-supportato', { cause: e });
 	}
 	// passa-basso nativo, poi un campione su due a YIN: regge il rumore di fondo e costa un quarto
 	const filtro = c.createBiquadFilter();

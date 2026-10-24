@@ -23,6 +23,11 @@ export type ContestoWidget = {
 	fase: Fase;
 	/** carica per nome un widget o un componente (es. un disegno SVG) del modulo, o un widget core */
 	carica: (nome: string) => Promise<ComponenteCaricato>;
+	/**
+	 * statistica anonima (core/statistiche.ts) di un momento della scheda; attività e numero della scheda
+	 * li aggiunge il motore. Fuori da un'attività (vetrina /dev) non c'è
+	 */
+	conta?: (evento: 'scaduta' | 'voce-forte') => void;
 };
 
 /** Props di ogni widget. `props` arriva da `scheda.props` (dati non tipizzati: il widget li valida). */

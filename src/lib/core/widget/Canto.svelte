@@ -143,7 +143,9 @@
 			f.freq !== null &&
 			Math.abs(distanzaCents(f.freq, opzioni.note[corrente], { equivalenzaOttava })) >
 				opzioni.tolleranzaCents;
+		const avvisata = voceForte.avviso;
 		voceForte = avanzaVoceForte(voceForte, f, fuori);
+		if (voceForte.avviso && !avvisata) contesto.conta?.('voce-forte');
 		stato = avanzaSequenza(stato, f, opzioni);
 		if (stato.esito !== 'in-corso') concludi();
 	}
@@ -162,6 +164,7 @@
 		frame = null;
 		const riuscita = stato.esito === 'riuscita';
 		fase = riuscita ? 'riuscita' : 'scaduta';
+		if (!riuscita) contesto.conta?.('scaduta');
 		if (emesso) return;
 		emesso = true; // conta il primo tentativo; poi si riprova quanto si vuole
 		onesito({

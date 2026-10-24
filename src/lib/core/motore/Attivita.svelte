@@ -11,6 +11,7 @@
 	} from '../contenuti/registry';
 	import type { Fase } from '../contenuti/schema';
 	import { registraErrore } from '../errori';
+	import { conta } from '../statistiche';
 	import { prerequisitiMancanti, prossimoPasso } from '../percorso';
 	import { progressi } from '../store/progressi.svelte';
 	import { PREFERENZE_PREDEFINITE } from '../store/schema-progressi';
@@ -120,17 +121,23 @@
 		});
 	}
 
+	/** statistiche anonime dei widget (ContestoWidget.conta): l'attività e la scheda le aggiunge il motore */
+	const contaScheda = (e: 'scaduta' | 'voce-forte') =>
+		conta(e, { a: attivita.id, s: stato.indice + 1 });
+
 	/** la scheda mostrata ha già i suoi esiti in questo giro: ci si è tornati con Indietro */
 	let rivista = false;
 
 	function vaiA(i: number) {
 		// conta la prima risposta: rifare una scheda "prova" sapendo già la soluzione non cancella gli errori
 		rivista = esiti.some((e) => e.scheda === i);
+		conta('scheda', { a: attivita.id, s: i + 1 });
 		salvaScheda(i);
 		void mostra('schede', i);
 	}
 
 	function inizia(da: number) {
+		conta('inizio', { a: attivita.id });
 		esiti = [];
 		giro++;
 		seed = nuovoSeed();
@@ -179,6 +186,7 @@
 			prossimo = suggerisci(prossimoPasso(catalogo, progressi.doc, oggi), attivita.id);
 		}
 		risultato = { superata: esito.superata, vuota, stelle, prossimo };
+		conta('fine', { a: attivita.id, v: vuota ? 'vuota' : esito.superata ? 'superata' : 'quasi' });
 		void mostra('riepilogo');
 	}
 </script>
@@ -302,7 +310,8 @@
 								preferenze,
 								seed,
 								fase: scheda.fase,
-								carica
+								carica,
+								conta: contaScheda
 							}}
 							onesito={registra}
 							onfine={avanti}
