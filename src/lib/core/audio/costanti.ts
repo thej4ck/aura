@@ -79,8 +79,23 @@ export const TENUTA_SEQUENZA_MS = 600;
 /** Fuori zona o in silenzio il progresso della tenuta cala a questa frazione della velocità con cui cresce. */
 export const CALO_TENUTA = 0.5;
 
-/** Tempo di ascolto (senza i momenti in cui suona il sito) prima di proporre di riascoltare. */
-export const ASCOLTO_MAX_MS = 20_000;
+/**
+ * Tempo di ascolto (senza i momenti in cui suona il sito) prima di proporre di riascoltare. Era 20 s:
+ * provando dal vero, a un bambino che cerca ancora la nota sembrava di essere interrotto.
+ */
+export const ASCOLTO_MAX_MS = 40_000;
+
+/**
+ * «Non serve cantare più forte» (musica/voce-forte.ts): per arrivare a una nota molti bambini alzano il
+ * volume e forzano la voce. VOCE_BASE_MS di voce danno il livello di partenza; l'avviso arriva dopo
+ * FORTE_MS di voce più forte di CRESCENDO_DB rispetto alla partenza mentre è fuori nota, oppure oltre
+ * FORTE_DBFS in assoluto (con il controllo automatico del volume spento una voce normale sta tra −46 e
+ * −34 dBFS, vedi GATE_RMS). Valori di partenza: da calibrare con le prove sui dispositivi veri.
+ */
+export const VOCE_BASE_MS = 1000;
+export const CRESCENDO_DB = 10;
+export const FORTE_DBFS = -14;
+export const FORTE_MS = 800;
 
 /** "Nota comoda": mediana della voce negli ultimi FINESTRA ms, quando ne è piena almeno COPERTURA. */
 export const FINESTRA_NOTA_COMODA_MS = 2000;

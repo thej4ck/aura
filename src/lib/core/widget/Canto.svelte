@@ -16,7 +16,9 @@
 	import type { Riproduzione } from '../audio/synth.ts';
 	import type { Rigo } from '../contenuti/schema.ts';
 	import type { ContestoWidget, EsitoWidget } from '../motore/widget.ts';
+	import { distanzaCents } from '../audio/frequenze.ts';
 	import { avanzaSequenza, nuovaSequenza } from '../musica/intonazione.ts';
+	import { avanzaVoceForte, nuovaVoceForte } from '../musica/voce-forte.ts';
 	import { midi, nomeNota } from '../musica/note.ts';
 	import Avviso from '../ui/Avviso.svelte';
 	import Button from '../ui/Button.svelte';
@@ -74,6 +76,7 @@
 	type Fase = 'pronto' | 'permesso' | 'ascolto' | 'riuscita' | 'scaduta' | 'senza-microfono';
 	let fase = $state<Fase>('pronto');
 	let stato = $state.raw(nuovaSequenza());
+	let voceForte = $state.raw(nuovaVoceForte());
 	let frame = $state.raw<FrameMic | null>(null);
 	let riproduzione = $state.raw<Riproduzione>();
 	let suona = $state<number | null>(null);
@@ -128,6 +131,7 @@
 		if (!vivo) return aperto.chiudi();
 		microfono = aperto;
 		stato = nuovaSequenza();
+		voceForte = nuovaVoceForte();
 		fase = 'ascolto';
 		ascolta(suonate); // prima il turno del sito, poi quello del bambino
 	}
@@ -135,6 +139,11 @@
 	function ascoltaFrame(f: FrameMic) {
 		if (fase !== 'ascolto') return;
 		frame = f;
+		const fuori =
+			f.freq !== null &&
+			Math.abs(distanzaCents(f.freq, opzioni.note[corrente], { equivalenzaOttava })) >
+				opzioni.tolleranzaCents;
+		voceForte = avanzaVoceForte(voceForte, f, fuori);
 		stato = avanzaSequenza(stato, f, opzioni);
 		if (stato.esito !== 'in-corso') concludi();
 	}
@@ -193,6 +202,9 @@
 					.join(' ');
 			case 'senza-microfono':
 				return `${errore} ${m.canta_senza_microfono()}`;
+			case 'ascolto':
+				// mentre si canta l'unico feedback è il consiglio di non forzare (musica/voce-forte.ts)
+				return voceForte.avviso ? m.canta_troppo_forte() : '';
 			default:
 				return '';
 		}
@@ -214,7 +226,7 @@
 		<div class="microfono">
 			<span class="icona-mic"><Icona nome="microfono" dimensione="1.75rem" /></span>
 			<div class="spiega">
-				<p class="per-te">{m.canta_microfono()}</p>
+				<p class="per-te">{m.canta_microfono()} {m.canta_voce_leggera()}</p>
 				<p class="per-adulti">{m.canta_microfono_adulti()}</p>
 			</div>
 		</div>
@@ -256,7 +268,11 @@
 	{/if}
 
 	<Avviso
-		tono={fase === 'riuscita' ? 'successo' : fase === 'senza-microfono' ? 'info' : 'attenzione'}
+		tono={fase === 'riuscita'
+			? 'successo'
+			: fase === 'senza-microfono' || fase === 'ascolto'
+				? 'info'
+				: 'attenzione'}
 		testo={feedback}
 	/>
 

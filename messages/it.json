@@ -623,6 +623,8 @@
 		}
 	],
 	"canta_microfono": "Il microfono serve solo per ascoltarti. Niente viene registrato.",
+	"canta_voce_leggera": "Canta con la voce di quando parli: non serve forte.",
+	"canta_troppo_forte": "Non serve cantare più forte: la nota si trova con una voce leggera, come quando parli.",
 	"canta_microfono_adulti": "Per gli adulti: il suono del microfono si analizza solo nel browser, mentre si canta. Non si salva e non si invia a nessuno.",
 	"canta_inizia": "Ascolta e canta",
 	"canta_leggi_inizia": "Leggi e canta",
