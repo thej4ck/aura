@@ -16,10 +16,12 @@
 	// (giusto). Fermata prima con «Basta così», mostra le note raggiunte, ma non si salva e non conta.
 	import { TOLLERANZE_CENTS } from '#lib/core/audio/costanti.ts';
 	import { sblocca } from '#lib/core/audio/contesto.ts';
+	import { distanzaCents } from '#lib/core/audio/frequenze.ts';
 	import { ErroreMic, apriMicrofono, type FrameMic, type Microfono } from '#lib/core/audio/mic.ts';
 	import type { Riproduzione } from '#lib/core/audio/synth.ts';
 	import type { WidgetProps } from '#lib/core/motore/widget.ts';
 	import { midi, nomeNota, scomponi } from '#lib/core/musica/note.ts';
+	import { avanzaVoceForte, nuovaVoceForte } from '#lib/core/musica/voce-forte.ts';
 	import { progressi } from '#lib/core/store/progressi.svelte.ts';
 	import Avviso from '#lib/core/ui/Avviso.svelte';
 	import Button from '#lib/core/ui/Button.svelte';
@@ -57,6 +59,8 @@
 	type Vista = 'pronto' | 'permesso' | 'gioco' | 'senza-microfono';
 	let vista = $state<Vista>('pronto');
 	let stato = $state.raw<StatoEstensione>(nuovaEstensione());
+	/** ai limiti della voce si forza facilmente: il consiglio di non cantare più forte (musica/voce-forte.ts) */
+	let voceForte = $state.raw(nuovaVoceForte());
 	let frame = $state.raw<FrameMic | null>(null);
 	let riproduzione = $state.raw<Riproduzione>();
 	let suona = $state<number | null>(null);
@@ -118,6 +122,7 @@
 		void sblocca(); // nel gesto, prima di ogni await (iOS)
 		riproduzione?.ferma();
 		stato = nuovaEstensione();
+		voceForte = nuovaVoceForte();
 		esito = null;
 		vista = 'permesso';
 		if (await apri()) vista = 'gioco';
@@ -148,11 +153,22 @@
 	function ascoltaFrame(f: FrameMic) {
 		if (vista !== 'gioco' || (stato.fase !== 'nota-comoda' && stato.fase !== 'giro')) return;
 		frame = f;
+		// fuori nota solo nei giri, dove c'è una nota da cantare; cercando la nota comoda conta il volume
+		const fuori =
+			stato.fase === 'giro' &&
+			rigo !== null &&
+			f.freq !== null &&
+			Math.abs(distanzaCents(f.freq, midi(rigo.note[corrente].altezza))) > opzioni.tolleranzaCents;
+		const avvisata = voceForte.avviso;
+		voceForte = avanzaVoceForte(voceForte, f, fuori);
+		if (voceForte.avviso && !avvisata) contesto.conta?.('voce-forte');
 		const prima = stato;
 		stato = avanzaEstensione(stato, f, opzioni);
-		if (stato.fase === 'giro' && stato.giro !== prima.giro)
+		if (stato.fase === 'giro' && stato.giro !== prima.giro) {
+			// il consiglio vale per la nota di adesso: a ogni giro riparte (la voce di partenza resta)
+			voceForte = { ...voceForte, avviso: false, forteMs: 0 };
 			suonaArpeggio(); // prima il turno del sito
-		else if (stato.fase === 'pausa')
+		} else if (stato.fase === 'pausa')
 			chiudiMicrofono(); // si beve: il microfono non serve
 		else if (stato.fase === 'fine') concludi();
 	}
@@ -207,6 +223,11 @@
 		if (vista !== 'gioco') return '';
 		if (stato.fase === 'pausa') return m.canto_estensione_pausa();
 		if (stato.fase === 'fine') return '';
+		const consiglio = voceForte.avviso ? ` ${m.canta_troppo_forte()}` : '';
+		return istruzione() + consiglio;
+	});
+
+	function istruzione() {
 		switch (stato.evento) {
 			case 'radice':
 				return m.canto_estensione_radice({ nome: nomeNota(rigo!.note[0].altezza, nomi) });
@@ -221,7 +242,7 @@
 			default:
 				return m.canto_estensione_comoda();
 		}
-	});
+	}
 
 	const fine = $derived.by(() => {
 		if (stato.fase !== 'fine') return '';
