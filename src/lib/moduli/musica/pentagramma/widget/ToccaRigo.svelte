@@ -23,6 +23,7 @@
 	import Avviso from '#lib/core/ui/Avviso.svelte';
 	import Domanda from '#lib/core/ui/Domanda.svelte';
 	import Button from '#lib/core/ui/Button.svelte';
+	import AzioniScheda from '#lib/core/widget/AzioniScheda.svelte';
 
 	let { props, contesto, onesito, onfine }: WidgetProps = $props();
 
@@ -98,9 +99,9 @@
 <Avviso tono={trovato ? 'successo' : 'attenzione'} testo={feedback} />
 
 {#if trovato}
-	<div class="azioni">
+	<AzioniScheda>
 		<Button dimensione="l" onclick={onfine}>{m.pulsante_avanti()}</Button>
-	</div>
+	</AzioniScheda>
 {/if}
 
 <style>
@@ -163,8 +164,5 @@
 	}
 	.trovato .nome::after {
 		content: ' ✓';
-	}
-	.azioni {
-		display: flex;
 	}
 </style>

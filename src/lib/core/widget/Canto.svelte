@@ -8,6 +8,7 @@
 	// (scheda nascosta, pagina lasciata) si torna all'inizio, senza esito.
 	// In lettura (`lettura`) le note sono da leggere: il sito suona solo la prima, la nota di partenza, che
 	// sullo Staff è scritta come nota di riferimento. Sentirle tutte serve dopo, per controllarsi.
+	import type { Snippet } from 'svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { ASCOLTO_MAX_MS, TOLLERANZE_CENTS } from '../audio/costanti.ts';
 	import { sblocca } from '../audio/contesto.ts';
@@ -23,6 +24,7 @@
 	import PitchMeter from '../ui/PitchMeter.svelte';
 	import ProgressRing from '../ui/ProgressRing.svelte';
 	import Staff from '../ui/Staff.svelte';
+	import AzioniScheda from './AzioniScheda.svelte';
 	import { ERRORI_MIC, suonaSeguendo } from './musica.ts';
 
 	type Props = {
@@ -38,6 +40,11 @@
 		lettura?: boolean;
 		/** «Basta così, vado avanti» mentre il microfono ascolta: passa oltre senza esito (lezioni) */
 		bastaCosi?: boolean;
+		/**
+		 * altri pulsanti che lasciano il turno (il «Basta così» dei giochi a giri): vanno con «Avanti» nella
+		 * stessa AzioniScheda, perché un widget ne mostra una sola
+		 */
+		azioni?: Snippet;
 		/** secondi di ogni nota suonata dal sito */
 		durataS: number;
 		etichette: boolean;
@@ -54,6 +61,7 @@
 		equivalenzaOttava,
 		lettura = false,
 		bastaCosi = false,
+		azioni,
 		durataS,
 		etichette,
 		colori,
@@ -87,6 +95,7 @@
 	});
 	const corrente = $derived(Math.min(stato.indice, altezze.length - 1));
 	const finita = $derived(fase === 'riuscita' || fase === 'scaduta' || fase === 'senza-microfono');
+	const basta = $derived(bastaCosi && fase === 'ascolto');
 
 	function ascolta(quante = altezze.length) {
 		riproduzione?.ferma();
@@ -277,22 +286,28 @@
 				{m.widget_ascolta()}
 			</Button>
 		{/if}
-		{#if bastaCosi && fase === 'ascolto'}
-			<!-- la voce non si forza: ci si può fermare senza aspettare la fine dell'ascolto -->
-			<Button dimensione="l" variante="quieta" icona="chiudi" onclick={onfine}>
-				{m.canta_basta_avanti()}
-			</Button>
-		{/if}
-		{#if finita}
-			<Button
-				dimensione="l"
-				variante={fase === 'scaduta' ? 'secondaria' : 'primaria'}
-				onclick={onfine}
-			>
-				{m.pulsante_avanti()}
-			</Button>
-		{/if}
 	</div>
+
+	{#if azioni || basta || finita}
+		<AzioniScheda>
+			{@render azioni?.()}
+			{#if basta}
+				<!-- la voce non si forza: ci si può fermare senza aspettare la fine dell'ascolto -->
+				<Button dimensione="l" variante="quieta" icona="chiudi" onclick={onfine}>
+					{m.canta_basta_avanti()}
+				</Button>
+			{/if}
+			{#if finita}
+				<Button
+					dimensione="l"
+					variante={fase === 'scaduta' ? 'secondaria' : 'primaria'}
+					onclick={onfine}
+				>
+					{m.pulsante_avanti()}
+				</Button>
+			{/if}
+		</AzioniScheda>
+	{/if}
 </div>
 
 <style>

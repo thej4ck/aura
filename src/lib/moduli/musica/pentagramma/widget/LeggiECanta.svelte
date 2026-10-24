@@ -42,12 +42,9 @@
 	}
 </script>
 
-<div class="testa">
-	<p class="conta" tabindex="-1" bind:this={contatore}>
-		{m.pentagramma_melodia_di({ numero: i + 1, totale: melodie.length })}
-	</p>
-	<Button variante="quieta" icona="chiudi" onclick={onfine}>{m.pentagramma_basta_cosi()}</Button>
-</div>
+<p class="conta" tabindex="-1" bind:this={contatore}>
+	{m.pentagramma_melodia_di({ numero: i + 1, totale: melodie.length })}
+</p>
 <p class="consiglio">{m.pentagramma_leggi_consiglio()}</p>
 
 {#key i}
@@ -63,18 +60,17 @@
 		item={melodia.join('-')}
 		{onesito}
 		onfine={prossima}
-	/>
+	>
+		{#snippet azioni()}
+			<!-- «Basta così» sempre in vista: nella barra della scheda, accanto ad «Avanti» -->
+			<Button variante="quieta" icona="chiudi" onclick={onfine}>
+				{m.pentagramma_basta_cosi()}
+			</Button>
+		{/snippet}
+	</Canto>
 {/key}
 
 <style>
-	/* «Basta così» sempre in vista, in alto accanto al contatore */
-	.testa {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--spazio-3);
-		align-items: center;
-		justify-content: space-between;
-	}
 	.conta {
 		font-size: var(--testo-l);
 		font-weight: var(--peso-medio);

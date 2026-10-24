@@ -27,6 +27,7 @@
 	import Domanda from '../ui/Domanda.svelte';
 	import Icona from '../ui/Icona.svelte';
 	import type { WidgetProps } from '../motore/widget';
+	import AzioniScheda from './AzioniScheda.svelte';
 
 	let { props, contesto, onesito, onfine }: WidgetProps = $props();
 
@@ -89,9 +90,9 @@
 <Avviso tono={trovata ? 'successo' : 'attenzione'} testo={feedback} />
 
 {#if trovata}
-	<div class="azioni">
+	<AzioniScheda>
 		<Button dimensione="l" onclick={onfine}>{m.pulsante_avanti()}</Button>
-	</div>
+	</AzioniScheda>
 {/if}
 
 <style>
@@ -157,8 +158,5 @@
 	}
 	.opzione[aria-disabled='true']:not(.giusta) {
 		cursor: default;
-	}
-	.azioni {
-		display: flex;
 	}
 </style>

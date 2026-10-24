@@ -1,7 +1,7 @@
 <script lang="ts">
 	// Motore unico delle attività: obiettivo → schede (Scopri / Proviamo insieme / Prova tu) → riepilogo.
 	// Raccoglie gli esiti dei widget, salva la scheda corrente a ogni passo e alla fine registra la verifica.
-	import { tick } from 'svelte';
+	import { tick, type Snippet } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { m } from '#lib/paraglide/messages.js';
 	import {
@@ -21,6 +21,7 @@
 	import LeggiAltaVoce from '../ui/LeggiAltaVoce.svelte';
 	import SegnalaProblema from '../ui/SegnalaProblema.svelte';
 	import Stelle from '../ui/Stelle.svelte';
+	import AzioniScheda, { impostaBarraScheda } from '../widget/AzioniScheda.svelte';
 	import {
 		avanzamentoSchede,
 		gruppiFase,
@@ -64,6 +65,17 @@
 		{ superata: boolean; vuota: boolean; stelle: number; prossimo?: AttivitaCatalogo } | undefined =
 		$state();
 	let titolo: HTMLElement | undefined = $state();
+
+	// i pulsanti del widget (AzioniScheda) vanno nella barra in fondo, accanto a «Indietro»
+	let azioni = $state.raw<Snippet>();
+	impostaBarraScheda({
+		mostra(s) {
+			azioni = s;
+			return () => {
+				if (azioni === s) azioni = undefined;
+			};
+		}
+	});
 
 	const record = $derived(progressi.doc?.attivita[attivita.id]);
 	const preferenze = $derived(progressi.doc?.preferenze ?? PREFERENZE_PREDEFINITE);
@@ -178,9 +190,9 @@
 
 {#snippet nonCaricata()}
 	<Avviso tono="attenzione" testo={m.attivita_widget_errore()} />
-	<div class="azioni">
+	<AzioniScheda>
 		<Button dimensione="l" onclick={avanti}>{m.pulsante_avanti()}</Button>
-	</div>
+	</AzioniScheda>
 {/snippet}
 
 <div class="attivita">
@@ -305,15 +317,18 @@
 			</section>
 		{/key}
 
-		<div class="piede-scheda">
+		<!-- sempre sullo schermo: quando la scheda è più alta si aggancia al fondo (sticky), altrimenti sta qui -->
+		<div class="barra">
 			{#if !stato.prima}
 				<Button variante="quieta" icona="freccia-sinistra" onclick={() => vaiA(stato.indice - 1)}>
-					{m.pulsante_indietro()}
+					<span class="indietro">{m.pulsante_indietro()}</span>
 				</Button>
 			{/if}
-			<div class="segnala">
-				<SegnalaProblema attivita={attivita.id} scheda="{stato.indice + 1}/{stato.totale}" />
-			</div>
+			<div class="azioni-widget">{@render azioni?.()}</div>
+		</div>
+		<!-- per gli adulti: sotto la barra, fuori dai comandi del bambino -->
+		<div class="segnala">
+			<SegnalaProblema attivita={attivita.id} scheda="{stato.indice + 1}/{stato.totale}" />
 		</div>
 	{:else if risultato}
 		<section class="riepilogo" aria-labelledby="{id}-riepilogo">
@@ -558,13 +573,40 @@
 	}
 
 	/* «Segnala» resta a destra, lontano dai controlli del bambino, anche senza «Indietro» */
-	.piede-scheda {
+	.barra {
+		position: sticky;
+		bottom: 0;
+		z-index: 1;
+		display: flex;
+		gap: var(--spazio-3);
+		align-items: center;
+		/* un filo più larga della colonna: il contenuto che scorre sotto non spunta ai lati */
+		margin-inline: calc(-1 * var(--spazio-2));
+		padding: var(--spazio-3) var(--spazio-2) max(var(--spazio-3), env(safe-area-inset-bottom));
+		border-top: 1px solid var(--colore-bordo);
+		background: var(--colore-fondo);
+	}
+	.azioni-widget {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--spazio-3);
+		align-items: center;
+		justify-content: flex-end;
+		margin-inline-start: auto;
+	}
+	/* su un telefono stretto «Indietro» resta la freccia: il nome lo legge ancora il lettore di schermo */
+	@media (max-width: 30rem) {
+		.indietro {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip-path: inset(50%);
+			white-space: nowrap;
+		}
 	}
 	.segnala {
-		margin-inline-start: auto;
+		align-self: flex-end;
 	}
 
 	.riepilogo h2 {

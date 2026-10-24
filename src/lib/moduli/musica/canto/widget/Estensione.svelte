@@ -29,6 +29,7 @@
 	import PitchMeter from '#lib/core/ui/PitchMeter.svelte';
 	import ProgressRing from '#lib/core/ui/ProgressRing.svelte';
 	import Staff from '#lib/core/ui/Staff.svelte';
+	import AzioniScheda from '#lib/core/widget/AzioniScheda.svelte';
 	import { ERRORI_MIC, suonaSeguendo } from '#lib/core/widget/musica.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import {
@@ -77,6 +78,8 @@
 	const opzioni = $derived({ tolleranzaCents: TOLLERANZE_CENTS[contesto.preferenze.tolleranza] });
 	const rigo = $derived(stato.radice !== null ? arpeggio(stato.radice) : null);
 	const corrente = $derived(Math.min(stato.sequenza.indice, (rigo?.note.length ?? 1) - 1));
+	/** misura finita, o senza microfono: al posto di «Basta così» c'è «Avanti» */
+	const finita = $derived(stato.fase === 'fine' || vista === 'senza-microfono');
 	const nomeConOttava = (a: string) =>
 		m.notazione_tasto({ nome: nomeNota(a, nomi), ottava: scomponi(a).ottava });
 
@@ -340,8 +343,8 @@
 		/>
 	</div>
 
-	<div class="azioni">
-		{#if vista === 'pronto' || vista === 'permesso'}
+	{#if vista === 'pronto' || vista === 'permesso'}
+		<div class="azioni">
 			<Button
 				dimensione="l"
 				icona="play"
@@ -350,24 +353,33 @@
 			>
 				{m.canto_estensione_inizia()}
 			</Button>
-		{:else if stato.fase === 'pausa'}
+		</div>
+	{:else if stato.fase === 'pausa'}
+		<div class="azioni">
 			<Button dimensione="l" icona="play" onclick={continua}>
 				{m.canto_estensione_continua()}
 			</Button>
-		{:else if stato.fase === 'fine' || vista === 'senza-microfono'}
-			<Button dimensione="l" onclick={onfine}>{m.pulsante_avanti()}</Button>
-			{#if vista === 'gioco'}
-				<Button dimensione="l" variante="secondaria" icona="ricomincia" onclick={comincia}>
-					{m.canto_estensione_ricomincia()}
-				</Button>
-			{/if}
-		{/if}
-		{#if !(stato.fase === 'fine' || vista === 'senza-microfono')}
+		</div>
+	{:else if finita && vista === 'gioco'}
+		<div class="azioni">
+			<Button dimensione="l" variante="secondaria" icona="ricomincia" onclick={comincia}>
+				{m.canto_estensione_ricomincia()}
+			</Button>
+		</div>
+	{/if}
+
+	{#if !finita}
+		<AzioniScheda>
 			<Button dimensione="l" variante="secondaria" icona="chiudi" onclick={bastaCosi}>
 				{m.canto_basta()}
 			</Button>
-		{/if}
-	</div>
+		</AzioniScheda>
+	{:else if stato.fase !== 'pausa'}
+		<!-- in pausa senza microfono c'è solo «Continua», che riprova ad aprirlo -->
+		<AzioniScheda>
+			<Button dimensione="l" onclick={onfine}>{m.pulsante_avanti()}</Button>
+		</AzioniScheda>
+	{/if}
 </div>
 
 <style>

@@ -37,12 +37,9 @@
 </script>
 
 <div class="serie">
-	<div class="testa">
-		<p class="contatore" tabindex="-1" bind:this={elContatore}>
-			{contatore(indice + 1, giri.length)}
-		</p>
-		<Button variante="quieta" icona="chiudi" onclick={onfine}>{m.canto_basta()}</Button>
-	</div>
+	<p class="contatore" tabindex="-1" bind:this={elContatore}>
+		{contatore(indice + 1, giri.length)}
+	</p>
 	{#key indice}
 		<Canto
 			rigo={giro.rigo}
@@ -55,7 +52,12 @@
 			item={giro.item}
 			{onesito}
 			onfine={prossimo}
-		/>
+		>
+			{#snippet azioni()}
+				<!-- «Basta così» sempre in vista: nella barra della scheda, accanto ad «Avanti» -->
+				<Button variante="quieta" icona="chiudi" onclick={onfine}>{m.canto_basta()}</Button>
+			{/snippet}
+		</Canto>
 	{/key}
 </div>
 
@@ -69,13 +71,5 @@
 		color: var(--colore-testo-tenue);
 		font-size: var(--testo-l);
 		font-weight: var(--peso-medio);
-	}
-	/* «Basta così» sempre in vista, in alto accanto al contatore */
-	.testa {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--spazio-3);
-		align-items: center;
-		justify-content: space-between;
 	}
 </style>

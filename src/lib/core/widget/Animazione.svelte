@@ -30,6 +30,7 @@
 	import Button from '../ui/Button.svelte';
 	import PlayerPassi from '../ui/PlayerPassi.svelte';
 	import type { WidgetProps } from '../motore/widget';
+	import AzioniScheda from './AzioniScheda.svelte';
 
 	let { scheda, props, contesto, onfine }: WidgetProps = $props();
 
@@ -54,12 +55,6 @@
 	<Avviso tono="attenzione" testo={m.attivita_widget_errore()} />
 {/await}
 
-<div class="azioni">
+<AzioniScheda>
 	<Button dimensione="l" onclick={onfine}>{m.pulsante_avanti()}</Button>
-</div>
-
-<style>
-	.azioni {
-		display: flex;
-	}
-</style>
+</AzioniScheda>

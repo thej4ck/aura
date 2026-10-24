@@ -20,6 +20,7 @@
 	import type { WidgetProps } from '../motore/widget.ts';
 	import Button from '../ui/Button.svelte';
 	import Staff from '../ui/Staff.svelte';
+	import AzioniScheda from './AzioniScheda.svelte';
 	import { suonaSeguendo } from './musica.ts';
 
 	let { props, contesto, onfine }: WidgetProps = $props();
@@ -72,10 +73,12 @@
 	>
 		{riproduzione ? m.widget_ferma() : ascoltata ? m.widget_ascolta_di_nuovo() : m.widget_ascolta()}
 	</Button>
-	{#if ascoltata}
-		<Button dimensione="l" onclick={onfine}>{m.pulsante_avanti()}</Button>
-	{/if}
 </div>
+{#if ascoltata}
+	<AzioniScheda>
+		<Button dimensione="l" onclick={onfine}>{m.pulsante_avanti()}</Button>
+	</AzioniScheda>
+{/if}
 
 <style>
 	.azioni {

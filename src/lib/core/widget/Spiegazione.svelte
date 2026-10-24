@@ -21,6 +21,7 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import Button from '../ui/Button.svelte';
 	import type { WidgetProps } from '../motore/widget';
+	import AzioniScheda from './AzioniScheda.svelte';
 	import { riceviSuono, type SuonoDisegno } from './suono.svelte.ts';
 
 	let { props, contesto, onfine }: WidgetProps = $props();
@@ -49,9 +50,9 @@
 	</figure>
 {/if}
 
-<div class="azioni">
-	{#if suono}
-		{@const suona = suono.nota !== null}
+{#if suono}
+	{@const suona = suono.nota !== null}
+	<div class="azioni">
 		<Button
 			dimensione="l"
 			variante="secondaria"
@@ -60,9 +61,11 @@
 		>
 			{suona ? m.widget_ferma() : m.widget_ascolta()}
 		</Button>
-	{/if}
+	</div>
+{/if}
+<AzioniScheda>
 	<Button dimensione="l" onclick={onfine}>{m.pulsante_avanti()}</Button>
-</div>
+</AzioniScheda>
 
 <style>
 	.illustrazione {

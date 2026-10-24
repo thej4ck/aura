@@ -21,6 +21,7 @@
 	import Domanda from '#lib/core/ui/Domanda.svelte';
 	import Button from '#lib/core/ui/Button.svelte';
 	import Staff from '#lib/core/ui/Staff.svelte';
+	import AzioniScheda from '#lib/core/widget/AzioniScheda.svelte';
 	import {
 		estrai,
 		leggiLeitner,
@@ -172,18 +173,18 @@
 
 	<Avviso tono={trovata ? 'successo' : 'attenzione'} testo={feedback} />
 
-	<div class="piede">
-		<p class="conta">
-			<span>{m.pentagramma_che_nota_lette({ count: lette })}</span>
-			<span class="in-gioco">{m.pentagramma_che_nota_in_gioco({ note: inGioco.join(', ') })}</span>
-		</p>
-		<!-- si può smettere dopo la prima risposta: un gioco senza risposte non misura niente -->
-		{#if lette || provate.length}
+	<p class="conta">
+		<span>{m.pentagramma_che_nota_lette({ count: lette })}</span>
+		<span class="in-gioco">{m.pentagramma_che_nota_in_gioco({ note: inGioco.join(', ') })}</span>
+	</p>
+	<!-- si può smettere dopo la prima risposta: un gioco senza risposte non misura niente -->
+	{#if lette || provate.length}
+		<AzioniScheda>
 			<Button variante="secondaria" dimensione="l" onclick={onfine}>
 				{m.pentagramma_ho_finito()}
 			</Button>
-		{/if}
-	</div>
+		</AzioniScheda>
+	{/if}
 </div>
 
 <style>
@@ -257,13 +258,6 @@
 	}
 	.nota-si {
 		--colore-nota: var(--nota-si);
-	}
-	.piede {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--spazio-4);
-		align-items: center;
-		justify-content: space-between;
 	}
 	.conta {
 		display: flex;

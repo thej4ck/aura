@@ -35,6 +35,7 @@
 	import Button from '#lib/core/ui/Button.svelte';
 	import Keyboard from '#lib/core/ui/Keyboard.svelte';
 	import Staff from '#lib/core/ui/Staff.svelte';
+	import AzioniScheda from '#lib/core/widget/AzioniScheda.svelte';
 	import { suonaSeguendo } from '#lib/core/widget/musica.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { rigoDi } from '../sequenza.ts';
@@ -108,8 +109,8 @@
 	<Avviso
 		testo={toccata ? m.canto_tastiera_toccato({ nome: nomeNotaParlato(toccata, nomi) }) : ''}
 	/>
-	<div class="azioni">
-		{#if sequenza.length}
+	{#if sequenza.length}
+		<div class="azioni">
 			<Button
 				dimensione="l"
 				variante={ascoltata ? 'secondaria' : 'primaria'}
@@ -122,11 +123,13 @@
 						? m.widget_ascolta_di_nuovo()
 						: m.widget_ascolta()}
 			</Button>
-		{/if}
-		{#if !sequenza.length || ascoltata}
+		</div>
+	{/if}
+	{#if !sequenza.length || ascoltata}
+		<AzioniScheda>
 			<Button dimensione="l" onclick={onfine}>{m.pulsante_avanti()}</Button>
-		{/if}
-	</div>
+		</AzioniScheda>
+	{/if}
 </div>
 
 <style>

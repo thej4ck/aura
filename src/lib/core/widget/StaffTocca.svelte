@@ -48,6 +48,7 @@
 	import Button from '../ui/Button.svelte';
 	import Domanda from '../ui/Domanda.svelte';
 	import Staff from '../ui/Staff.svelte';
+	import AzioniScheda from './AzioniScheda.svelte';
 
 	let { props, contesto, onesito, onfine }: WidgetProps = $props();
 
@@ -126,15 +127,7 @@
 <Avviso tono={trovata ? 'successo' : 'attenzione'} testo={feedback} />
 
 {#if trovata}
-	<div class="azioni">
+	<AzioniScheda>
 		<Button dimensione="l" onclick={onfine}>{m.pulsante_avanti()}</Button>
-	</div>
+	</AzioniScheda>
 {/if}
-
-<style>
-	.azioni {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--spazio-3);
-	}
-</style>
