@@ -53,6 +53,18 @@
 	const scheda = $derived(
 		SCHEDE.find((s) => s.id === ancora || s.sezioni.includes(ancora)) ?? SCHEDE[0]
 	);
+
+	// su telefono le schede sono una riga che scorre: quella aperta resta in vista. Solo in orizzontale,
+	// senza scrollIntoView, che sposterebbe anche la pagina (es. arrivando a #crediti)
+	let lista: HTMLUListElement | undefined = $state();
+	$effect(() => {
+		const aperta = lista?.querySelector<HTMLElement>(`[href="#${scheda.id}"]`);
+		if (!lista || !aperta) return;
+		const margine = 16;
+		const da = aperta.getBoundingClientRect().left - lista.getBoundingClientRect().left;
+		if (da < margine || da + aperta.offsetWidth > lista.clientWidth - margine)
+			lista.scrollLeft += da - margine;
+	});
 	const VOCE = [m.genitori_voce_1, m.genitori_voce_2, m.genitori_voce_3, m.genitori_voce_4];
 	const AIUTARE = [
 		m.genitori_aiutare_1,
@@ -97,7 +109,7 @@
 	{/if}
 
 	<nav class="schede" aria-label={m.genitori_indice()}>
-		<ul>
+		<ul bind:this={lista}>
 			{#each SCHEDE as s (s.id)}
 				<li>
 					<a href="#{s.id}" aria-current={s === scheda ? 'true' : undefined}>{s.titolo()}</a>
@@ -249,6 +261,20 @@
 	}
 	.schede a:hover {
 		border-color: var(--colore-accento);
+	}
+	/* su telefono una riga sola che scorre: andando a capo le schede prendevano mezzo schermo. La
+	   scheda tagliata sul bordo dice che ce ne sono altre; il padding lascia spazio al contorno del focus */
+	@media (max-width: 40rem) {
+		.schede ul {
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			padding: var(--spazio-2);
+			margin: calc(-1 * var(--spazio-2));
+			scrollbar-width: none;
+		}
+		.schede li {
+			flex: none;
+		}
 	}
 	/* la scheda aperta è piena, le altre solo bordate: non conta solo il colore */
 	.schede a[aria-current='true'] {
