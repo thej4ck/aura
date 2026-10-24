@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ASCOLTO_MAX_MS } from '#lib/core/audio/costanti.ts';
 import { freqDaMidi } from '#lib/core/audio/frequenze.ts';
 import type { FrameVoce } from '#lib/core/musica/intonazione.ts';
 import { GIRI_MELODIA, midi } from '#lib/core/musica/note.ts';
@@ -153,7 +154,7 @@ describe('estensione vocale', () => {
 		// mentre si cerca, lo Staff mostra la nota che si canta
 		expect(notaInCorso(nuovaEstensione())).toBeNull();
 		expect(notaInCorso(canta(nuovaEstensione(), freqDaMidi(62.1), 0.5, { t: 0 }))).toBe('D4');
-		const muto = canta(nuovaEstensione(), null, 21, { t: 0 });
+		const muto = canta(nuovaEstensione(), null, ASCOLTO_MAX_MS / 1000 + 1, { t: 0 });
 		expect(muto).toMatchObject({ fase: 'fine', motivo: 'non-sentita' });
 	});
 
