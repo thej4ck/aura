@@ -25,6 +25,13 @@ Il sito conta alcuni eventi in forma anonima e aggregata. Li manda al nostro ser
 - **Lettura**: `GET /statistiche/riepilogo` con la chiave segreta `STATISTICHE_CHIAVE` (variabile del servizio su Railway, mai nel repo). Si legge con `scripts/statistiche.mjs`.
 - **Servizio**: `statistiche/` (Node 24, nessuna dipendenza, Dockerfile proprio) è un servizio a parte nello stesso progetto Railway, con un volume su `/data`. Abbiamo scelto un servizio separato invece di mettere Node nel container di Caddy: un processo per container e un deploy indipendente.
 
+## Configurazione su Railway
+
+Railway ha deprecato `railway.json` («Config as Code»): quello nella radice tiene solo il build con il Dockerfile, che vale per entrambi i servizi. Il resto sta nelle impostazioni dei servizi (dashboard o API):
+
+- servizio `statistiche`: Root Directory `statistiche`, watch path `/statistiche/**`, healthcheck `/statistiche/salute`, niente sospensione e niente dominio pubblico, volume su `/data`, variabili `PORT=8080` e `STATISTICHE_CHIAVE`;
+- servizio del sito: healthcheck `/`, sospensione attiva, variabile `STATISTICHE_HOST=statistiche.railway.internal:8080`.
+
 ## Alternative scartate
 
 - **Servizi di analytics esterni** (Plausible, Umami cloud, Google Analytics): i dati e l'IP passerebbero da terzi, contro la 0002.
