@@ -6,7 +6,13 @@
 	import { sblocca } from '../../audio/contesto.ts';
 	import { riepiloga, type Riepilogo } from '../../audio/diagnosi.ts';
 	import { midiDaFreq } from '../../audio/frequenze.ts';
-	import { ErroreMic, apriMicrofono, type FrameMic, type Microfono } from '../../audio/mic.ts';
+	import {
+		ErroreMic,
+		apriMicrofono,
+		type CodiceErroreMic,
+		type FrameMic,
+		type Microfono
+	} from '../../audio/mic.ts';
 	import { altezza, nomeNota } from '../../musica/note.ts';
 	import { progressi } from '../../store/progressi.svelte';
 	import Avviso from '../../ui/Avviso.svelte';
@@ -29,6 +35,16 @@
 		['noiseSuppression', m.mic_riduzione],
 		['autoGainControl', m.mic_volume_auto]
 	];
+	// microfono negato senza nessuna richiesta: lo bloccano il sito o il browser, oppure il sistema
+	const PASSI: Partial<Record<CodiceErroreMic, (() => string)[]>> = {
+		'permesso-negato': [
+			m.mic_permesso_sito,
+			m.mic_permesso_browser,
+			m.mic_permesso_bambini,
+			m.mic_permesso_app
+		],
+		'permesso-sistema': [m.mic_permesso_android, m.mic_permesso_computer]
+	};
 
 	let microfono = $state.raw<Microfono>();
 	let apertura = false;
@@ -37,6 +53,19 @@
 	let ultimo = $state.raw<FrameMic>();
 	let riepilogo = $state.raw<Riepilogo>();
 	let errore = $state('');
+	let codice = $state<CodiceErroreMic>();
+	let dettaglio = $state('');
+
+	/** per chi aiuta a distanza: l'errore così come l'ha dato il browser, e il permesso che ricorda per il sito */
+	async function rispostaBrowser(e: unknown): Promise<string> {
+		const causa = e instanceof ErroreMic ? e.cause : e;
+		const testo = causa instanceof Error ? `${causa.name}: ${causa.message}` : String(causa);
+		const stato = await navigator.permissions?.query({ name: 'microphone' }).then(
+			(s) => s.state,
+			() => undefined
+		);
+		return stato ? `${testo} · permissions: ${stato}` : testo;
+	}
 
 	function ascolta(f: FrameMic) {
 		frame.push(f);
@@ -61,6 +90,8 @@
 		if (apertura) return;
 		apertura = true;
 		errore = '';
+		codice = undefined;
+		dettaglio = '';
 		void sblocca(); // nel gesto, prima di ogni await (iOS)
 		try {
 			const aperto = await apriMicrofono({ onframe: ascolta, onchiuso: chiuso });
@@ -68,7 +99,10 @@
 			if (vivo) microfono = aperto;
 			else aperto.chiudi();
 		} catch (e) {
-			errore = ERRORI_MIC[e instanceof ErroreMic ? e.codice : 'non-supportato']();
+			codice = e instanceof ErroreMic ? e.codice : 'non-supportato';
+			// qui siamo già dove il messaggio dei giochi rimanda: al posto del rimando, i passi
+			errore = PASSI[codice] ? m.mic_permesso_intro() : ERRORI_MIC[codice]();
+			dettaglio = await rispostaBrowser(e);
 		} finally {
 			apertura = false;
 		}
@@ -118,6 +152,16 @@
 		</Button>
 	</div>
 	<Avviso tono="attenzione" testo={errore} />
+	{#if codice && PASSI[codice]}
+		<ol class="passi">
+			{#each PASSI[codice] as passo (passo)}
+				<li>{passo()}</li>
+			{/each}
+		</ol>
+	{/if}
+	{#if dettaglio}
+		<p class="tenue">{m.mic_risposta_browser({ testo: dettaglio })}</p>
+	{/if}
 
 	{#if microfono}
 		<dl class="numeri">
@@ -204,6 +248,13 @@
 		max-width: var(--larghezza-testo);
 		color: var(--colore-testo-tenue);
 		font-size: var(--testo-s);
+	}
+	.passi {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spazio-2);
+		max-width: var(--larghezza-testo);
+		padding-inline-start: 1.25em;
 	}
 	.numeri {
 		display: grid;

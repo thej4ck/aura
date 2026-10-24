@@ -271,3 +271,39 @@ test('schede: una alla volta, l’indirizzo le ricorda e i vecchi link aprono qu
 	);
 	await expect(titolo("Installa l'app")).toBeInViewport();
 });
+
+test('microfono negato senza richiesta: i passi per il browser o per il sistema', async ({
+	page
+}) => {
+	// come Chrome quando non chiede: «Permission denied» (sito o browser), «… by system» (Android, computer)
+	await page.addInitScript(() => {
+		navigator.mediaDevices.getUserMedia = () =>
+			Promise.reject(
+				new DOMException(
+					(globalThis as { rifiuto?: string }).rifiuto ?? 'Permission denied',
+					'NotAllowedError'
+				)
+			);
+	});
+	await apri(page, '/genitori#microfono');
+	const sezione = page.getByRole('region', { name: 'Prova il microfono' });
+	const apriMic = sezione.getByRole('button', { name: 'Apri il microfono' });
+
+	await apriMic.click();
+	await expect(
+		sezione.getByText(/^Il microfono è stato negato senza nessuna richiesta/)
+	).toBeVisible();
+	await expect(sezione.getByRole('listitem')).toHaveCount(4);
+	await expect(sezione.getByRole('listitem').first()).toContainText('a sinistra dell’indirizzo');
+	await expect(
+		sezione.getByText(/^Risposta del browser: NotAllowedError: Permission denied/)
+	).toBeVisible();
+
+	await page.evaluate(
+		() => ((globalThis as { rifiuto?: string }).rifiuto = 'Permission denied by system')
+	);
+	await apriMic.click();
+	await expect(sezione.getByText(/NotAllowedError: Permission denied by system/)).toBeVisible();
+	await expect(sezione.getByRole('listitem')).toHaveCount(2);
+	await expect(sezione.getByRole('listitem').first()).toContainText('Su Android');
+});

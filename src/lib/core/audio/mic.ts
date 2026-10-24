@@ -24,7 +24,11 @@ export type FrameMic = {
 };
 
 export type CodiceErroreMic =
-	'permesso-negato' | 'nessun-microfono' | 'contesto-non-sicuro' | 'non-supportato';
+	| 'permesso-negato'
+	| 'permesso-sistema'
+	| 'nessun-microfono'
+	| 'contesto-non-sicuro'
+	| 'non-supportato';
 
 export class ErroreMic extends Error {
 	readonly codice: CodiceErroreMic;
@@ -49,10 +53,13 @@ export type MotivoChiusura = 'nascosta' | 'pagina-lasciata';
 const INTERVALLO_MS = 1000 / FPS_MIC;
 
 function codiceDa(e: unknown): CodiceErroreMic {
-	switch ((e as { name?: string } | null)?.name) {
+	const { name, message } = (e ?? {}) as { name?: string; message?: string };
+	switch (name) {
 		case 'NotAllowedError':
 		case 'SecurityError':
-			return 'permesso-negato';
+			// Chrome scrive «Permission denied by system» quando è il sistema (Android, macOS, Windows)
+			// a negare il microfono al browser: allora le impostazioni del sito non bastano
+			return /by system/i.test(message ?? '') ? 'permesso-sistema' : 'permesso-negato';
 		case 'NotFoundError':
 		case 'NotReadableError': // occupato da un'altra app o guasto
 		case 'OverconstrainedError':

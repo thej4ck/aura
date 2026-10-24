@@ -231,11 +231,13 @@ describe('apriMicrofono', () => {
 				(e) => (e instanceof mic.ErroreMic ? e.codice : 'altro')
 			);
 		const apri = () => mic.apriMicrofono({ onframe: () => {} });
-		const rifiuta = (name: string) =>
-			getUserMedia.mockRejectedValueOnce(Object.assign(new Error(name), { name }));
+		const rifiuta = (name: string, messaggio = name) =>
+			getUserMedia.mockRejectedValueOnce(Object.assign(new Error(messaggio), { name }));
 
-		rifiuta('NotAllowedError');
+		rifiuta('NotAllowedError', 'Permission denied');
 		expect(await codice(apri())).toBe('permesso-negato');
+		rifiuta('NotAllowedError', 'Permission denied by system');
+		expect(await codice(apri())).toBe('permesso-sistema');
 		rifiuta('NotFoundError');
 		expect(await codice(apri())).toBe('nessun-microfono');
 		rifiuta('NotReadableError');

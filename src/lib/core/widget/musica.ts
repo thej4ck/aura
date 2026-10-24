@@ -57,6 +57,7 @@ export function suonaSeguendo(
 /** Cosa dire quando il microfono non si apre: per l'adulto, con cosa può fare. */
 export const ERRORI_MIC: Record<CodiceErroreMic, () => string> = {
 	'permesso-negato': m.audio_errore_permesso_negato,
+	'permesso-sistema': m.audio_errore_permesso_sistema,
 	'nessun-microfono': m.audio_errore_nessun_microfono,
 	'contesto-non-sicuro': m.audio_errore_contesto_non_sicuro,
 	'non-supportato': m.audio_errore_non_supportato
