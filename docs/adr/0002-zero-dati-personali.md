@@ -1,6 +1,6 @@
 # 0002. Zero dati personali
 
-Stato: accettata · 2026-10-21
+Stato: accettata · 2026-10-21 · modificata dalla 0007 (statistiche d'uso anonime e aggregate)
 
 ## Contesto
 
@@ -9,7 +9,7 @@ Il modulo Canto usa il microfono: le famiglie devono potersi fidare che l'audio 
 
 ## Decisione
 
-- Nessun account, cookie, analytics, telemetria, pubblicità, pixel o servizio di raccolta errori. Nessuna richiesta verso terzi: font e risorse sono self-hosted.
+- Nessun account, cookie, analytics di terzi, pubblicità, pixel o servizio di raccolta errori. Nessuna richiesta verso terzi: font e risorse sono self-hosted. Unica eccezione, dalla 0007: contatori d'uso anonimi verso il nostro server, senza identificativi né IP.
 - I progressi stanno in IndexedDB. L'unico modo per portarli altrove è un file che l'adulto esporta o collega. Il profilo ha un avatar emoji e un alias facoltativo che resta in locale.
 - Gli errori si registrano solo in locale; un pulsante "copia dettagli" permette all'adulto di inviarli, se vuole.
 - La sintesi vocale usa solo voci locali (`voice.localService`).
