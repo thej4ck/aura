@@ -2,6 +2,7 @@
 	import '#lib/core/tokens.css';
 	import '#lib/core/base.css';
 	import { onMount } from 'svelte';
+	import { version } from '$app/env';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import favicon from '#lib/assets/favicon.svg';
@@ -33,6 +34,14 @@
 		else delete html.dataset.testo;
 		html.toggleAttribute('data-contrasto-alto', !!a?.contrastoAlto);
 		html.toggleAttribute('data-riduci-movimento', !!a?.riduciMovimento);
+	});
+
+	// il commit della build (vite.config.ts); fuso fisso: il prerender e il browser scrivono la stessa data
+	const versione = m.layout_versione({
+		versione: version.slice(0, 7),
+		data: new Intl.DateTimeFormat('it', { dateStyle: 'long', timeZone: 'Europe/Rome' }).format(
+			new Date(__DATA_BUILD__)
+		)
 	});
 
 	// promemoria discreto per l'adulto: solo un link nel piè di pagina, niente finestre
@@ -139,6 +148,7 @@
 	<p>{m.layout_autore()}</p>
 	<a href={resolve('/informazioni')}>{m.layout_informazioni()}</a>
 	<SegnalaProblema />
+	<p class="versione">{versione}</p>
 	{#if backup}
 		<a class="backup" href="{resolve('/genitori')}#backup">
 			<Icona nome="info" />
@@ -349,6 +359,9 @@
 	}
 	.piede .backup {
 		color: var(--colore-info);
+	}
+	.piede .versione {
+		font-size: var(--testo-xs);
 	}
 
 	@media (max-width: 30rem) {

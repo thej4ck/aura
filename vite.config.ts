@@ -5,6 +5,8 @@ import { sveltekit } from '@sveltejs/kit/vite';
 
 // SvelteKit 3: la configurazione del kit sta qui (svelte.config.js non è più supportato).
 export default defineConfig({
+	// quando è stata fatta la build: «Versione … del …» nel piè di pagina
+	define: { __DATA_BUILD__: JSON.stringify(new Date().toISOString()) },
 	plugins: [
 		sveltekit({
 			compilerOptions: {

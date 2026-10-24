@@ -11,6 +11,7 @@
 	"layout_privacy_link": "Come funziona",
 	"layout_autore": "Un progetto gratuito di Nicola Mondinelli.",
 	"layout_informazioni": "Informazioni",
+	"layout_versione": "Versione {versione} del {data}",
 	"profilo_attivo": "Profilo attivo: {avatar}",
 	"profilo_cambia": "Profilo attivo: {avatar}. Cambia profilo",
 	"profilo_scegli": "Chi impara adesso?",
