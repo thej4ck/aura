@@ -24,6 +24,7 @@ export default defineConfig({
 	reporter: process.env.CI ? 'github' : 'list',
 	// genera il WAV del microfono finto
 	globalSetup: './tests/setup-mic.ts',
+	// ogni progetto deve comparire nei gruppi e2e di .github/workflows/ci.yml, altrimenti la CI non lo esegue
 	projects: [
 		{
 			name: 'chromium',

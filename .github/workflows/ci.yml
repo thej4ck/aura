@@ -30,12 +30,25 @@ jobs:
       - run: npm test
 
   e2e:
+    name: e2e ${{ matrix.nome }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # gruppi bilanciati sulla durata (le shard di Playwright dividono per numero di test, e il progetto dev
+    # pesa più di tutti gli altri insieme). Un progetto nuovo in playwright.config.ts va aggiunto qui
     strategy:
       fail-fast: false
       matrix:
-        shard: [1/3, 2/3, 3/3]
+        include:
+          - nome: pagine e voce
+            argomenti: --project chromium --project voce
+          - nome: microfono
+            argomenti: --project mic
+          - nome: dev 1/3
+            argomenti: --project dev --shard=1/3
+          - nome: dev 2/3
+            argomenti: --project dev --shard=2/3
+          - nome: dev 3/3
+            argomenti: --project dev --shard=3/3
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -51,7 +64,7 @@ jobs:
       # niente --with-deps: il runner ha già Chrome con le sue librerie, e apt-get a volte resta appeso per minuti
       - if: steps.cache-pw.outputs.cache-hit != 'true'
         run: npx playwright install chromium
-      - run: npm run test:e2e -- --shard=${{ matrix.shard }}
+      - run: npm run test:e2e -- ${{ matrix.argomenti }}
 
   # il controllo obbligatorio su main si chiama «ci»: passa solo se passano tutti gli altri
   ci:
