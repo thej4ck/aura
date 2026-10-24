@@ -2,8 +2,10 @@ import * as v from 'valibot';
 import { ID_LOCALE, ID_MODULO, ID_QUALIFICATO } from '../contenuti/schema';
 
 export const FORMATO = 'aura-progressi';
-export const SCHEMA_ATTUALE = 1;
+export const SCHEMA_ATTUALE = 2;
 
+/** la base del testo (tokens.css: tutto è in rem). Lo schema 1 aveva solo `accessibilita.testoGrande` */
+export const DIMENSIONI_TESTO = ['piccolo', 'normale', 'grande', 'molto-grande'] as const;
 export const STATI_ATTIVITA = ['nuova', 'in_corso', 'completata'] as const;
 export const STATI_AVANZAMENTO = ['da_iniziare', 'in_corso', 'completato'] as const;
 
@@ -31,8 +33,8 @@ export const SchemaPreferenze = v.object({
 		stato: v.optional(v.picklist(STATI_AVANZAMENTO))
 	}),
 	letturaAltaVoce: v.boolean(),
+	dimensioneTesto: v.picklist(DIMENSIONI_TESTO),
 	accessibilita: v.object({
-		testoGrande: v.boolean(),
 		contrastoAlto: v.boolean(),
 		riduciMovimento: v.boolean()
 	}),
@@ -93,7 +95,8 @@ export const PREFERENZE_PREDEFINITE: Preferenze = {
 	filtroModuli: {},
 	// il pulsante compare solo se c'è una voce locale: chi non legge ancora (6 anni) ha la narrazione da subito
 	letturaAltaVoce: true,
-	accessibilita: { testoGrande: false, contrastoAlto: false, riduciMovimento: false },
+	dimensioneTesto: 'normale',
+	accessibilita: { contrastoAlto: false, riduciMovimento: false },
 	latenzaAudioMs: 0,
 	aggiornato: new Date(0).toISOString()
 };

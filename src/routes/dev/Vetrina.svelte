@@ -31,7 +31,6 @@
 
 	type Accessibilita = Preferenze['accessibilita'];
 	const ACCESSIBILITA: [keyof Accessibilita, () => string][] = [
-		['testoGrande', m.pref_testo_grande],
 		['contrastoAlto', m.pref_contrasto_alto],
 		['riduciMovimento', m.pref_riduci_movimento]
 	];
@@ -63,6 +62,17 @@
 		{#if progressi.doc}
 			{@const a = progressi.doc.preferenze.accessibilita}
 			<div class="opzioni">
+				<label class="interruttore">
+					<input
+						type="checkbox"
+						checked={progressi.doc.preferenze.dimensioneTesto === 'grande'}
+						onchange={(e) =>
+							progressi.aggiornaPreferenze({
+								dimensioneTesto: e.currentTarget.checked ? 'grande' : 'normale'
+							})}
+					/>
+					{m.pref_testo_grande()}
+				</label>
 				{#each ACCESSIBILITA as [chiave, etichetta] (chiave)}
 					<label class="interruttore">
 						<input

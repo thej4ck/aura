@@ -7,11 +7,30 @@ import {
 	type Documento
 } from './schema-progressi';
 
+/** input non fidato: quello che non è un oggetto diventa vuoto, e poi lo respinge la validazione */
+const oggetto = (x: unknown): Record<string, unknown> =>
+	typeof x === 'object' && x !== null && !Array.isArray(x) ? (x as Record<string, unknown>) : {};
+
 /**
  * Migrazioni pure: la chiave n trasforma un documento dello schema n nello schema n + 1
  * (e aggiorna il campo `schema`). Ogni migrazione ha un test con un documento della versione precedente.
  */
-const MIGRAZIONI: Record<number, (doc: Record<string, unknown>) => Record<string, unknown>> = {};
+const MIGRAZIONI: Record<number, (doc: Record<string, unknown>) => Record<string, unknown>> = {
+	// 1 → 2: la casella «Testo grande» diventa una delle quattro dimensioni del testo
+	1: (doc) => {
+		const preferenze = oggetto(doc.preferenze);
+		const { testoGrande, ...accessibilita } = oggetto(preferenze.accessibilita);
+		return {
+			...doc,
+			schema: 2,
+			preferenze: {
+				...preferenze,
+				dimensioneTesto: testoGrande === true ? 'grande' : 'normale',
+				accessibilita
+			}
+		};
+	}
+};
 
 /** Porta un documento qualsiasi (input non fidato) all'ultima versione dello schema e lo valida. */
 export function migra(json: unknown): Documento {

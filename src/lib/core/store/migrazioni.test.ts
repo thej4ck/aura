@@ -52,4 +52,26 @@ describe('migra', () => {
 		expect(() => migra(stelle)).toThrow(/stelle[\s\S]*aggiornato|aggiornato[\s\S]*stelle/);
 		expect(codice(() => migra({ ...doc, profilo: { id: 'x', avatar: '🦊' } }))).toBe('non-valido');
 	});
+
+	it('1 → 2: la casella «Testo grande» diventa la dimensione del testo', () => {
+		const attuale = nuovoDocumento('🦊');
+		const preferenze: Record<string, unknown> = { ...attuale.preferenze };
+		delete preferenze.dimensioneTesto;
+		const versione1 = (testoGrande: boolean) => ({
+			...attuale,
+			schema: 1,
+			preferenze: {
+				...preferenze,
+				accessibilita: { testoGrande, contrastoAlto: true, riduciMovimento: false }
+			}
+		});
+		expect(migra(versione1(true)).preferenze).toMatchObject({
+			dimensioneTesto: 'grande',
+			accessibilita: { contrastoAlto: true, riduciMovimento: false }
+		});
+		expect(migra(versione1(false)).preferenze.dimensioneTesto).toBe('normale');
+		expect(migra(versione1(true)).preferenze.accessibilita).not.toHaveProperty('testoGrande');
+		// preferenze rotte: niente eccezioni a metà, le respinge la validazione
+		expect(codice(() => migra({ ...versione1(true), preferenze: 'x' }))).toBe('non-valido');
+	});
 });

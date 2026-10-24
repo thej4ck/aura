@@ -3,7 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apriDb } from './db';
 import { leggi, permesso, salvaHandle, scrivi } from './file';
 import { AVATARI, PAROLA_AVATAR, Progressi, SALVA_DOPO_MS } from './progressi.svelte';
-import { ErroreProgressi, nuovoDocumento, type Documento } from './schema-progressi';
+import {
+	ErroreProgressi,
+	nuovoDocumento,
+	SCHEMA_ATTUALE,
+	type Documento
+} from './schema-progressi';
 
 // picker, permessi e scrittura su file restano finti; esporta, salvaHandle e handleSalvato sono quelli veri
 vi.mock('./file', async (originale) => ({
@@ -237,7 +242,9 @@ describe('avvio difficile', () => {
 	});
 
 	it('un documento che questa versione non sa leggere resta in IndexedDB e si conta', async () => {
-		await (await apriDb(indexedDB)).put('profili', { ...nuovoDocumento('🐙'), schema: 2 });
+		await (
+			await apriDb(indexedDB)
+		).put('profili', { ...nuovoDocumento('🐙'), schema: SCHEMA_ATTUALE + 1 });
 		const p = await avvia();
 		expect(p.illeggibili).toBe(1);
 		expect(p.profili).toHaveLength(1); // quello nuovo, per poter usare il sito

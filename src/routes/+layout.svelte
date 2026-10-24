@@ -26,9 +26,11 @@
 
 	// preferenze di accessibilità del profilo → attributi su <html> (i token fanno il resto)
 	$effect(() => {
-		const a = progressi.doc?.preferenze.accessibilita;
+		const p = progressi.doc?.preferenze;
+		const a = p?.accessibilita;
 		const html = document.documentElement;
-		html.toggleAttribute('data-testo-grande', !!a?.testoGrande);
+		if (p && p.dimensioneTesto !== 'normale') html.dataset.testo = p.dimensioneTesto;
+		else delete html.dataset.testo;
 		html.toggleAttribute('data-contrasto-alto', !!a?.contrastoAlto);
 		html.toggleAttribute('data-riduci-movimento', !!a?.riduciMovimento);
 	});

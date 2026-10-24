@@ -1,7 +1,7 @@
 /*
  * Token del design system. Tutto in rem: testo grande, fasce d'età e contrasto si ottengono
  * cambiando questi valori, non i componenti. Varianti con attributi su <html>:
- *   data-eta="6-10" · data-testo-grande · data-contrasto-alto · data-riduci-movimento
+ *   data-eta="6-10" · data-testo="piccolo|grande|molto-grande" · data-contrasto-alto · data-riduci-movimento
  * Contrasti verificati (WCAG 2.2 AA): testo ≥ 4.5:1, bordi dei controlli e grafica ≥ 3:1, in chiaro e in scuro.
  */
 :root {
@@ -137,9 +137,15 @@
 	--target: 3.5rem;
 }
 
-/* testo grande: tutto è in rem, basta cambiare la base */
-:root[data-testo-grande] {
+/* dimensione del testo: tutto è in rem, basta cambiare la base */
+:root[data-testo='piccolo'] {
+	font-size: 87.5%;
+}
+:root[data-testo='grande'] {
 	font-size: 125%;
+}
+:root[data-testo='molto-grande'] {
+	font-size: 150%;
 }
 
 /* contrasto alto */

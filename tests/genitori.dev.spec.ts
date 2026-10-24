@@ -113,7 +113,7 @@ test('impostazioni: dopo il controllo si riflettono sugli attributi di <html> e 
 }) => {
 	await apri(page, '/genitori#impostazioni');
 	const html = page.locator('html');
-	const testoGrande = page.getByRole('checkbox', { name: 'Testo grande' });
+	const testoGrande = page.getByRole('radio', { name: 'Grande', exact: true });
 
 	// annullato il controllo, la casella torna com'era
 	await page.getByRole('checkbox', { name: 'Meno movimento' }).click();
@@ -124,7 +124,7 @@ test('impostazioni: dopo il controllo si riflettono sugli attributi di <html> e 
 	await testoGrande.click();
 	await superaGate(page);
 	await expect(testoGrande).toBeChecked();
-	await expect(html).toHaveAttribute('data-testo-grande');
+	await expect(html).toHaveAttribute('data-testo', 'grande');
 	await expect(page.getByText('Impostazione salvata.')).toBeVisible();
 
 	// una volta per visita: la modifica dopo non chiede di nuovo
@@ -136,8 +136,9 @@ test('impostazioni: dopo il controllo si riflettono sugli attributi di <html> e 
 
 	await page.waitForTimeout(800); // salvataggio debounced (400 ms) su IndexedDB
 	await apri(page, '/genitori#impostazioni');
-	await expect(html).toHaveAttribute('data-testo-grande');
+	await expect(html).toHaveAttribute('data-testo', 'grande');
 	await expect(html).toHaveAttribute('data-contrasto-alto');
+	await expect(testoGrande).toBeChecked();
 	await expect(page.getByRole('radio', { name: 'C, D, E' })).toBeChecked();
 	// la manopola della latenza è nascosta finché non c'è il modulo Ritmo o una calibrazione
 	await expect(page.getByRole('spinbutton')).toHaveCount(0);

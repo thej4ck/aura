@@ -19,8 +19,13 @@
 	});
 
 	type Accessibilita = Preferenze['accessibilita'];
+	const DIMENSIONI: [Preferenze['dimensioneTesto'], () => string][] = [
+		['piccolo', m.genitori_testo_piccolo],
+		['normale', m.genitori_testo_normale],
+		['grande', m.genitori_testo_grande],
+		['molto-grande', m.genitori_testo_molto_grande]
+	];
 	const ACCESSIBILITA: [keyof Accessibilita, () => string][] = [
-		['testoGrande', m.pref_testo_grande],
 		['contrastoAlto', m.pref_contrasto_alto],
 		['riduciMovimento', m.pref_riduci_movimento]
 	];
@@ -61,7 +66,7 @@
 		);
 	}
 
-	function scelta<K extends 'nomiNote' | 'tolleranza'>(
+	function scelta<K extends 'nomiNote' | 'tolleranza' | 'dimensioneTesto'>(
 		e: Evento,
 		chiave: K,
 		valore: Preferenze[K]
@@ -85,6 +90,26 @@
 {#if progressi.doc}
 	{@const p = progressi.doc.preferenze}
 	<form class="impostazioni" onsubmit={(e) => e.preventDefault()}>
+		<fieldset>
+			<legend>{m.genitori_dimensione_testo()}</legend>
+			<div class="opzioni">
+				{#each DIMENSIONI as [valore, etichetta] (valore)}
+					<label class="opzione">
+						<input
+							type="radio"
+							name="{id}-testo"
+							value={valore}
+							checked={p.dimensioneTesto === valore}
+							onchange={(e) => scelta(e, 'dimensioneTesto', valore)}
+						/>
+						<!-- l'anteprima della misura: la «A» cresce con l'opzione -->
+						<span class="anteprima {valore}" aria-hidden="true">A</span>
+						{etichetta()}
+					</label>
+				{/each}
+			</div>
+		</fieldset>
+
 		<fieldset>
 			<legend>{m.genitori_impostazioni_lettura()}</legend>
 			<div class="opzioni">
@@ -211,6 +236,20 @@
 		height: 1.25rem;
 		margin: 0;
 		accent-color: var(--colore-accento);
+	}
+	/* in em del testo attuale, nelle stesse proporzioni delle quattro basi (tokens.css) */
+	.anteprima {
+		font-weight: var(--peso-forte);
+		line-height: 1;
+	}
+	.anteprima.piccolo {
+		font-size: 0.875em;
+	}
+	.anteprima.grande {
+		font-size: 1.25em;
+	}
+	.anteprima.molto-grande {
+		font-size: 1.5em;
 	}
 	.aiuto {
 		max-width: var(--larghezza-testo);
