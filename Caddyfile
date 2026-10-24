@@ -34,6 +34,19 @@
 	# le pagine non hanno lo slash finale (/moduli, non /moduli/): stesso contenuto, un solo indirizzo
 	@slash path_regexp slash ^(.+)/$
 	redir @slash {re.slash.1}{?query} 308
+	# statistiche anonime (docs/adr/0007-statistiche-anonime.md): al servizio sulla rete privata di
+	# Railway. Senza gli header con l'IP del visitatore: il servizio non lo riceve proprio
+	handle /statistiche/* {
+		request_body {
+			max_size 1KB
+		}
+		reverse_proxy {$STATISTICHE_HOST:127.0.0.1:9} {
+			header_up -X-Forwarded-For
+			header_up -X-Real-Ip
+			header_up -X-Envoy-External-Address
+			header_up -User-Agent
+		}
+	}
 	root * /srv
 	try_files {path} {path}.html {path}/index.html
 	# .br/.gz generati in build; encode resta solo come ripiego per i file non precompressi
