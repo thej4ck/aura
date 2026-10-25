@@ -27,16 +27,18 @@
 		<Avviso tono="successo" testo={m.pwa_gia_installata()} />
 	{:else}
 		<ProblemaNoto id="safari-dati-7-giorni" />
+		<!-- prima delle istruzioni: il backup si scarica prima di installare -->
+		<ProblemaNoto id="app-dati-separati" />
 		{#if installazione.invito}
 			<Button onclick={installa}>{m.pwa_installa()}</Button>
 		{:else if d?.sistema === 'iOS'}
 			<Avviso tono="info" testo={m.pwa_ios()} />
-		{:else if d?.apple}
+		{:else if d?.apple && (d.versione ?? 0) >= 17}
+			<!-- Aggiungi al Dock: Safari 17 su macOS Sonoma o successivo (la versione di macOS non si legge) -->
 			<p>{m.pwa_mac()}</p>
 		{:else}
 			<p>{m.pwa_altri()}</p>
 		{/if}
-		<ProblemaNoto id="app-dati-separati" />
 	{/if}
 </div>
 

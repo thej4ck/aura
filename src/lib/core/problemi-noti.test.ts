@@ -28,15 +28,24 @@ const DISPOSITIVI: Record<string, Dispositivo> = {
 		outputLatency: false
 	},
 	ipadFirefox: { ...BASE, browser: 'Firefox', sistema: 'iOS', versioneIos: 18, apple: true },
-	macSafari: { ...BASE, browser: 'Safari', sistema: 'macOS', apple: true },
+	macSafari: { ...BASE, browser: 'Safari', versione: 18, sistema: 'macOS', apple: true },
+	// Safari 16: niente outputLatency, e niente app nel Dock
 	macSafariVecchio: {
 		...BASE,
 		browser: 'Safari',
+		versione: 16,
 		sistema: 'macOS',
 		apple: true,
 		outputLatency: false
 	},
-	macIsolamento: { ...BASE, browser: 'Safari', sistema: 'macOS', apple: true, webAudio: false },
+	macIsolamento: {
+		...BASE,
+		browser: 'Safari',
+		versione: 18,
+		sistema: 'macOS',
+		apple: true,
+		webAudio: false
+	},
 	// nel prerender: nessun navigator, nessuna API
 	vuoto: { apple: false, app: false, webAudio: false, outputLatency: false }
 };
@@ -98,7 +107,7 @@ describe('problemi noti', () => {
 			]
 		],
 		['macSafari', ['safari-dati-7-giorni', 'app-dati-separati']],
-		['macSafariVecchio', ['safari-dati-7-giorni', 'app-dati-separati', 'output-latency-assente']],
+		['macSafariVecchio', ['safari-dati-7-giorni', 'output-latency-assente']],
 		['macIsolamento', ['safari-dati-7-giorni', 'app-dati-separati', 'apple-isolamento']]
 	])('%s', (nome, attesi) => {
 		expect(applicati(DISPOSITIVI[nome])).toEqual(attesi);

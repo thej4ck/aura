@@ -29,8 +29,9 @@ export const PROBLEMI_NOTI = {
 		d.apple && !d.app && (ios(d) ? m.problema_dati_7_giorni_ios() : m.problema_dati_7_giorni_mac()),
 
 	// L'app installata (schermata Home, Dock) ha uno spazio dati suo, separato dal browser
-	// (WebKit 181849, firt.dev/notes/pwa-ios, WWDC 2023 sessione 10120).
-	'app-dati-separati': (d) => d.apple && !d.app && m.problema_app_dati_separati(),
+	// (WebKit 181849, firt.dev/notes/pwa-ios, WWDC 2023 sessione 10120). Sul Mac il Dock c'è da Safari 17.
+	'app-dati-separati': (d) =>
+		d.apple && !d.app && (ios(d) || (d.versione ?? 0) >= 17) && m.problema_app_dati_separati(),
 
 	// Dopo un'altra app, lo schermo bloccato o un suono di sistema l'AudioContext può restare muto
 	// ('interrupted', o 'running' fermo), e nell'app installata resume() può non risolversi mai
