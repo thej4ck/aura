@@ -327,7 +327,7 @@
 		{/key}
 
 		<!-- sempre sullo schermo: quando la scheda è più alta si aggancia al fondo (sticky), altrimenti sta qui -->
-		<div class="barra">
+		<div class="barra" data-barra-fondo>
 			{#if !stato.prima}
 				<Button variante="quieta" icona="freccia-sinistra" onclick={() => vaiA(stato.indice - 1)}>
 					<span class="indietro">{m.pulsante_indietro()}</span>

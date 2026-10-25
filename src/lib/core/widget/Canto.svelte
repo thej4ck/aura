@@ -26,6 +26,7 @@
 	import PitchMeter from '../ui/PitchMeter.svelte';
 	import ProgressRing from '../ui/ProgressRing.svelte';
 	import Staff from '../ui/Staff.svelte';
+	import { mostraIntero } from '../ui/scorrimento.ts';
 	import AzioniScheda from './AzioniScheda.svelte';
 	import { ERRORI_MIC, suonaSeguendo } from './musica.ts';
 
@@ -99,6 +100,8 @@
 	const corrente = $derived(Math.min(stato.indice, altezze.length - 1));
 	const finita = $derived(fase === 'riuscita' || fase === 'scaduta' || fase === 'senza-microfono');
 	const basta = $derived(bastaCosi && fase === 'ascolto');
+	/** tocca al bambino: il misuratore deve essere sullo schermo (su un telefono può stare sotto il rigo) */
+	const canta = $derived(fase === 'ascolto' && !riproduzione);
 
 	function ascolta(quante = altezze.length) {
 		riproduzione?.ferma();
@@ -259,15 +262,21 @@
 				{/if}
 			</p>
 		</div>
-		<PitchMeter
-			target={opzioni.note[corrente]}
-			tolleranzaCents={opzioni.tolleranzaCents}
-			{frame}
-			{equivalenzaOttava}
-			nomeTarget={corrente < suonate
-				? nomeNota(altezze[corrente], contesto.preferenze.nomiNote)
-				: undefined}
-		/>
+		<div
+			{@attach (el) => {
+				if (canta) mostraIntero(el);
+			}}
+		>
+			<PitchMeter
+				target={opzioni.note[corrente]}
+				tolleranzaCents={opzioni.tolleranzaCents}
+				{frame}
+				{equivalenzaOttava}
+				nomeTarget={corrente < suonate
+					? nomeNota(altezze[corrente], contesto.preferenze.nomiNote)
+					: undefined}
+			/>
+		</div>
 	{/if}
 
 	<Avviso

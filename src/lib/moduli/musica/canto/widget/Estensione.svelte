@@ -28,6 +28,7 @@
 	import { nonPerdereIlFocus } from '#lib/core/ui/focus.ts';
 	import Icona from '#lib/core/ui/Icona.svelte';
 	import Keyboard from '#lib/core/ui/Keyboard.svelte';
+	import { mostraIntero } from '#lib/core/ui/scorrimento.ts';
 	import PitchMeter from '#lib/core/ui/PitchMeter.svelte';
 	import ProgressRing from '#lib/core/ui/ProgressRing.svelte';
 	import Staff from '#lib/core/ui/Staff.svelte';
@@ -331,12 +332,19 @@
 			/>
 			<p>{m.canta_nota_di({ numero: corrente + 1, totale: rigo.note.length })}</p>
 		</div>
-		<PitchMeter
-			target={midi(rigo.note[corrente].altezza)}
-			tolleranzaCents={opzioni.tolleranzaCents}
-			{frame}
-			nomeTarget={nomeNota(rigo.note[corrente].altezza, nomi)}
-		/>
+		<!-- quando tocca al bambino il misuratore deve essere sullo schermo -->
+		<div
+			{@attach (el) => {
+				if (!riproduzione) mostraIntero(el);
+			}}
+		>
+			<PitchMeter
+				target={midi(rigo.note[corrente].altezza)}
+				tolleranzaCents={opzioni.tolleranzaCents}
+				{frame}
+				nomeTarget={nomeNota(rigo.note[corrente].altezza, nomi)}
+			/>
+		</div>
 	{:else if stato.fase === 'fine' && esito}
 		{@const scritti = limitiScritti(esito)}
 		<Staff

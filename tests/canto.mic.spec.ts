@@ -144,3 +144,20 @@ test('cosa sono le note: si toccano solo i tasti bianchi, i neri arrivano più a
 	expect(esterne).toEqual([]);
 	expect(errori).toEqual([]);
 });
+
+test('su un telefono, quando tocca cantare, il misuratore della voce è sullo schermo sopra la barra', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 360, height: 640 });
+	await page.emulateMedia({ reducedMotion: 'reduce' }); // si salta, senza scorrere piano: niente attese
+	await apri(page, 'tieni-la-nota', 'Tieni la nota');
+	await page.getByRole('button', { name: 'Avanti' }).click();
+	await page.getByRole('button', { name: 'Ascolta e canta' }).click();
+
+	const turno = page.getByRole('list', { name: 'A chi tocca' }).locator('[aria-current="step"]');
+	await expect(turno).toHaveText('Canta', { timeout: 10_000 });
+	const misuratore = await page.getByRole('img', { name: /Misuratore della voce/ }).boundingBox();
+	const barra = await page.locator('[data-barra-fondo]').boundingBox();
+	expect(misuratore!.y).toBeGreaterThanOrEqual(0);
+	expect(misuratore!.y + misuratore!.height).toBeLessThanOrEqual(barra!.y);
+});
