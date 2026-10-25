@@ -5,6 +5,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { modulo as canto } from '../src/lib/moduli/musica/canto/modulo';
 import { modulo as pentagramma } from '../src/lib/moduli/musica/pentagramma/modulo';
+import { modulo as ritmo } from '../src/lib/moduli/musica/ritmo/modulo';
 import { sorveglia } from './sorveglianza';
 
 test.setTimeout(90_000); // la prima visita al server di sviluppo compila al volo
@@ -32,7 +33,7 @@ type Dati = {
 /** schede che si superano con «Avanti»: per arrivare al disegno basta premerlo */
 const PASSIVE = new Set(['spiegazione', 'animazione']);
 
-const casi: Caso[] = ([canto, pentagramma] as Dati[]).flatMap((m) =>
+const casi: Caso[] = ([canto, pentagramma, ritmo] as Dati[]).flatMap((m) =>
 	m.attivita.flatMap((a) =>
 		a.schede.flatMap((s, indice): Caso[] => {
 			const p = s.props;
