@@ -6,18 +6,30 @@
 // (`spiegazione`) suona solo con il pulsante «Ascolta», che la spiegazione mostra da sé.
 import { getContext, setContext, untrack } from 'svelte';
 import { ora, sblocca } from '../audio/contesto.ts';
-import type { Riproduzione } from '../audio/synth.ts';
+import { MIDI_LEGNETTO, suonaColpi } from '../audio/percussioni.ts';
+import { suona as suonaNote, type Riproduzione } from '../audio/synth.ts';
+import type { Rigo } from '../contenuti/schema.ts';
 import { midi as midiDi } from '../musica/note.ts';
-import { PAUSA_S, suonaSeguendo } from './musica.ts';
+import { colpi, eventiRitmo } from '../musica/ritmo.ts';
+import { PAUSA_S, segui } from './musica.ts';
 
 export type SuonoDisegno = {
-	/** la nota che suona, come indice nelle altezze del passo; null in silenzio */
+	/**
+	 * la nota che suona, come indice nelle altezze del passo (in un Rigo, in `rigo.note`, pause comprese:
+	 * durante una pausa è la pausa); null in silenzio
+	 */
 	readonly nota: number | null;
-	/** il midi della nota che suona (per `data-suona` e per i tasti); null in silenzio */
+	/**
+	 * il midi della nota che suona (per `data-suona` e per i tasti): in un rigo ritmico MIDI_LEGNETTO, in
+	 * una pausa null; null in silenzio
+	 */
 	readonly midi: number | null;
-	/** secondi dall'inizio della prima nota, sul clock audio; null in silenzio. La nota i parte a i × ritmo */
+	/**
+	 * secondi dall'inizio della prima nota, sul clock audio; null in silenzio. In un elenco di altezze la
+	 * nota i parte a i × ritmo; in un Rigo a inizi(rigo.note)[i] × ritmo (musica/ritmo.ts)
+	 */
 	readonly tempo: number | null;
-	/** secondi tra l'inizio di una nota e quello della successiva */
+	/** secondi tra l'inizio di una nota e quello della successiva; in un Rigo, secondi di un battito */
 	readonly ritmo: number;
 	/** suona le note del passo mostrato; se stanno suonando, le ferma (il pulsante «Ascolta») */
 	ascolta(): void;
@@ -27,17 +39,21 @@ const ILLUSTRAZIONE = Symbol('illustrazione sonora');
 
 /**
  * Da chiamare nell'inizializzazione del disegno. `stato` dà il passo mostrato (nelle illustrazioni, il
- * fotogramma finale) e se il player è in riproduzione; `altezze` le note da suonare in quel passo, in
- * ordine (nessuna: il passo è muto). Ogni nota dura `durataS`.
+ * fotogramma finale) e se il player è in riproduzione; `note` quello da suonare in quel passo (nessuna
+ * nota: il passo è muto): un elenco di altezze, ognuna lunga `durataS` e separata da PAUSA_S, oppure un
+ * Rigo validato con le durate, dove una semiminima dura `durataS` (60 / BPM) e le altre in proporzione,
+ * senza silenzi in più. Il rigo ritmico suona col legnetto (audio/percussioni.ts), le pause tacciono.
  */
 export function suonoDisegno(
 	stato: () => { passo: number; inRiproduzione?: boolean },
-	altezze: (passo: number) => readonly string[],
+	note: (passo: number) => readonly string[] | Rigo,
 	durataS = 0.7
 ): SuonoDisegno {
 	let nota = $state<number | null>(null);
 	let tempo = $state<number | null>(null);
-	let note: readonly string[] = [];
+	/** il midi di ogni nota del passo che suona (null nelle pause) */
+	let midi: readonly (number | null)[] = [];
+	let rigo = false;
 	let corrente: Riproduzione | undefined;
 
 	function ferma() {
@@ -46,13 +62,45 @@ export function suonoDisegno(
 		nota = null;
 		tempo = null;
 	}
+	/** la riproduzione del passo e l'inizio (s) di ogni sua nota; undefined se il passo è muto */
+	function riproduci(
+		n: readonly string[] | Rigo
+	): { r: Riproduzione; inizi: number[] } | undefined {
+		if (!('note' in n)) {
+			rigo = false;
+			midi = n.map(midiDi);
+			const inizi = n.map((_, i) => i * (durataS + PAUSA_S));
+			if (!n.length) return;
+			void sblocca();
+			return {
+				r: suonaNote(midi.map((m, i) => ({ midi: m!, inizio: inizi[i], durata: durataS }))),
+				inizi
+			};
+		}
+		rigo = true;
+		midi = n.note.map((x) => (x.pausa ? null : n.ritmico ? MIDI_LEGNETTO : midiDi(x.altezza)));
+		if (!n.note.length) return;
+		void sblocca();
+		const e = eventiRitmo(n, 60 / durataS);
+		const inizi = e.note.map((x) => x.inizio);
+		// ponytail: le note di un rigo con le durate suonano legate; un'articolazione se servirà
+		const r = n.ritmico
+			? suonaColpi(colpi(e))
+			: suonaNote(
+					e.note
+						.filter((x) => !x.pausa)
+						.map((x) => ({ midi: midi[x.nota]!, inizio: x.inizio, durata: x.durata }))
+				);
+		return { r, inizi };
+	}
 	function suona(passo: number) {
 		ferma();
-		note = altezze(passo);
-		if (!note.length) return;
+		const brano = riproduci(note(passo));
+		if (!brano) return;
 		nota = 0;
 		tempo = 0;
-		const r = suonaSeguendo(note, durataS, (i) => {
+		const { r, inizi } = brano;
+		segui(r, inizi, (i) => {
 			if (corrente !== r) return; // la coda di una riproduzione già fermata
 			nota = i;
 			tempo = i === null ? null : Math.max(0, ora() - r.t0);
@@ -85,12 +133,14 @@ export function suonoDisegno(
 			return nota;
 		},
 		get midi() {
-			return nota === null ? null : midiDi(note[nota]);
+			return nota === null ? null : (midi[nota] ?? null);
 		},
 		get tempo() {
 			return tempo;
 		},
-		ritmo: durataS + PAUSA_S,
+		get ritmo() {
+			return rigo ? durataS : durataS + PAUSA_S;
+		},
 		ascolta: () => (corrente ? ferma() : suona(untrack(stato).passo))
 	};
 	const registra = getContext<((s: SuonoDisegno) => void) | undefined>(ILLUSTRAZIONE);

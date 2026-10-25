@@ -231,7 +231,7 @@ Ogni animazione o illustrazione che mostra note o altezze le fa **sentire**, in 
 {/each}
 ```
 
-`suono.nota` è l'indice della nota che suona (null in silenzio) e `suono.midi` la sua altezza; per un movimento continuo, come la pallina di `canto/widget/Scala.svelte`, `suono.tempo` dà i secondi dall'inizio sul clock audio (la nota i parte a `i × suono.ritmo`). I disegni fatti con lo Staff partono da `pentagramma/widget/disegni/RigoAPassi.svelte`, che fa già tutto. `tests/animazioni.dev.spec.ts` apre ogni animazione e ogni illustrazione dei moduli, preme play o «Ascolta» e controlla che le note si sentano e che l'evidenziazione (`data-suona`) le segua. Un disegno che non mostra note né altezze resta muto, ma va aggiunto con il motivo all'elenco `MUTI` di quel test.
+`suono.nota` è l'indice della nota che suona (null in silenzio) e `suono.midi` la sua altezza; per un movimento continuo, come la pallina di `canto/widget/Scala.svelte`, `suono.tempo` dà i secondi dall'inizio sul clock audio (la nota i parte a `i × suono.ritmo`). Al posto delle altezze un passo può dare un `Rigo` con le durate: una semiminima dura il terzo argomento di `suonoDisegno` (60 / BPM), le pause tacciono e il rigo ritmico suona col legnetto, con `suono.midi` uguale a `MIDI_LEGNETTO`. I disegni fatti con lo Staff partono da `pentagramma/widget/disegni/RigoAPassi.svelte`, che fa già tutto. `tests/animazioni.dev.spec.ts` apre ogni animazione e ogni illustrazione dei moduli, preme play o «Ascolta» e controlla che le note si sentano e che l'evidenziazione (`data-suona`) le segua. Un disegno che non mostra note né altezze resta muto, ma va aggiunto con il motivo all'elenco `MUTI` di quel test.
 
 ## 8. Immagini
 

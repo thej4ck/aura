@@ -46,17 +46,32 @@ export function suonaSeguendo(
 ): Riproduzione {
 	void sblocca();
 	const passo = durataS + PAUSA_S;
-	const r = suona(altezze.map((a, i) => ({ midi: midi(a), inizio: i * passo, durata: durataS })));
-	let raf = requestAnimationFrame(function segui() {
-		const i = Math.floor((ora() - r.t0) / passo);
-		onnota(Math.min(altezze.length - 1, Math.max(0, i)));
-		raf = requestAnimationFrame(segui);
+	const inizi = altezze.map((_, i) => i * passo);
+	const r = suona(altezze.map((a, i) => ({ midi: midi(a), inizio: inizi[i], durata: durataS })));
+	segui(r, inizi, onnota);
+	return r;
+}
+
+/**
+ * Segue una riproduzione sul clock audio: a ogni frame `onnota(i)` con l'ultimo evento cominciato
+ * (`inizi` in secondi dall'inizio, in ordine; prima del primo, 0), `onnota(null)` alla fine o dopo ferma().
+ */
+export function segui(
+	r: Riproduzione,
+	inizi: readonly number[],
+	onnota: (i: number | null) => void
+): void {
+	let raf = requestAnimationFrame(function giro() {
+		const t = ora() - r.t0;
+		let i = 0;
+		while (i + 1 < inizi.length && inizi[i + 1] <= t) i++;
+		onnota(i);
+		raf = requestAnimationFrame(giro);
 	});
 	void r.fine.then(() => {
 		cancelAnimationFrame(raf);
 		onnota(null);
 	});
-	return r;
 }
 
 /** Cosa dire quando il microfono non si apre: per l'adulto, con cosa può fare. */
