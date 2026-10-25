@@ -20,6 +20,11 @@ function sessione() {
 	if (s) s.type = microfoni > 0 ? 'play-and-record' : 'playback';
 }
 
+// ponytail: senza Web Audio (Modalità di isolamento) new AudioContext lancia e i pulsanti che suonano non fanno
+// niente: lo dice all'adulto l'avviso apple-isolamento. Un'Aura muta ma giocabile (pianifica() e sblocca() a vuoto)
+// se le segnalazioni la chiederanno.
+// ponytail: su iOS, dopo un'altra app, il contesto può restare muto (avviso ios-audio-muto): suspend() e resume()
+// al ritorno visibile se le prove su un iPhone vero (docs/prove-su-dispositivi.md) mostrano che basta.
 export function contesto(): AudioContext {
 	if (!ctx) {
 		ctx = new AudioContext({ latencyHint: 'interactive' });

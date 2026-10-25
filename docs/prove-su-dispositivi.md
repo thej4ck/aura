@@ -14,6 +14,7 @@ La sessione audio è gestita in `src/lib/core/audio/contesto.ts`.
 - [ ] **Chiusura del microfono** (fine attività, cambio pagina, scheda in background): l'audio torna in `playback`, di nuovo udibile col tasto silenzioso; l'indicatore del microfono di Safari si spegne.
 - [ ] Richiesta del permesso del microfono: testo chiaro; negandolo l'attività propone un'alternativa e non si blocca.
 - [ ] Rotazione dello schermo, blocco e sblocco, ritorno da un'altra app: l'audio riparte al primo tocco.
+- [ ] **Salvataggio dopo ore in background** (iOS 17.4 o successivo, WebKit 273827): se compare l'avviso di salvataggio, annota se basta ricaricare la pagina. In quel caso la riapertura del database sull'evento `close` (`src/lib/core/store/db.ts`) può farlo da sola.
 - [ ] Sia iPhone sia iPad, con almeno una versione di iOS/iPadOS recente e una più vecchia ancora supportata.
 
 ## Android (Chrome)

@@ -34,6 +34,9 @@ function apri(fabbrica: IDBFactory): Promise<IDBDatabase> {
 function suIdb(db: IDBDatabase): Db {
 	// ponytail: un'altra scheda che aggiorna la versione del db chiude questa connessione; questa poi va ricaricata
 	db.onversionchange = () => db.close();
+	// ponytail: su iOS 17.4+ la connessione si può perdere da sola (WebKit 273827, evento close): si ritenta
+	// la scrittura e l'avviso ios-salvataggio dice di ricaricare. Riaprire il db su 'close' se un iPhone vero
+	// mostra che basta (docs/prove-su-dispositivi.md): spesso anche una connessione nuova fallisce.
 	const op = <T>(
 		store: NomeStore,
 		modo: IDBTransactionMode,
