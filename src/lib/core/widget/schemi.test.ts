@@ -3,6 +3,7 @@ import * as v from 'valibot';
 import { describe, expect, it } from 'vitest';
 import { BPM_RITMO } from '../audio/costanti.ts';
 import { rigoRitmico } from '../musica/ritmo.ts';
+import { schemaProps as ascolta } from './Ascolta.svelte';
 import { schemaProps as battiRitmo } from './BattiRitmo.svelte';
 import { schemaProps as cantaNota } from './CantaNota.svelte';
 import { schemaProps as cantaSequenza } from './CantaSequenza.svelte';
@@ -72,5 +73,18 @@ describe('ritmo', () => {
 		// anche una melodia con le durate: si batte il suo ritmo
 		const melodia = { tempo: '2/4', note: [{ altezza: 'C4', durata: '2' }] };
 		expect(valido(battiRitmo, { rigo: melodia })).toBe(true);
+	});
+
+	it('ascolta: le note oppure un ritmo, mai tutti e due né nessuno', () => {
+		expect(v.parse(ascolta, { ritmo })).toMatchObject({
+			bpm: BPM_RITMO,
+			metronomo: false,
+			sillabe: true
+		});
+		expect(valido(ascolta, { note: ['C4'] })).toBe(true);
+		expect(valido(ascolta, { note: ['C4'], ritmo })).toBe(false);
+		expect(valido(ascolta, {})).toBe(false);
+		// il rigo ritmico non passa da `note`: lì si suonano le altezze
+		expect(valido(ascolta, { note: ritmo })).toBe(false);
 	});
 });
