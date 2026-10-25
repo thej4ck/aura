@@ -916,6 +916,7 @@
 	"canto_estensione_tastiera": "Le note della tua voce, sulla tastiera",
 	"canto_estensione_rigo_limiti": "La nota più grave e la più acuta della tua voce",
 	"canto_estensione_senza_microfono": "Per scoprire fin dove arriva la voce serve il microfono. Puoi tornare quando vuoi.",
+	"ritmo_disegno_rigo": "Il ritmo",
 	"mic_titolo": "Prova il microfono",
 	"mic_intro": "Per capire se il microfono sente bene la voce: aprilo, canta o tieni una nota e guarda i numeri. Non si registra e non si salva niente: i numeri restano su questa pagina e spariscono quando chiudi il microfono.",
 	"mic_apri": "Apri il microfono",
