@@ -159,9 +159,17 @@
 				});
 				// scheda lasciata mentre si aspettava il permesso: il microfono si chiude subito
 				if (!vivo) return aperto.chiudi();
+				// pagina nascosta (o microfono già chiuso dal browser) nel frattempo: niente turno in
+				// background, che al ritorno conterebbe come non riuscito; si riparte da «Inizia»
+				if (fase !== 'permesso' || document.visibilityState === 'hidden') {
+					aperto.chiudi();
+					fase = 'pronto';
+					return;
+				}
 				mani = aperto;
 			} catch (e) {
 				if (!vivo) return;
+				if (document.visibilityState === 'hidden') return void (fase = 'pronto'); // la scelta resta
 				errore = ERRORI_MIC[e instanceof ErroreMic ? e.codice : 'non-supportato']();
 				scegli('tocco'); // senza microfono si batte col tocco: mai senza un modo di battere
 			}
@@ -360,7 +368,8 @@
 		{/if}
 	</div>
 
-	{#if fase === 'pronto' || fase === 'permesso'}
+	<!-- la scelta anche nell'esito, se non si è sentito niente: un microfono muto non lascia senza tocco -->
+	{#if fase === 'pronto' || fase === 'permesso' || (fase === 'esito' && !sentiti)}
 		<fieldset class="fonte" disabled={fase === 'permesso'}>
 			<legend>{m.ritmo_come()}</legend>
 			<div class="opzioni">

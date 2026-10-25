@@ -214,6 +214,59 @@ test('senza microfono si batte col tocco, e la scelta si ricorda', async ({ page
 	await expect(w.getByRole('radio', { name: 'Tocco lo schermo' })).toBeChecked();
 });
 
+type ConMicrofono = { __ctx: AudioContext; __tracce: MediaStreamTrack[]; __rifiuta: boolean };
+
+test('la pagina si nasconde mentre si aspetta il microfono: niente turno nascosto, si riparte da capo', async ({
+	page
+}) => {
+	// un microfono che risponde dopo un secondo (il permesso), dal contesto audio della pagina stessa
+	await page.addInitScript(() => {
+		const w = window as unknown as ConMicrofono;
+		w.__tracce = [];
+		const Contesto = window.AudioContext;
+		window.AudioContext = class extends Contesto {
+			constructor(...a: ConstructorParameters<typeof AudioContext>) {
+				super(...a);
+				w.__ctx = this;
+			}
+		};
+		navigator.mediaDevices.getUserMedia = () =>
+			new Promise((ok, ko) =>
+				setTimeout(() => {
+					if (w.__rifiuta) return ko(new DOMException('chiuso', 'NotAllowedError'));
+					const d = w.__ctx.createMediaStreamDestination();
+					w.__tracce.push(...d.stream.getTracks());
+					ok(d.stream);
+				}, 1000)
+			);
+	});
+	await apriVetrina(page);
+	const w = widget(page, 'batti-ritmo-lettura');
+	const pagina = (stato: 'hidden' | 'visible') =>
+		page.evaluate((s) => {
+			Object.defineProperty(document, 'visibilityState', { value: s, configurable: true });
+			document.dispatchEvent(new Event('visibilitychange'));
+		}, stato);
+	// il permesso dato e quello negato (passando a un'altra app con la richiesta aperta)
+	for (const rifiuta of [false, true]) {
+		await page.evaluate((r) => ((window as unknown as ConMicrofono).__rifiuta = r), rifiuta);
+		await w.getByRole('radio', { name: 'Batto le mani' }).check();
+		await w.getByRole('button', { name: 'Leggi e batti' }).click();
+		await pagina('hidden');
+		await page.waitForTimeout(1500); // la risposta arriva a pagina nascosta
+		await expect(w.getByRole('list', { name: 'A chi tocca' })).toHaveCount(0);
+		const accese = await page.evaluate(
+			() =>
+				(window as unknown as ConMicrofono).__tracce.filter((t) => t.readyState === 'live').length
+		);
+		expect(accese, `rifiuta: ${rifiuta}`).toBe(0);
+		await pagina('visible');
+		await expect(w.getByRole('button', { name: 'Leggi e batti' })).toBeVisible();
+		await expect(w.getByRole('radio', { name: 'Batto le mani' })).toBeChecked(); // la scelta resta
+	}
+	await expect(esiti(page, 'batti-ritmo-lettura')).toHaveText(['Nessun esito per ora.']);
+});
+
 test('su un telefono, quando tocca battere, il rigo e il tasto sono sullo schermo; il battito segue i clic', async ({
 	page
 }) => {
@@ -276,6 +329,8 @@ test('il turno a eco col tocco: il sito e poi il bambino, a tempo, con i colpi g
 	);
 	const rigo = w.getByRole('group', { name: 'Il ritmo da battere' });
 	await expect(rigo.locator('svg .battito.mancato')).toHaveCount(4);
+	// non si è sentito niente: si può scegliere un altro modo di battere prima di riprovare
+	await expect(w.getByRole('radio', { name: 'Batto le mani' })).toBeVisible();
 
 	// 'ta ti-ti ta sst': il sito suona attacco e ritmo (4 + 4 clic, 4 legnetti: la pausa tace), poi
 	// l'attacco del bambino e i clic piano sotto i suoi battiti (4 + 4); un clic ogni battito, senza buchi
