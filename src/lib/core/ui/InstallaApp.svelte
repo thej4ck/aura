@@ -1,11 +1,13 @@
 <script lang="ts">
-	// Il perché e il come dell'installazione, senza titolo: lo mette la pagina che lo contiene.
+	// Il perché e il come dell'installazione, senza titolo: lo mette la pagina che lo contiene. Su iPhone, iPad
+	// e Safari per Mac anche i problemi noti dei dati: cancellati dopo 7 giorni, separati da quelli dell'app.
 	import { onMount } from 'svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { dispositivo, type Dispositivo } from '../piattaforma.ts';
 	import { installazione } from '../pwa/installazione.svelte.ts';
 	import Avviso from './Avviso.svelte';
 	import Button from './Button.svelte';
+	import ProblemaNoto from './ProblemaNoto.svelte';
 
 	let d = $state.raw<Dispositivo>();
 	onMount(() => (d = dispositivo()));
@@ -23,12 +25,18 @@
 	<p>{m.pwa_perche()}</p>
 	{#if installata}
 		<Avviso tono="successo" testo={m.pwa_gia_installata()} />
-	{:else if installazione.invito}
-		<Button onclick={installa}>{m.pwa_installa()}</Button>
-	{:else if d?.sistema === 'iOS'}
-		<Avviso tono="info" testo={m.pwa_ios()} />
 	{:else}
-		<p>{m.pwa_altri()}</p>
+		<ProblemaNoto id="safari-dati-7-giorni" />
+		{#if installazione.invito}
+			<Button onclick={installa}>{m.pwa_installa()}</Button>
+		{:else if d?.sistema === 'iOS'}
+			<Avviso tono="info" testo={m.pwa_ios()} />
+		{:else if d?.apple}
+			<p>{m.pwa_mac()}</p>
+		{:else}
+			<p>{m.pwa_altri()}</p>
+		{/if}
+		<ProblemaNoto id="app-dati-separati" />
 	{/if}
 </div>
 
