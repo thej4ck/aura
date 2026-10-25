@@ -69,6 +69,23 @@ test('ogni battito una volta, al suo posto, anche con il thread occupato e la vo
 	expect(await violazioniGravi(page)).toEqual([]);
 });
 
+test('un worklet che non manda blocchi: si passa al ripiego, e i battiti arrivano lo stesso', async ({
+	page
+}) => {
+	// come un browser dove il nodo senza uscite non elabora (il rischio di Safari e Firefox)
+	await page.addInitScript(() => {
+		const Nodo = window.AudioWorkletNode;
+		window.AudioWorkletNode = class extends Nodo {
+			constructor(...a: ConstructorParameters<typeof AudioWorkletNode>) {
+				super(...a);
+				Object.defineProperty(this.port, 'onmessage', { set() {}, get: () => null });
+			}
+		};
+	});
+	const { tempi } = await apri(page);
+	await expect.poll(async () => (await tempi()).length, { timeout: 30_000 }).toBeGreaterThan(3);
+});
+
 test('turni: mentre suona il ritmo il microfono non ascolta, poi riprende', async ({
 	page,
 	baseURL
