@@ -1,6 +1,8 @@
 <script lang="ts">
-	// Sezione della vetrina: pentagramma e tastiera con la teoria di musica/note.ts.
-	import type { Rigo } from '#lib/core/contenuti/schema.ts';
+	// Sezione della vetrina: pentagramma e tastiera con la teoria di musica/note.ts, e il ritmo.
+	import * as v from 'valibot';
+	import { SchemaRigo, type Rigo } from '#lib/core/contenuti/schema.ts';
+	import { rigoRitmico, type SegnoBattito } from '#lib/core/musica/ritmo.ts';
 	import {
 		altezza,
 		arpeggioMaggiore,
@@ -28,6 +30,35 @@
 		chiave: 'violino',
 		note: ['G4', 'D5'].map((altezza) => ({ altezza, durata: '1' as const }))
 	};
+
+	// ritmo (ADR 0008): righi ritmici e melodie con le durate, validati come i contenuti
+	const RITMICO = v.parse(SchemaRigo, rigoRitmico('ta ti-ti ta-a sst ta-a-a', '4/4'));
+	// un esempio di ogni segno: giusto, presto, tardi, in più (nella pausa), mancato
+	const BATTITI: SegnoBattito[] = [
+		{ battito: 0.03, giudizio: 'giusto', nota: 0 },
+		{ battito: 0.84, giudizio: 'presto', nota: 1 },
+		{ battito: 1.52, giudizio: 'giusto', nota: 2 },
+		{ battito: 2.22, giudizio: 'tardi', nota: 3 },
+		{ battito: 4.45, giudizio: 'in-piu', nota: 4 },
+		{ battito: 5, giudizio: 'mancato', nota: 5 }
+	];
+	const RITMICO_TRE = v.parse(SchemaRigo, rigoRitmico('ta-a ta ti-ti ti-ti ta ta-a-a', '3/4'));
+	const melodia = (tempo: '3/4' | '4/4', note: string) =>
+		v.parse(SchemaRigo, {
+			tempo,
+			note: note.split(' ').map((n) => {
+				const [altezza, durata] = n.split(':');
+				const punto = durata.endsWith('.');
+				const d = durata.replace('.', '');
+				return altezza === 'p'
+					? { pausa: true, durata: d }
+					: { altezza, durata: d, ...(punto ? { punto } : {}) };
+			})
+		});
+	const MELODIA = melodia('4/4', 'G4:4 A4:8 B4:8 C5:4 D5:4 E5:2 p:4 F4:8 D5:8');
+	const MELODIA_TRE = melodia('3/4', 'G4:8 p:8 D5:8 p:8 C5:4 G4:2.');
+	const PAUSE = melodia('4/4', 'E5:1 p:1 G4:2 p:2');
+	const PAUSE_RITMICO = v.parse(SchemaRigo, { ...PAUSE, ritmico: true });
 
 	let nomi = $state<NomiNote>('solfeggio');
 	let rivela = $state(false);
@@ -74,6 +105,27 @@
 	<div class="coppia">
 		<Staff rigo={TAGLI} etichetta={m.notazione_dev_tagli()} etichette nomiNote={nomi} />
 		<Staff rigo={SEMIBREVI} etichetta={m.notazione_dev_semibrevi()} compatto />
+	</div>
+
+	<h3>{m.notazione_dev_ritmo()}</h3>
+	<div class="coppia">
+		<Staff rigo={RITMICO} etichetta={m.notazione_dev_ritmico()} sillabe battiti={BATTITI} />
+		<Staff rigo={RITMICO_TRE} etichetta={m.notazione_dev_ritmico_tre()} sillabe />
+	</div>
+	<div class="coppia">
+		<Staff
+			rigo={MELODIA}
+			etichetta={m.notazione_dev_melodia()}
+			etichette
+			colori
+			nomiNote={nomi}
+			evidenzia={[6]}
+		/>
+		<Staff rigo={MELODIA_TRE} etichetta={m.notazione_dev_melodia_tre()} sillabe />
+	</div>
+	<div class="coppia">
+		<Staff rigo={PAUSE} etichetta={m.notazione_dev_pause()} compatto />
+		<Staff rigo={PAUSE_RITMICO} etichetta={m.notazione_dev_pause_ritmico()} compatto sillabe />
 	</div>
 
 	<h3>{m.notazione_dev_interattivo()}</h3>

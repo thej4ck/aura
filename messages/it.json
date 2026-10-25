@@ -535,6 +535,57 @@
 	"notazione_sillaba_ta_a_a": "TA-A-A",
 	"notazione_sillaba_ta_a_a_a": "TA-A-A-A",
 	"notazione_sillaba_sst": "SST",
+	"notazione_figura": [
+		{
+			"declarations": ["input durata"],
+			"selectors": ["durata"],
+			"match": {
+				"durata=1": "semibreve",
+				"durata=2": "minima",
+				"durata=8": "croma",
+				"durata=16": "semicroma",
+				"durata=*": "semiminima"
+			}
+		}
+	],
+	"notazione_puntata": "{figura} puntata",
+	"notazione_pausa_di": "pausa di {figura}",
+	"notazione_figura_numero": "Figura {numero} di {totale}: {descrizione}",
+	"notazione_con_figura": "{descrizione}, {figura}",
+	"notazione_con_sillaba": "{descrizione}, {sillaba}",
+	"notazione_battuta": [
+		{
+			"declarations": ["input descrizione", "input giudizio"],
+			"selectors": ["giudizio"],
+			"match": {
+				"giudizio=giusto": "{descrizione}, battuta giusta",
+				"giudizio=presto": "{descrizione}, battuta un po' presto",
+				"giudizio=tardi": "{descrizione}, battuta un po' tardi",
+				"giudizio=*": "{descrizione}, mancata"
+			}
+		}
+	],
+	"notazione_in_piu": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Un battito in più",
+				"countPlural=other": "{count} battiti in più"
+			}
+		}
+	],
+	"notazione_in_piu_pause": [
+		{
+			"declarations": ["input descrizione", "input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{descrizione}, uno nella pausa",
+				"countPlural=other": "{descrizione}, {count} nelle pause"
+			}
+		}
+	],
+	"notazione_tempo": "Tempo in chiave: {battiti} quarti",
 	"notazione_zona": "Zona colorata: da {da} a {a}",
 	"notazione_dev_titolo": "Pentagramma e tastiera",
 	"notazione_dev_nomi": "Nomi delle note",
@@ -552,6 +603,13 @@
 	"notazione_dev_tastiera": "Tastiera da toccare",
 	"notazione_dev_tasto": "Hai toccato: {nome}.",
 	"notazione_dev_registro": "Registro vocale, solo da guardare",
+	"notazione_dev_ritmo": "Ritmo: figure, pause e battute",
+	"notazione_dev_ritmico": "Rigo ritmico in 4/4, con le sillabe e i battiti",
+	"notazione_dev_ritmico_tre": "Rigo ritmico in 3/4",
+	"notazione_dev_melodia": "Melodia in 4/4, con la pausa evidenziata",
+	"notazione_dev_melodia_tre": "Melodia in 3/4: croma con la codetta e minima puntata",
+	"notazione_dev_pause": "Pause di semibreve e di minima",
+	"notazione_dev_pause_ritmico": "Pause di semibreve e di minima sul rigo ritmico",
 	"audio_pitch_su": "Un po' più su",
 	"audio_pitch_giu": "Un po' più giù",
 	"audio_pitch_giusto": "Così! Tieni la nota",
