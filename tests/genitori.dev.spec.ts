@@ -140,8 +140,21 @@ test('impostazioni: dopo il controllo si riflettono sugli attributi di <html> e 
 	await expect(html).toHaveAttribute('data-contrasto-alto');
 	await expect(testoGrande).toBeChecked();
 	await expect(page.getByRole('radio', { name: 'C, D, E' })).toBeChecked();
-	// la manopola della latenza è nascosta finché non c'è il modulo Ritmo o una calibrazione
-	await expect(page.getByRole('spinbutton')).toHaveCount(0);
+
+	// la manopola della latenza (ritmo, cuffie Bluetooth): un numero tra 0 e 500, che resta
+	const latenza = page.getByRole('spinbutton', { name: /^Ritardo dell.audio, in millisecondi$/ });
+	await expect(latenza).toHaveValue('0');
+	await latenza.fill('180');
+	await latenza.blur();
+	await expect(page.getByText('Impostazione salvata.')).toBeVisible();
+	await latenza.fill('9000');
+	await latenza.blur();
+	await expect(latenza).toHaveValue('500'); // fuori dai limiti: si riporta lì
+	await latenza.fill('180');
+	await latenza.blur();
+	await page.waitForTimeout(800);
+	await apri(page, '/genitori#impostazioni');
+	await expect(latenza).toHaveValue('180');
 });
 
 test('selettore: il filtro si annuncia e resta nelle preferenze', async ({ page }) => {

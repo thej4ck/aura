@@ -79,6 +79,19 @@
 		);
 	}
 
+	/** Il ritardo dell'audio, in ms: un numero intero tra 0 e LATENZA_MAX_MS (fuori, si riporta lì). */
+	const LATENZA_MAX_MS = 500;
+	function latenza(e: Evento) {
+		const el = e.currentTarget;
+		const prima = progressi.doc!.preferenze.latenzaAudioMs;
+		const ms = Math.min(LATENZA_MAX_MS, Math.max(0, Math.round(el.valueAsNumber || 0)));
+		el.value = String(ms);
+		cambia(
+			() => ({ latenzaAudioMs: ms }),
+			() => (el.value = String(prima))
+		);
+	}
+
 	// letta al momento di applicare: gli oggetti annidati vanno passati interi
 	const accessibilita = (chiave: keyof Accessibilita, valore: boolean): Patch => ({
 		accessibilita: { ...progressi.doc!.preferenze.accessibilita, [chiave]: valore }
@@ -177,12 +190,25 @@
 		</fieldset>
 
 		<!--
-			ponytail: manopola della latenza audio (preferenze.latenzaAudioMs, 0..500 ms, messaggi
-			genitori_latenza e genitori_latenza_aiuto) nascosta: oggi nessun widget ne ha bisogno. Va
-			mostrata quando arriva il modulo Ritmo o una calibrazione guidata (suona e tocca, la
-			latenza si misura invece di chiederla); la preferenza resta nello schema, nel salvataggio e
-			nel microfono.
+			ponytail: la latenza si chiede all'adulto invece di misurarla; una calibrazione guidata (suona
+			e tocca) se le prove sui dispositivi veri la chiedono (ADR 0008)
 		-->
+		<div class="campo">
+			<label for="{id}-latenza" class="titolo">{m.genitori_latenza()}</label>
+			<p id="{id}-latenza-aiuto" class="aiuto">{m.genitori_latenza_aiuto()}</p>
+			<input
+				id="{id}-latenza"
+				class="numero"
+				type="number"
+				inputmode="numeric"
+				min="0"
+				max={LATENZA_MAX_MS}
+				step="10"
+				value={p.latenzaAudioMs}
+				aria-describedby="{id}-latenza-aiuto"
+				onchange={latenza}
+			/>
+		</div>
 	</form>
 	<Avviso tono="successo" testo={salvata} />
 {/if}
@@ -206,10 +232,27 @@
 		border: 0;
 		min-width: 0;
 	}
-	legend {
+	legend,
+	.titolo {
 		padding: 0;
 		margin-block-end: var(--spazio-2);
 		font-weight: var(--peso-forte);
+	}
+	.campo {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spazio-2);
+		align-items: flex-start;
+	}
+	.numero {
+		width: 8rem;
+		min-height: var(--target);
+		padding-inline: var(--spazio-3);
+		border: 1px solid var(--colore-bordo-forte);
+		border-radius: var(--raggio-m);
+		background: var(--colore-superficie);
+		color: var(--colore-testo);
+		font: inherit;
 	}
 	.opzioni {
 		display: flex;
