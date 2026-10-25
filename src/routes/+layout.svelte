@@ -12,6 +12,7 @@
 	import Avviso from '#lib/core/ui/Avviso.svelte';
 	import Icona from '#lib/core/ui/Icona.svelte';
 	import PausaGentile from '#lib/core/ui/PausaGentile.svelte';
+	import ProblemaNoto from '#lib/core/ui/ProblemaNoto.svelte';
 	import SegnalaProblema from '#lib/core/ui/SegnalaProblema.svelte';
 	import { serveBackup } from '#lib/core/vista/genitori.ts';
 	import type { LayoutProps } from './$types';
@@ -131,6 +132,8 @@
 					? m.avviso_errore_salvataggio()
 					: m.avviso_non_persistente()}
 			/>
+			<!-- ponytail: la Modalità di isolamento di iOS 16 lascia IndexedDB, e qui non si vede; un avviso a sé se servirà -->
+			<ProblemaNoto id={progressi.erroreSalvataggio ? 'ios-salvataggio' : 'apple-isolamento'} />
 		{/if}
 		{#if progressi.illeggibili}
 			<Avviso tono="info" testo={m.avviso_illeggibili()} />

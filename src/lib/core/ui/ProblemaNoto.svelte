@@ -8,10 +8,11 @@
 
 	let { id }: { id: IdProblema } = $props();
 
-	let testo: string | false = $state(false);
+	let montato = $state(false);
 	onMount(() => {
-		testo = problemaNoto(id);
+		montato = true;
 	});
+	const testo = $derived(montato && problemaNoto(id));
 </script>
 
 {#if testo}
