@@ -550,6 +550,42 @@
 	],
 	"notazione_puntata": "{figura} puntata",
 	"notazione_pausa_di": "pausa di {figura}",
+	"notazione_figura_numero": "Figura {numero} di {totale}: {descrizione}",
+	"notazione_con_figura": "{descrizione}, {figura}",
+	"notazione_con_sillaba": "{descrizione}, {sillaba}",
+	"notazione_battuta": [
+		{
+			"declarations": ["input descrizione", "input giudizio"],
+			"selectors": ["giudizio"],
+			"match": {
+				"giudizio=giusto": "{descrizione}, battuta giusta",
+				"giudizio=presto": "{descrizione}, battuta un po' presto",
+				"giudizio=tardi": "{descrizione}, battuta un po' tardi",
+				"giudizio=*": "{descrizione}, mancata"
+			}
+		}
+	],
+	"notazione_in_piu": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Un battito in più",
+				"countPlural=other": "{count} battiti in più"
+			}
+		}
+	],
+	"notazione_in_piu_pause": [
+		{
+			"declarations": ["input descrizione", "input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{descrizione}, uno nella pausa",
+				"countPlural=other": "{descrizione}, {count} nelle pause"
+			}
+		}
+	],
+	"notazione_tempo": "Tempo in chiave: {battiti} quarti",
 	"notazione_zona": "Zona colorata: da {da} a {a}",
 	"notazione_dev_titolo": "Pentagramma e tastiera",
 	"notazione_dev_nomi": "Nomi delle note",
