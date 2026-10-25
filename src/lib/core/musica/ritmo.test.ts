@@ -362,7 +362,14 @@ describe('valutazione dei battiti', () => {
 		);
 		expect(presto.spostato).toBe('presto');
 		// latenza piccola, dentro la tolleranza: niente da dire
-		expect(valutaBattiti(e, T0, giusti.map((t) => t + 0.08), FACILE).spostato).toBeNull();
+		expect(
+			valutaBattiti(
+				e,
+				T0,
+				giusti.map((t) => t + 0.08),
+				FACILE
+			).spostato
+		).toBeNull();
 	});
 
 	it("segni sotto le note: in battiti dall'inizio del rigo, scarto tolto", () => {
