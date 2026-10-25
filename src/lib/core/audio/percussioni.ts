@@ -34,9 +34,13 @@ export const MIDI_LEGNETTO = 84;
 export const MIDI_CLIC = 96;
 export const MIDI_ACCENTO = 103;
 
-/** picco dell'oscillatore prima del compressore comune (il rumore dell'attacco è una frazione) */
-const PICCO_LEGNETTO = 0.4;
-const PICCO_LEGNETTO_ACCENTO = 0.55;
+/**
+ * Picco dell'oscillatore prima del compressore comune (il rumore dell'attacco è una frazione). Misure in
+ * Chromium dopo il compressore: una nota della scala del synth ha RMS 0,16 sui primi 50 ms e picco 0,38;
+ * il legnetto 0,15 (0,20 con l'accento) e picco 0,46 (0,63); il clic, cortissimo, 0,05 e picco 0,43.
+ */
+const PICCO_LEGNETTO = 0.28;
+const PICCO_LEGNETTO_ACCENTO = 0.4;
 const PICCO_CLIC = 0.25;
 /** il rumore dell'attacco, rispetto al picco: lo schiocco del legno e del clic */
 const RUMORE_LEGNETTO = 0.6;
