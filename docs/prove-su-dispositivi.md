@@ -35,7 +35,15 @@ Con bambini di età diverse (in particolare 6-7 e 9-10 anni), in stanze vere (si
 - [ ] Tolleranze `TOLLERANZE_CENTS` (facile ±50, medio ±30, preciso ±15): "facile" accoglie i bambini piccoli senza regalare la nota; "preciso" è alla portata di chi canta bene.
 - [ ] `FINESTRA_NOTA_COMODA_MS` e `COPERTURA_NOTA_COMODA`: la "nota comoda" proposta è davvero comoda da cantare.
 - [ ] Il feedback resta formativo e senza pressione (nessun conto alla rovescia, nessun "sbagliato").
-- [ ] Latenza audio: la manopola in `/genitori` è nascosta (vedi il commento `ponytail:` in `Impostazioni.svelte`). Misura il ritardo reale sui dispositivi di prova e valuta se serve riproporla.
+- [ ] Latenza audio: la manopola «Ritardo dell'audio» in `/genitori` (0-500 ms). Misura il ritardo reale sui dispositivi di prova (con e senza cuffie Bluetooth) e annota quanto serve.
+
+## Ritmo (il modulo è in bozza fino a queste prove)
+
+- [ ] Legnetto e clic udibili, anche col tasto silenzioso su iOS; il clic piano del turno col tocco si sente ma non copre il legnetto.
+- [ ] Il tocco sul tasto grande: un battito per tocco, anche con due dita o il palmo; a tempo la prova riesce senza cuffie e con le cuffie Bluetooth (se dice sempre «dopo il clic», prova la manopola della latenza).
+- [ ] Battere le mani su Safari (iPhone, iPad) e Firefox: i battiti arrivano (nella vetrina `/dev`, pannello «Battiti di mani», la cattura dice `worklet` o `raf`); il microfono non salta durante il turno; una chiamata o il microfono scollegato riportano il turno all'inizio.
+- [ ] La voce che dice le sillabe (TA, TI-TI, SST) non conta come battito; in un'aula con eco non si perdono battiti.
+- [ ] Su un telefono, col testo «Grande» e «Molto grande», quando tocca al bambino il rigo e il tasto sono sullo schermo, sopra la barra.
 
 ## Installazione PWA e offline
 
