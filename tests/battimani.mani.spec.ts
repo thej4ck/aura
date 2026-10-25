@@ -82,8 +82,9 @@ test('un worklet che non manda blocchi: si passa al ripiego, e i battiti arrivan
 			}
 		};
 	});
-	const { tempi } = await apri(page);
+	const { sezione, tempi } = await apri(page);
 	await expect.poll(async () => (await tempi()).length, { timeout: 30_000 }).toBeGreaterThan(3);
+	await expect(sezione.getByTestId('mani-cattura')).toContainText('raf');
 });
 
 test('turni: mentre suona il ritmo il microfono non ascolta, poi riprende', async ({

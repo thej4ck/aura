@@ -27,6 +27,8 @@
 	/** i tempi (s, clock audio) dei battiti sentiti, e la forza dell'ultimo */
 	let tempi = $state<number[]>([]);
 	let forza = $state(0);
+	/** come si cattura: si rilegge a ogni battito, perché un worklet muto passa al ripiego dopo l'apertura */
+	let cattura = $state('');
 	let errore = $state('');
 
 	function ritmo() {
@@ -55,12 +57,15 @@
 				onbattito: (b) => {
 					tempi.push(b.t);
 					forza = b.forza;
+					if (mani) cattura = mani.cattura;
 				},
 				onchiuso: () => (mani = undefined),
 				latenzaMs: progressi.doc?.preferenze.latenzaAudioMs
 			});
-			if (vivo) mani = aperto;
-			else aperto.chiudi();
+			if (vivo) {
+				mani = aperto;
+				cattura = aperto.cattura;
+			} else aperto.chiudi();
 		} catch (e) {
 			errore = e instanceof ErroreMic ? ERRORI_MIC[e.codice]() : m.audio_errore_non_supportato();
 		} finally {
@@ -105,7 +110,7 @@
 			<dt>{m.mani_dev_forza()}</dt>
 			<dd>{forza.toFixed(2)}</dd>
 			<dt>{m.mani_dev_cattura()}</dt>
-			<dd data-testid="mani-cattura">{mani.cattura}, {mani.sampleRate} Hz</dd>
+			<dd data-testid="mani-cattura">{cattura}, {mani.sampleRate} Hz</dd>
 		</dl>
 		<!-- i tempi esatti per i test end-to-end -->
 		<output hidden data-testid="mani-tempi">{JSON.stringify(tempi)}</output>
