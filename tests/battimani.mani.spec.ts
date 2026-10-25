@@ -26,7 +26,7 @@ async function apri(page: Page) {
 
 /**
  * L'errore massimo (ms) degli intervalli trovati rispetto a quelli del WAV, dal punto del giro che
- * combacia meglio: sotto pochi ms vuol dire nessun battito perso o in più, e tempi al campione.
+ * combacia meglio: sotto pochi ms vuol dire nessun battito perso o in più, e tempi quasi al campione.
  */
 function erroreMs(tempi: number[]): number {
 	const intervalli = tempi.slice(1).map((t, i) => t - tempi[i]);
@@ -55,7 +55,13 @@ test('ogni battito una volta, al suo posto, anche con il thread occupato e la vo
 	// più di un giro del WAV: 8 battiti e una frase detta a voce ogni 9 s
 	await expect.poll(async () => (await tempi()).length, { timeout: 40_000 }).toBeGreaterThan(10);
 	const t = await tempi();
-	expect(erroreMs(t), JSON.stringify(t)).toBeLessThan(5);
+	// ~3,9 ms sono fissi (misurati, uguali a ogni giro): l'attacco è il primo campione al 30% del picco,
+	// che cade un po' prima o dopo con la forza del battito e la stanza. Con il limite a 5 ms il test è
+	// fallito una volta al merge: col processore carico Chromium può perdere o ripetere un blocco (10 ms)
+	// del WAV del microfono finto. 15 ms li contiene e resta 4 volte sotto la tolleranza più stretta
+	// (60 ms) e sotto il frame di un'analisi a 30 al secondo (33 ms); un battito perso o in più sposta
+	// un intervallo di oltre 350 ms.
+	expect(erroreMs(t), JSON.stringify(t)).toBeLessThan(15);
 	await sezione.getByRole('button', { name: 'Chiudi il microfono' }).click();
 	await expect(sezione.getByTestId('mani-conteggio')).toBeHidden();
 	expect(esterne).toEqual([]);
