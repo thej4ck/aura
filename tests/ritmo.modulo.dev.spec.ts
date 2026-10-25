@@ -20,6 +20,14 @@ async function apri(page: Page, attivita: string) {
 const avanti = (page: Page) => page.getByRole('button', { name: 'Avanti', exact: true }).click();
 const feedback = (page: Page) => page.getByRole('main').getByRole('status');
 const rigo = (page: Page) => page.getByRole('group', { name: 'Il ritmo da battere' });
+/**
+ * Le minime del rigo, voce per voce: «Figura 2 di 3: minima» (e la sillaba, se c'è), mai «semiminima».
+ * Nel testo di tutto il gruppo le voci sono attaccate («…: minimaFigura 2…») e un \b non le separa.
+ */
+const minime = (page: Page) =>
+	rigo(page)
+		.getByRole('listitem')
+		.filter({ hasText: /: minima\b/ });
 
 /** Dove cominciano i suoni di un ritmo scritto con una sillaba per nota ('ta ti ti ta-a sst'), in battiti. */
 function attacchi(sillabe: string): string {
@@ -163,7 +171,7 @@ test('«Leggi e batti»: tre ritmi riusciti di fila portano TA-A, che resta; dop
 
 	for (let g = 1; g <= 3; g++) {
 		await expect(page.getByText(`Giro ${g} di 6`, { exact: true })).toBeVisible();
-		await expect(rigo(page)).not.toContainText(/\bminima\b/); // «semiminima» no
+		await expect(minime(page)).toHaveCount(0);
 		await battiTutto(page, 'Leggi e batti');
 		await avanti(page);
 	}
@@ -171,7 +179,7 @@ test('«Leggi e batti»: tre ritmi riusciti di fila portano TA-A, che resta; dop
 	// la figura nuova arriva presentata, con le sillabe sotto le note
 	await expect(page.getByText('Giro 4 di 6', { exact: true })).toBeFocused();
 	await expect(page.getByText('Arriva una figura nuova: TA-A')).toBeVisible();
-	await expect(rigo(page)).toContainText(/\bminima\b/);
+	await expect(minime(page)).not.toHaveCount(0);
 	// senza battere: il consiglio dice cosa fare, e il ritmo dopo è un ripasso con le sillabe
 	await page.getByRole('button', { name: 'Leggi e batti' }).click();
 	await expect(feedback(page)).toHaveText(
@@ -181,7 +189,7 @@ test('«Leggi e batti»: tre ritmi riusciti di fila portano TA-A, che resta; dop
 	await avanti(page);
 	await expect(page.getByText('Giro 5 di 6', { exact: true })).toBeVisible();
 	await expect(page.getByText('Le sillabe sotto le note ti aiutano')).toBeVisible();
-	await expect(rigo(page)).not.toContainText(/\bminima\b/);
+	await expect(minime(page)).toHaveCount(0);
 
 	// quattro ritmi bastano: il gioco è completato
 	await page.getByRole('button', { name: 'Basta così' }).click();
@@ -194,7 +202,7 @@ test('«Leggi e batti»: tre ritmi riusciti di fila portano TA-A, che resta; dop
 	await page.getByRole('button', { name: 'Leggi e batti' }).click();
 	await page.getByRole('button', { name: 'Basta così, vado avanti' }).click();
 	await expect(page.getByText('Giro 1 di 6', { exact: true })).toBeVisible();
-	await expect(rigo(page)).toContainText(/\bminima\b/);
+	await expect(minime(page)).not.toHaveCount(0);
 });
 
 test('su un telefono i disegni stanno interi, e la pausa tace mentre il suo battito si accende', async ({
