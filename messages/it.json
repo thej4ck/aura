@@ -999,11 +999,12 @@
 	"problema_dati_7_giorni_ios": "Su iPhone e iPad il browser cancella i dati dei siti non installati dopo 7 giorni di uso senza aprire Aura. Con l'app installata i progressi restano.",
 	"problema_dati_7_giorni_mac": "Safari cancella i dati dei siti non installati dopo 7 giorni di uso senza aprire Aura. Con l'app installata (macOS Sonoma o successivo) i progressi restano; altrimenti scaricate spesso il backup.",
 	"problema_app_dati_separati": "I progressi fatti qui nel browser non passano da soli nell'app. Prima di installarla scaricate il backup qui sopra; poi, nell'app, aprite Per i genitori › Backup e app e importatelo.",
-	"problema_ios_audio_muto": "Su iPhone e iPad, dopo un'altra app o lo schermo bloccato, a volte Aura resta senza suono: ricaricate la pagina. Se non basta, chiudete e riaprite Safari (o l'app).",
+	"problema_ios_audio_muto": "Su iPhone e iPad, dopo un'altra app o lo schermo bloccato, a volte Aura resta senza suono: ricaricate la pagina. Se non basta, chiudete e riaprite il browser (o l'app).",
 	"problema_ios16_silenzioso": "Con iOS 16, se iPhone o iPad è in silenzioso i suoni di Aura non si sentono: togliete il silenzioso.",
 	"problema_output_latency": "Questo browser non misura il ritardo dell'audio: con cuffie o casse Bluetooth, per il ritmo, di solito servono 150-250.",
 	"problema_android_voce": "Su Android, se la voce legge l'italiano con un accento straniero, installate la voce italiana nelle impostazioni del dispositivo, alla voce Sintesi vocale.",
 	"problema_ios_salvataggio": "Su iPhone e iPad a volte serve ricaricare la pagina per salvare di nuovo. Se il messaggio resta, riavviate il dispositivo: i progressi già salvati non si perdono.",
 	"problema_apple_isolamento": "Su questo dispositivo suoni, microfono e salvataggi sono bloccati, di solito dalla Modalità di isolamento. Si può escludere solo Aura: nelle impostazioni del sito in Safari, disattivate Modalità di isolamento.",
+	"problema_apple_isolamento_app": "Su questo dispositivo suoni, microfono e salvataggi sono bloccati, di solito dalla Modalità di isolamento. Si può escludere solo questo browser: Impostazioni › Privacy e sicurezza › Modalità di isolamento, poi disattivatelo nell'elenco delle app.",
 	"problema_firefox_persistenza": "Premendo il pulsante qui sotto, Firefox chiede se Aura può conservare i dati in modo permanente: scegliete Consenti, così i progressi non vengono cancellati quando il dispositivo libera spazio."
 }

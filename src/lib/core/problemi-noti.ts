@@ -57,8 +57,11 @@ export const PROBLEMI_NOTI = {
 		ios(d) && d.webAudio && (d.versioneIos ?? 99) >= 17 && m.problema_ios_salvataggio(),
 
 	// La Modalità di isolamento toglie Web Audio, getUserMedia e (da iOS 17) IndexedDB
-	// (support.apple.com/105120, WebKit 266363).
-	'apple-isolamento': (d) => d.apple && !d.webAudio && m.problema_apple_isolamento(),
+	// (support.apple.com/105120, WebKit 266363). Safari esclude un sito, iOS esclude le altre app.
+	'apple-isolamento': (d) =>
+		d.apple &&
+		!d.webAudio &&
+		(d.browser === 'Safari' ? m.problema_apple_isolamento() : m.problema_apple_isolamento_app()),
 
 	// Solo Firefox chiede all'utente il permesso per navigator.storage.persist() (MDN, Storage quotas and
 	// eviction criteria; web.dev/articles/persistent-storage). FxiOS è WebKit.

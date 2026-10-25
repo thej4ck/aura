@@ -123,4 +123,11 @@ describe('problemi noti', () => {
 		expect(permesso(DISPOSITIVI.iphoneApp)).toMatch(/ogni apertura/);
 		expect(PROBLEMI_NOTI['safari-dati-7-giorni'](DISPOSITIVI.macSafari)).toMatch(/^Safari/);
 	});
+
+	it('negli altri browser di iOS nessun testo nomina Safari', () => {
+		const isolato = { ...DISPOSITIVI.ipadFirefox, webAudio: false, outputLatency: false };
+		for (const d of [DISPOSITIVI.ipadFirefox, isolato])
+			for (const p of Object.values(PROBLEMI_NOTI)) expect(p(d) || '').not.toMatch(/Safari/);
+		expect(PROBLEMI_NOTI['apple-isolamento'](isolato)).toMatch(/elenco delle app/);
+	});
 });
