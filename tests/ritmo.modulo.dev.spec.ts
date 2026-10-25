@@ -84,7 +84,7 @@ test('«Il battito» per intero su un telefono: si ascolta, si batte a tempo, si
 	expect(await violazioniGravi(page)).toEqual([]);
 	await avanti(page);
 
-	// Prova tu: l'eco di otto battiti, poi il battito tenuto da soli dopo il conteggio
+	// Prova tu: l'eco di otto battiti, poi in lettura, dopo il conteggio
 	await battiTutto(page, 'Ascolta e batti');
 	await expect(rigo(page).locator('svg .battito.giusto')).toHaveCount(8);
 	await avanti(page);

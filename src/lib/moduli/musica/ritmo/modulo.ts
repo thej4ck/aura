@@ -38,7 +38,7 @@ export const modulo = {
 			'Ripetere un ritmo, leggerlo e riconoscerlo ascoltando.'
 		],
 		comeFunziona:
-			'Prima ascolti, poi batti. Si batte toccando il tasto grande oppure battendo le mani, se c’è un microfono. Prima di battere si conta sempre: uno, due, tre, quattro. Alla fine vedi sotto ogni nota com’è andato il tuo battito, e un consiglio su cosa fare.',
+			'Prima ascolti, poi batti. Si batte toccando il tasto grande oppure battendo le mani, se c’è un microfono. Prima di battere si conta sempre una battuta: di solito uno, due, tre, quattro. Alla fine vedi sotto ogni nota com’è andato il tuo battito, e un consiglio su cosa fare.',
 		cosaServe: [
 			'L’audio acceso, per sentire il battito.',
 			'Un dito, o la barra spaziatrice, per battere.',
@@ -214,7 +214,7 @@ export const modulo = {
 					widget: 'batti-ritmo',
 					titolo: 'Continua tu',
 					testo:
-						'Questa volta senti solo il conteggio. Poi il battito lo tieni tu: una volta per ogni nota.',
+						'Questa volta il ritmo non lo senti prima: dopo il conteggio batti tu, una volta per ogni nota, insieme al battito.',
 					props: { rigo: R('ta ta ta ta'), modo: 'lettura' }
 				},
 				{
@@ -549,7 +549,7 @@ export const modulo = {
 						corretta: 1,
 						ascolta: true,
 						suggerimento:
-							'Ascolta il secondo battito: c’è un suono, ce ne sono due, o c’è il silenzio?'
+							'Ascolta il secondo battito: c’è un suono o c’è il silenzio? E sul primo, un colpo o due?'
 					}
 				}
 			]
@@ -718,7 +718,7 @@ export const modulo = {
 					widget: 'spiegazione',
 					titolo: 'Come si gioca',
 					testo:
-						'Vedi un ritmo scritto. Dopo il conteggio, uno, due, tre, quattro, lo batti leggendo le note. Si comincia con TA e TI-TI; quando li leggi bene, arrivano TA-A, la pausa e le battute.'
+						'Vedi un ritmo scritto. Dopo il conteggio di una battuta lo batti leggendo le note. Si comincia con TA e TI-TI; quando li leggi bene, arrivano TA-A, la pausa e le battute.'
 				},
 				{
 					id: 'insieme',
