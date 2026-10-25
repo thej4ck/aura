@@ -2,6 +2,7 @@ import * as v from 'valibot';
 import { describe, expect, it } from 'vitest';
 import {
 	ABBINAMENTO_MAX_MS,
+	CALO_A_MS,
 	SCARTO_MAX_MS,
 	TOLLERANZE_RITMO_MS,
 	VOLUME_CLIC_PIANO
@@ -16,6 +17,8 @@ import {
 	finestraAscolto,
 	inizi,
 	lunghezza,
+	momentoTurno,
+	pianoTurno,
 	rigoRitmico,
 	segniBattiti,
 	sillaba,
@@ -322,5 +325,97 @@ describe('valutazione dei battiti', () => {
 		expect(segni[0].battito).toBeCloseTo(0.2 / battitoS, 6);
 		expect(segni[2].battito).toBeCloseTo(1.5, 9); // mancata: all'inizio della nota
 		expect(segni[4].battito).toBeCloseTo(3 + 0.1 / battitoS, 6);
+	});
+});
+
+describe('turno ritmico', () => {
+	// 'ta sst ti-ti ta' a 60 BPM: un battito al secondo, una battuta in 4/4
+	const rigo = rigoRitmico('ta sst ti-ti ta', '4/4');
+	const conta = (p: ReturnType<typeof pianoTurno>, f: (k: (typeof p.colpi)[number]) => boolean) =>
+		p.colpi.filter(f).length;
+	const clic = (k: { timbro: string }) => k.timbro === 'clic';
+
+	it('eco col tocco: il sito suona attacco e ritmo con tutti i clic, poi il bambino ha attacco e clic piano', () => {
+		const p = pianoTurno(rigo, 60, { eco: true, fonte: 'tocco' });
+		expect(p.da).toBe(8); // attacco (4) e ritmo (4) del sito
+		// legnetto solo nel turno del sito: 4 note, la pausa tace
+		expect(p.colpi.filter((k) => k.timbro === 'legnetto').map((k) => k.inizio)).toEqual([
+			4, 6, 6.5, 7
+		]);
+		// un clic per battito, senza buchi da 0 a 15: il battito non salta tra sito e bambino
+		expect(p.colpi.filter(clic).map((k) => k.inizio)).toEqual([...Array(16).keys()]);
+		expect(conta(p, (k) => clic(k) && k.inizio >= 12 && k.volume === VOLUME_CLIC_PIANO)).toBe(4);
+		expect(conta(p, (k) => clic(k) && k.inizio < 12 && k.volume === VOLUME_CLIC_PIANO)).toBe(0);
+		expect(p.fine).toBe(16); // la fine del rigo: l'ultima nota più il margine sta prima
+	});
+
+	it('col microfono dopo l’attacco del bambino non suona niente, e il turno aspetta il battito ritardato', () => {
+		const p = pianoTurno(rigo, 60, { eco: true, fonte: 'mani' });
+		const ultimo = Math.max(...p.colpi.map((k) => k.inizio));
+		expect(ultimo).toBe(11); // l'ultimo clic dell'attacco del bambino
+		expect(ultimo).toBeLessThan(p.da + p.bimbo.attaccoS);
+		expect(conta(p, clic)).toBe(12);
+		expect(p.fine).toBeCloseTo(16 + CALO_A_MS / 1000 + 0.05, 9);
+	});
+
+	it('in lettura suona solo l’attacco del bambino', () => {
+		const p = pianoTurno(rigo, 60, { eco: false, fonte: 'mani' });
+		expect(p.sito).toBeUndefined();
+		expect(p.da).toBe(0);
+		expect(p.colpi.map((k) => [k.timbro, k.inizio, k.accento])).toEqual([
+			['clic', 0, true],
+			['clic', 1, false],
+			['clic', 2, false],
+			['clic', 3, false]
+		]);
+	});
+
+	it('il battito visivo, la nota del sito e a chi tocca seguono il tempo', () => {
+		const p = pianoTurno(rigoRitmico('ta ta ta', '3/4'), 60, { eco: true, fonte: 'tocco' });
+		expect(p.perBattuta).toBe(3);
+		const momenti = [-0.1, 0, 1.5, 3, 4.9, 5.99, 6, 8.4, 8.5, 9, 11.9, 12].map((t) =>
+			momentoTurno(p, t)
+		);
+		expect(momenti.map((x) => x.battito)).toEqual([null, 0, 1, 0, 1, 2, 0, 2, 2, 0, 2, null]);
+		// il sito suona da 3 a 6 (dopo il suo attacco); la pausa del bambino no
+		expect(momenti.map((x) => x.suona)).toEqual([
+			null,
+			null,
+			null,
+			0,
+			1,
+			2,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]);
+		// «batti» da mezzo battito prima della prima nota del bambino (6 + 3 = 9)
+		expect(momenti.map((x) => x.turno).indexOf('batti')).toBe(8);
+		expect(momentoTurno(p, p.fine - 0.001).finito).toBe(false);
+		expect(momentoTurno(p, p.fine).finito).toBe(true);
+	});
+
+	it('senza tempo in chiave l’attacco del bambino riparte dal primo battito', () => {
+		// 3 battiti contati in 4: il sito finisce a metà battuta, l'attacco del bambino ricomincia da 1
+		const p = pianoTurno(rigoRitmico('ta ta ta'), 60, { eco: true, fonte: 'tocco' });
+		expect(p.da).toBe(7);
+		expect(momentoTurno(p, 6.5).battito).toBe(2);
+		expect(momentoTurno(p, 7).battito).toBe(0);
+	});
+
+	it('un turno battuto a tempo riesce; senza battiti tutte le note sono mancate', () => {
+		const p = pianoTurno(rigo, 72, { eco: false, fonte: 'tocco' });
+		const t0 = T0 + p.da;
+		const giusti = p.bimbo.note.filter((n) => !n.pausa).map((n) => t0 + n.inizio + 0.03);
+		expect(valutaBattiti(p.bimbo, t0, giusti, FACILE).riuscita).toBe(true);
+		// i tocchi sull'attacco (si batte insieme ai clic) e dopo la fine non contano
+		const [da, a] = finestraAscolto(p.bimbo, t0);
+		expect(da).toBeGreaterThan(t0 + p.bimbo.attaccoS - p.bimbo.battitoS);
+		expect(a).toBeLessThanOrEqual(T0 + p.fine);
+		const vuoto = valutaBattiti(p.bimbo, t0, [], FACILE);
+		expect(vuoto.note.map((n) => n.giudizio)).toEqual(Array(4).fill('mancato'));
 	});
 });

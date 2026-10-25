@@ -2,7 +2,12 @@
 // Un battito è una semiminima (tempi 2/4, 3/4, 4/4). I tempi in secondi sono sul clock audio, nel
 // riferimento del suono sentito (tempoSentito in audio/contesto.ts); nei test sono numeri.
 // Le durate sono frazioni diadiche (¼, ½, ¾, 1, 1½…): somme e confronti sono esatti, niente epsilon.
-import { ABBINAMENTO_MAX_MS, SCARTO_MAX_MS, VOLUME_CLIC_PIANO } from '#lib/core/audio/costanti.ts';
+import {
+	ABBINAMENTO_MAX_MS,
+	CALO_A_MS,
+	SCARTO_MAX_MS,
+	VOLUME_CLIC_PIANO
+} from '#lib/core/audio/costanti.ts';
 import type { Colpo } from '#lib/core/audio/percussioni.ts';
 import type { Durata, Tempo } from '#lib/core/contenuti/schema.ts';
 
@@ -396,4 +401,87 @@ export function segniBattiti(v: ValutazioneRitmo, e: EventiRitmo, t0: number): S
 			nota: x.pausa
 		}))
 	].toSorted((x, y) => x.battito - y.battito);
+}
+
+// --- Il turno ritmico (widget/TurnoRitmo.svelte) ------------------------------------------------
+
+/** Da dove vengono i battiti del bambino: il tocco (dito, Spazio, Invio) o le mani dal microfono. */
+export type FonteBattiti = 'tocco' | 'mani';
+
+/**
+ * Col microfono un battito arriva CALO_A_MS dopo il suo attacco (audio/battimani.ts), più il viaggio dei
+ * blocchi del worklet: il turno aspetta tanto dopo la fine della finestra, per non perdere l'ultimo.
+ */
+export const ATTESA_MANI_S = (CALO_A_MS + 50) / 1000;
+
+export type PianoTurno = {
+	/** quello che suona il sito prima del bambino (solo a eco) */
+	sito?: EventiRitmo;
+	/** gli eventi del turno del bambino, attacco compreso, da `da` */
+	bimbo: EventiRitmo;
+	/** secondi dall'inizio della riproduzione a quello del turno del bambino (il suo t0) */
+	da: number;
+	/** secondi dall'inizio della riproduzione alla fine del turno: dopo, si valuta */
+	fine: number;
+	/** battiti di una battuta, per il battito visivo (senza tempo in chiave si conta in 4) */
+	perBattuta: number;
+	/** una sola riproduzione per tutto il turno: il battito non salta tra il sito e il bambino */
+	colpi: Colpo[];
+};
+
+/**
+ * Il piano di un turno ritmico (ADR 0008), tutto in una riproduzione e sempre a tempo. A eco prima il
+ * sito: una battuta d'attacco e il ritmo col legnetto, con tutti i clic. Poi il bambino: una battuta
+ * d'attacco e i suoi battiti. Col tocco il metronomo continua piano; col microfono tace dopo l'attacco, così
+ * la riproduzione finisce (riproduzioneAttiva() falsa) prima della prima nota e il microfono sente. In
+ * lettura c'è solo il turno del bambino.
+ */
+export function pianoTurno(
+	rigo: { note: readonly NotaRitmica[]; tempo?: Tempo },
+	bpm: number,
+	{ eco, fonte }: { eco: boolean; fonte: FonteBattiti }
+): PianoTurno {
+	const sito = eco ? eventiRitmo(rigo, bpm, 1) : undefined;
+	const bimbo = eventiRitmo(rigo, bpm, 1);
+	const da = sito?.fineS ?? 0;
+	const metronomo = fonte === 'mani' ? 'attacco' : 'piano';
+	return {
+		sito,
+		bimbo,
+		da,
+		fine: finestraAscolto(bimbo, da)[1] + (fonte === 'mani' ? ATTESA_MANI_S : 0),
+		perBattuta: rigo.tempo ? battitiPerBattuta(rigo.tempo) : 4,
+		colpi: [
+			...(sito ? colpi(sito, { metronomo: 'tutti' }) : []),
+			...colpi(bimbo, { note: false, metronomo }).map((k) => ({ ...k, inizio: k.inizio + da }))
+		]
+	};
+}
+
+export type MomentoTurno = {
+	/** il battito della battuta che si sente (0 = il primo), dall'attacco alla fine del ritmo; null fuori */
+	battito: number | null;
+	/** la nota del sito che suona (indice in rigo.note, pause comprese); null se non suona il sito */
+	suona: number | null;
+	/** a chi tocca: «batti» da mezzo battito prima della prima nota del bambino */
+	turno: 'ascolta' | 'batti';
+	finito: boolean;
+};
+
+/** Cosa mostra il turno a `t` secondi dall'inizio della riproduzione (nel riferimento del suono sentito). */
+export function momentoTurno(p: PianoTurno, t: number): MomentoTurno {
+	const parte = t < p.da ? p.sito : p.bimbo;
+	const r = t < p.da ? t : t - p.da;
+	const battito =
+		parte && r >= 0 && r < parte.fineS ? Math.floor(r / parte.battitoS) % p.perBattuta : null;
+	const suona =
+		parte === p.sito && p.sito && r >= p.sito.attaccoS
+			? p.sito.note.findLast((n) => n.inizio <= r)!.nota
+			: null;
+	return {
+		battito,
+		suona,
+		turno: t >= p.da + p.bimbo.attaccoS - p.bimbo.battitoS / 2 ? 'batti' : 'ascolta',
+		finito: t >= p.fine
+	};
 }
