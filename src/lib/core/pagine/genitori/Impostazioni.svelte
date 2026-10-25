@@ -7,6 +7,7 @@
 	import type { Preferenze } from '../../store/schema-progressi';
 	import { ttsDisponibile } from '../../tts';
 	import Avviso from '../../ui/Avviso.svelte';
+	import ProblemaNoto from '../../ui/ProblemaNoto.svelte';
 
 	let { conGate }: { conGate: (azione: () => void) => void } = $props();
 
@@ -150,6 +151,7 @@
 				{m.genitori_lettura_aiuto()}
 				{#if !voceLocale}{m.genitori_lettura_assente()}{/if}
 			</p>
+			<ProblemaNoto id="android-voce-italiana" />
 		</fieldset>
 
 		<fieldset>
@@ -196,6 +198,7 @@
 		<div class="campo">
 			<label for="{id}-latenza" class="titolo">{m.genitori_latenza()}</label>
 			<p id="{id}-latenza-aiuto" class="aiuto">{m.genitori_latenza_aiuto()}</p>
+			<ProblemaNoto id="output-latency-assente" />
 			<input
 				id="{id}-latenza"
 				class="numero"
@@ -208,6 +211,9 @@
 				aria-describedby="{id}-latenza-aiuto"
 				onchange={latenza}
 			/>
+			<!-- «non si sente niente»: l'adulto cerca qui, tra le impostazioni dell'audio -->
+			<ProblemaNoto id="ios-audio-muto" />
+			<ProblemaNoto id="ios16-silenzioso" />
 		</div>
 	</form>
 	<Avviso tono="successo" testo={salvata} />
