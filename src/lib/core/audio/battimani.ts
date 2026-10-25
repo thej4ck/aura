@@ -278,6 +278,10 @@ const FFT_RIPIEGO = 8192;
  * sblocca() prima, nel gesto; lancia ErroreMic (e lo conta nelle statistiche anonime come 'mic'); senza
  * filtri per le chiamate; si chiude da solo quando la scheda si nasconde o la pagina viene lasciata, e
  * allora chiama `onchiuso`; chiudi() rilascia le tracce (idempotente).
+ * `onbattito` arriva ~CALO_A_MS (80 ms) dopo il battito, il tempo che serve a distinguerlo dalla voce;
+ * `t` resta quello dell'attacco. Un lampo sul battito, se serve, si disegna da lì.
+ * Il turno del bambino col microfono finisce in finestraAscolto (musica/ritmo.ts): conviene chiudere o
+ * smettere di contare CALO_A_MS dopo, per non perdere l'ultimo battito.
  *
  * Comportamento atteso, ognuno con il suo test che CONTA gli eventi generati (battimani.test.ts e
  * tests/*.mani.spec.ts, con i segnali di scripts/genera-wav.mjs):
