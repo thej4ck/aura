@@ -263,7 +263,7 @@ Quando un browser o un sistema ha un problema noto (verificato su un dispositivo
 
 1. il testo in `messages/it.json` (`problema_…`): per l'adulto, breve, dice cosa fare, senza allarmi;
 2. una voce in `src/lib/core/problemi-noti.ts`: id stabile, una funzione che riceve il `Dispositivo` di `piattaforma.ts` e dà il testo quando il problema si applica (altrimenti `false`), la fonte nel commento. Se un'API descrive il problema meglio dello user agent (es. `outputLatency`), si aggiunge a `Dispositivo` e si guarda quella;
-3. `<ProblemaNoto id="…" />` (`src/lib/core/ui/`) nel punto in cui serve: si decide nel browser, nel prerender non c'è niente;
+3. `<ProblemaNoto id="…" />` (`src/lib/core/ui/`) nel punto in cui serve: si decide nel browser, nel prerender non c'è niente. Se l'avviso riguarda un campo, `idTesto` gli dà un id da mettere nell'`aria-describedby` del campo;
 4. un caso in `src/lib/core/problemi-noti.test.ts` e, per un punto nuovo, in `tests/problemi-noti.spec.ts` (iPhone emulato e Chrome per computer).
 
 ## Checklist

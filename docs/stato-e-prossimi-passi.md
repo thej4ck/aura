@@ -23,13 +23,19 @@ Documento di passaggio tra una sessione di lavoro e la successiva. Va aggiornato
   - barra in fondo alle attività con «Indietro» e i pulsanti del widget (`AzioniScheda`), sempre sullo schermo;
   - quattro dimensioni del testo (schema dei progressi 2), versione e data della build nel piè di pagina;
   - segnalazioni su GitHub dietro GateAdulti, statistiche d'uso anonime (`scripts/statistiche.mjs` per leggerle).
+- **Problemi noti per piattaforma** (regola in CLAUDE.md; rilevamento in `core/piattaforma.ts`, registro in `core/problemi-noti.ts`, avviso `ProblemaNoto`): un avviso breve per l'adulto, solo sul dispositivo coinvolto e dove serve. Attivi:
+  - iOS: suoni più piano e cuffie Bluetooth a scatti col microfono aperto (promessa del microfono); permesso del microfono a ogni visita o apertura (Prova il microfono); audio muto dopo un'altra app (Impostazioni); tasto silenzioso con iOS 16 (Impostazioni e pagina dell'area); salvataggio bloccato da iOS 17, dopo un nuovo tentativo o già all'avvio (banner in alto);
+  - iOS e Safari per Mac, sito non installato: dati cancellati dopo 7 giorni, dati separati da quelli dell'app (Backup e app; sul Mac solo da Safari 17); Modalità di isolamento (banner in alto);
+  - browser senza `outputLatency` (Safari prima della 18.4): ritardo del Bluetooth (Impostazioni, sotto la manopola);
+  - Chrome per Android: voce italiana da installare (Impostazioni);
+  - Firefox, non su iOS: la persistenza dei dati la chiede l'adulto da Backup e app, dietro il controllo.
 - **Audio**:
   - sintetizzatore, microfono con YIN e gate adattivo al rumore di fondo, PitchMeter;
   - animazioni che suonano in sincrono, guidate dall'audio, con test di regressione;
   - diagnostica del microfono in /genitori, sezione «Prova il microfono», con i passi quando il permesso è negato senza richiesta;
   - ascolto fino a 40 s prima di «Riprova» e consiglio di non cantare più forte (`musica/voce-forte.ts`).
 - **Qualità**:
-  - `npm run verifica` (lint, check, Vitest, build, Playwright) dura circa 3-4 minuti: 445 test unitari e 146 e2e (progetti chromium, dev, mic, voce);
+  - `npm run verifica` (lint, check, Vitest, build, Playwright) dura circa 3-4 minuti: 475 test unitari e 152 e2e (progetti chromium, dev, mic, mani, voce);
   - durante lo sviluppo solo i test mirati (vedi CLAUDE.md, «Test e verifiche»).
 
 ## Prossimi passi, in ordine
