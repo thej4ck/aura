@@ -11,8 +11,9 @@ const microfonoFinto = (wav: string) => ({
 });
 
 // porte dedicate e strictPort: mai riusare per sbaglio il server di un altro progetto
-const porta = 4319; // build di produzione (vite preview)
-const portaDev = 4320; // server di sviluppo: serve per /dev, che in produzione non esiste
+// PORTA_E2E sposta le due porte (es. 4419 e 4420): lavori in parallelo in più worktree
+const porta = Number(process.env.PORTA_E2E ?? 4319); // build di produzione (vite preview)
+const portaDev = porta + 1; // server di sviluppo: serve per /dev, che in produzione non esiste
 
 export default defineConfig({
 	testDir: 'tests',
