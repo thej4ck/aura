@@ -74,9 +74,9 @@ function contestoMuto(): AudioContext {
 	} as unknown as AudioContext;
 }
 
-/** Un clock fermo per tanto in 'running' vuol dire contesto muto: uno sano avanza sempre. */
+/** Un clock in 'running' rimasto indietro di tanto rispetto al tempo vero vuol dire contesto muto. */
 const FERMO_MS = 250;
-/** l'ultimo currentTime visto, e quando (performance.now()) */
+/** l'ultima volta che lo si è visto in 'running': currentTime e performance.now() (t NaN: da rifare) */
 let visto = { t: NaN, ms: 0 };
 /** quando lo si è rimesso in moto l'ultima volta */
 let rimesso = -Infinity;
@@ -84,20 +84,25 @@ let rimesso = -Infinity;
 /**
  * Vero se il contesto è rimasto muto, e allora chi chiama lo rimette in moto: su iOS, dopo un'altra app, lo
  * schermo bloccato o un suono di sistema, resta 'interrupted' (fuori standard) oppure 'running' con il clock
- * fermo (WebKit 276016, 283419, 291892). Il clock fermo si vede confrontando due chiamate distanti almeno
- * FERMO_MS. Appena rimesso in moto no: il suo stato cambia dopo, e nello stesso gesto basta una volta.
+ * fermo (WebKit 276016, 283419, 291892). Un clock sano avanza quanto il tempo vero: se dall'ultima volta che
+ * lo si è visto in 'running' è rimasto indietro di più di FERMO_MS si è fermato, anche se nel frattempo era
+ * avanzato un po' (un suono di sistema con la pagina in vista: si vede già al primo tocco). Da 0 invece può
+ * partire in ritardo, e lì conta solo se è ancora fermo. Appena rimesso in moto no: il suo stato cambia
+ * dopo, e nello stesso gesto basta una volta.
  */
 function muto(c: AudioContext): boolean {
 	const ms = performance.now();
 	if (ms - rimesso < FERMO_MS) return false;
-	if (c.state === 'running' && c.currentTime === visto.t) {
-		if (ms - visto.ms < FERMO_MS) return false;
-	} else {
-		visto = { t: c.currentTime, ms };
-		if ((c.state as string) !== 'interrupted') return false;
-	}
-	rimesso = ms;
-	return true;
+	const t = c.currentTime;
+	const indietro = ms - visto.ms - (t - visto.t) * 1000; // NaN se non c'è un'osservazione in 'running'
+	const fermo =
+		(c.state as string) === 'interrupted' ||
+		(c.state === 'running' && indietro > FERMO_MS && (visto.t > 0 || t === 0));
+	if (fermo) rimesso = ms;
+	// fermo si conta da quando lo era già; dopo un altro stato o una rimessa in moto si riparte da capo
+	if (fermo || c.state !== 'running') visto = { t: NaN, ms };
+	else if (t !== visto.t) visto = { t, ms };
+	return fermo;
 }
 
 /**
@@ -114,8 +119,8 @@ function sveglia(c: AudioContext): Promise<void> {
 }
 
 /**
- * Al ritorno sulla pagina, senza gesto: un contesto muto si sospende ('interrupted' subito, il clock fermo
- * poco dopo) e riparte solo se qualcosa lo sta usando; altrimenti resta sospeso, per la batteria, e lo
+ * Al ritorno sulla pagina, senza gesto: un contesto muto si sospende (subito, o poco dopo se il clock si
+ * ferma proprio al ritorno) e riparte solo se qualcosa lo sta usando; altrimenti resta sospeso, per la batteria, e lo
  * risveglia la prossima sorgente o il prossimo gesto (sveglia).
  */
 function alRitorno() {

@@ -94,16 +94,27 @@ describe('contesto rimasto muto su iOS (WebKit 276016, 283419, 291892)', () => {
 	});
 
 	it("al gesto: 'running' con il clock fermo si rimette in moto, quello che avanza no", () => {
-		c.currentTime = 5;
+		void audio.sblocca(); // appena creato, a 0
+		adesso += 1000;
+		c.currentTime = 0.6; // partito in ritardo: non conta
 		void audio.sblocca();
 		adesso += 1000;
-		c.currentTime = 6; // avanza: sano
+		c.currentTime = 1.4; // 200 ms indietro, un buffer in ritardo: sano
 		void audio.sblocca();
 		expect(c.suspend).not.toHaveBeenCalled();
 		adesso += 1000; // fermo da un secondo
 		const rilascia = audio.usa('riproduzione');
 		expect(rimessoInMoto()).toBe(true);
 		rilascia();
+	});
+
+	it('al gesto: fermo dopo il tocco di prima, con la pagina in vista (un suono di sistema), basta il primo', () => {
+		c.currentTime = 5;
+		void audio.sblocca();
+		c.currentTime = 6; // avanza ancora un secondo, poi si ferma
+		adesso += 10_000;
+		void audio.sblocca();
+		expect(rimessoInMoto()).toBe(true);
 	});
 
 	it('al ritorno sulla pagina, senza sorgenti: si sospende e lo risveglia la prossima (batteria)', () => {
