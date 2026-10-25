@@ -237,7 +237,14 @@ class ContestoFinto {
 	createAnalyser = () => this.analizzatore;
 }
 
-let traccia: { stop: ReturnType<typeof vi.fn>; getSettings: () => MediaTrackSettings };
+let traccia: {
+	stop: ReturnType<typeof vi.fn>;
+	getSettings: () => MediaTrackSettings;
+	addEventListener: (tipo: string, f: () => void) => void;
+	removeEventListener: (tipo: string) => void;
+};
+/** gli ascoltatori della traccia del microfono: 'ended', 'mute' */
+const allaTraccia = new Map<string, () => void>();
 let getUserMedia: ReturnType<typeof vi.fn>;
 let prossimoFrame: (() => void) | undefined;
 const ascoltatori = new Map<string, () => void>();
@@ -248,7 +255,13 @@ let mic: typeof import('./mic.ts');
 describe('apriBattiMani', () => {
 	beforeEach(async () => {
 		NodoWorklet.creati = [];
-		traccia = { stop: vi.fn(), getSettings: () => ({ latency: 0.01 }) as MediaTrackSettings };
+		allaTraccia.clear();
+		traccia = {
+			stop: vi.fn(),
+			getSettings: () => ({ latency: 0.01 }) as MediaTrackSettings,
+			addEventListener: (tipo, f) => allaTraccia.set(tipo, f),
+			removeEventListener: (tipo) => allaTraccia.delete(tipo)
+		};
 		getUserMedia = vi.fn(async () => ({ getTracks: () => [traccia] }));
 		vi.stubGlobal('isSecureContext', true);
 		vi.stubGlobal('navigator', { mediaDevices: { getUserMedia } });
@@ -418,6 +431,60 @@ describe('apriBattiMani', () => {
 		expect(confronta(sentiti, RITMO)).toMatchObject({ trovati: 17, inPiu: 0 });
 		m.chiudi();
 		expect(prossimoFrame).toBeUndefined();
+	});
+
+	it('un worklet che si carica ma non manda blocchi: dopo mezzo secondo si passa al ripiego, e si sente', async () => {
+		vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+		try {
+			segnale = somma(campioniBattiMani({ battiti: RITMO, secondi: SECONDI }), quiete());
+			const battiti: BattitoMani[] = [];
+			const m = await mani.apriBattiMani({ onbattito: (b) => battiti.push(b) });
+			const c = contesto();
+			const [w] = NodoWorklet.creati;
+			expect(m.cattura).toBe('worklet');
+			// il contesto che ancora non parte non conta: si aspetta il suo clock, non l'orologio
+			vi.advanceTimersByTime(2000);
+			expect(m.cattura).toBe('worklet');
+			c.currentTime = 0.55;
+			vi.advanceTimersByTime(100);
+			expect(m.cattura).toBe('raf');
+			expect(w.port.postMessage).toHaveBeenCalledExactlyOnceWith('fine');
+			expect(w.port.onmessage).toBeNull();
+			expect(c.sorgente.disconnect).toHaveBeenCalledWith(w);
+			while ((c.currentTime += 1 / 60) < SECONDI) prossimoFrame!();
+			const sentiti = battiti.map((b) => ({ t: b.t + 0.03 }));
+			expect(confronta(sentiti, RITMO)).toMatchObject({ trovati: 17, inPiu: 0 });
+			m.chiudi();
+			expect(prossimoFrame).toBeUndefined();
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it('i blocchi arrivano: niente ripiego', async () => {
+		vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+		try {
+			const m = await mani.apriBattiMani({ onbattito: () => {} });
+			ascolta(1);
+			vi.advanceTimersByTime(2000);
+			expect(m.cattura).toBe('worklet');
+			expect(contesto().analizzatore.connect).not.toHaveBeenCalled();
+			expect(NodoWorklet.creati[0].port.postMessage).not.toHaveBeenCalled();
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it('la traccia si interrompe (una chiamata, il microfono scollegato): si chiude e lo dice', async () => {
+		for (const tipo of ['ended', 'mute']) {
+			const onchiuso = vi.fn();
+			await mani.apriBattiMani({ onbattito: () => {}, onchiuso });
+			allaTraccia.get(tipo)!();
+			expect(onchiuso, tipo).toHaveBeenCalledExactlyOnceWith('interrotto');
+			expect(NodoWorklet.creati.at(-1)!.port.postMessage).toHaveBeenCalledWith('fine');
+			expect(allaTraccia.size, 'gli ascoltatori se ne vanno con il microfono').toBe(0);
+		}
+		expect(traccia.stop).toHaveBeenCalledTimes(2);
 	});
 
 	it('permesso negato: ErroreMic con il suo codice, e nessun grafo', async () => {

@@ -39,7 +39,8 @@ export type BattiMani = {
 	chiudi(): void;
 	/** per la diagnostica: frequenza di campionamento, come si cattura, filtri davvero applicati */
 	sampleRate: number;
-	cattura: 'worklet' | 'raf';
+	/** diventa 'raf' anche dopo l'apertura, se il worklet non manda blocchi */
+	readonly cattura: 'worklet' | 'raf';
 	impostazioni: MediaTrackSettings;
 };
 
@@ -272,12 +273,14 @@ export class RilevatoreBattiti {
 
 /** Campioni dell'analizzatore nel ripiego senza worklet: ~170 ms a 48 kHz, più di un thread occupato. */
 const FFT_RIPIEGO = 8192;
+/** Secondi di clock audio senza blocchi dal worklet prima di passare al ripiego (un blocco dura ~11 ms). */
+const ATTESA_WORKLET_S = 0.5;
 
 /**
  * Apre il microfono e chiama `onbattito` a ogni battito di mani. Stesse regole di apriMicrofono (mic.ts):
  * sblocca() prima, nel gesto; lancia ErroreMic (e lo conta nelle statistiche anonime come 'mic'); senza
- * filtri per le chiamate; si chiude da solo quando la scheda si nasconde o la pagina viene lasciata, e
- * allora chiama `onchiuso`; chiudi() rilascia le tracce (idempotente).
+ * filtri per le chiamate; si chiude da solo quando la scheda si nasconde, la pagina viene lasciata o la
+ * traccia si interrompe, e allora chiama `onchiuso`; chiudi() rilascia le tracce (idempotente).
  * `onbattito` arriva ~CALO_A_MS (80 ms) dopo il battito, il tempo che serve a distinguerlo dalla voce;
  * `t` resta quello dell'attacco. Un lampo sul battito, se serve, si disegna da lì.
  * Il turno del bambino col microfono finisce in finestraAscolto (musica/ritmo.ts): conviene chiudere o
@@ -292,8 +295,9 @@ const FFT_RIPIEGO = 8192;
  *   il battito è un transitorio a banda larga con attacco di pochi ms, la voce no;
  * - dopo un battito, REFRATTARIO_BATTITO_MS di sordità: doppio picco ed eco della stanza non contano;
  * - soglia adattiva sul rumore di fondo stimato (come RumoreDiFondo in pitch.ts);
- * - il thread principale occupato fino a 100 ms non fa perdere battiti (AudioWorklet; senza, ripiego su
- *   rAF con un analizzatore lungo FFT_RIPIEGO, che legge solo i campioni nuovi).
+ * - il thread principale occupato fino a 100 ms non fa perdere battiti (AudioWorklet; senza, o con un
+ *   worklet che non manda blocchi, ripiego su rAF con un analizzatore lungo FFT_RIPIEGO, che legge solo
+ *   i campioni nuovi).
  */
 export async function apriBattiMani({
 	onbattito,
@@ -325,6 +329,29 @@ export async function apriBattiMani({
 	}
 
 	let cattura: BattiMani['cattura'] = 'worklet';
+	// ponytail: ripiego per i browser senza AudioWorklet, o con un worklet che non elabora; perde i battiti
+	// se il thread si blocca più di FFT_RIPIEGO campioni, e i bordi dei blocchi seguono currentTime (a
+	// scatti su alcuni Android)
+	function ripiego() {
+		cattura = 'raf';
+		if (mic.chiuso) return;
+		const analizzatore = c.createAnalyser();
+		analizzatore.fftSize = FFT_RIPIEGO;
+		sorgente.connect(analizzatore);
+		const buffer = new Float32Array(FFT_RIPIEGO);
+		let fatto = -1;
+		let raf = requestAnimationFrame(function giro() {
+			raf = requestAnimationFrame(giro);
+			const fine = Math.round(c.currentTime * sr);
+			const nuovi = fatto < 0 ? FFT_RIPIEGO : Math.min(FFT_RIPIEGO, fine - fatto);
+			if (nuovi <= 0) return;
+			analizzatore.getFloatTimeDomainData(buffer);
+			elabora(buffer.subarray(FFT_RIPIEGO - nuovi), fine - nuovi);
+			fatto = fine;
+		});
+		smonta = () => cancelAnimationFrame(raf);
+	}
+
 	try {
 		await c.audioWorklet.addModule(URL_WORKLET);
 		if (!mic.chiuso) {
@@ -334,35 +361,43 @@ export async function apriBattiMani({
 				channelCount: 1,
 				channelCountMode: 'explicit'
 			});
-			nodo.port.onmessage = (e: MessageEvent<{ primo: number; campioni: Float32Array }>) =>
+			let arrivati = false;
+			nodo.port.onmessage = (e: MessageEvent<{ primo: number; campioni: Float32Array }>) => {
+				arrivati = true;
 				elabora(e.data.campioni, e.data.primo);
+			};
 			sorgente.connect(nodo); // e basta: mai verso gli altoparlanti
-			smonta = () => {
+			let controllo: ReturnType<typeof setTimeout> | undefined;
+			const fermaWorklet = () => {
+				clearTimeout(controllo);
 				nodo.port.onmessage = null;
 				nodo.port.postMessage('fine'); // il processore smette, e il nodo si può liberare
 			};
+			smonta = fermaWorklet;
+			// un worklet che si carica ma non elabora (un nodo senza uscite su alcuni browser): senza blocchi
+			// dopo ATTESA_WORKLET_S di clock audio si passa al ripiego, invece di un microfono muto
+			const da = c.currentTime;
+			const controlla = () => {
+				if (arrivati || mic.chiuso) return;
+				if (c.currentTime - da < ATTESA_WORKLET_S) {
+					controllo = setTimeout(controlla, 100);
+					return;
+				}
+				fermaWorklet();
+				sorgente.disconnect(nodo);
+				ripiego();
+			};
+			controllo = setTimeout(controlla, 100);
 		}
 	} catch {
-		// ponytail: ripiego per i browser senza AudioWorklet; perde i battiti se il thread si blocca più di
-		// FFT_RIPIEGO campioni, e i bordi dei blocchi seguono currentTime (a scatti su alcuni Android)
-		cattura = 'raf';
-		if (!mic.chiuso) {
-			const analizzatore = c.createAnalyser();
-			analizzatore.fftSize = FFT_RIPIEGO;
-			sorgente.connect(analizzatore);
-			const buffer = new Float32Array(FFT_RIPIEGO);
-			let fatto = -1;
-			let raf = requestAnimationFrame(function giro() {
-				raf = requestAnimationFrame(giro);
-				const fine = Math.round(c.currentTime * sr);
-				const nuovi = fatto < 0 ? FFT_RIPIEGO : Math.min(FFT_RIPIEGO, fine - fatto);
-				if (nuovi <= 0) return;
-				analizzatore.getFloatTimeDomainData(buffer);
-				elabora(buffer.subarray(FFT_RIPIEGO - nuovi), fine - nuovi);
-				fatto = fine;
-			});
-			smonta = () => cancelAnimationFrame(raf);
-		}
+		ripiego();
 	}
-	return { chiudi: mic.chiudi, sampleRate: sr, cattura, impostazioni: mic.impostazioni };
+	return {
+		chiudi: mic.chiudi,
+		sampleRate: sr,
+		get cattura() {
+			return cattura;
+		},
+		impostazioni: mic.impostazioni
+	};
 }

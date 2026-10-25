@@ -50,8 +50,11 @@ export type Microfono = {
 	impostazioni: MediaTrackSettings;
 };
 
-/** Perché il microfono si è chiuso da solo: scheda nascosta, oppure pagina lasciata (anche verso la bfcache). */
-export type MotivoChiusura = 'nascosta' | 'pagina-lasciata';
+/**
+ * Perché il microfono si è chiuso da solo: scheda nascosta, pagina lasciata (anche verso la bfcache), oppure
+ * traccia interrotta (finita o ammutolita: una chiamata su iOS, il microfono scollegato).
+ */
+export type MotivoChiusura = 'nascosta' | 'pagina-lasciata' | 'interrotto';
 
 const INTERVALLO_MS = 1000 / FPS_MIC;
 
@@ -83,7 +86,7 @@ function codiceDa(e: unknown): CodiceErroreMic {
  * Apre il microfono e chiama `onframe` circa 30 volte al secondo. Chiamare prima sblocca() nel gesto
  * che apre il microfono (iOS). Lancia ErroreMic. Le tracce si rilasciano con chiudi(); il microfono si
  * chiude anche da solo quando la scheda si nasconde (rAF lì si ferma: niente frame, ma la spia resterebbe
- * accesa) o la pagina viene lasciata, e allora chiama `onchiuso`. Se il componente sparisce mentre si
+ * accesa), la pagina viene lasciata o la traccia si interrompe, e allora chiama `onchiuso`. Se il componente sparisce mentre si
  * aspetta il permesso, chiudi() va chiamato appena arriva.
  * `latenzaMs`: la manopola di latenza delle preferenze, tolta dal tempo dei frame.
  *
@@ -184,8 +187,9 @@ export type SorgenteMic = {
 /**
  * La parte comune di apriMicrofono e apriBattiMani (battimani.ts): controlla il browser, apre il
  * microfono senza i filtri delle chiamate (lancia ErroreMic, contato nelle statistiche anonime) e ne fa
- * una sorgente del contesto. Si chiude da solo quando la scheda si nasconde o la pagina viene lasciata, e
- * allora chiama `onchiuso`. Alla chiusura chiama `smonta`, che smonta il resto del grafo di chi lo usa.
+ * una sorgente del contesto. Si chiude da solo quando la scheda si nasconde, la pagina viene lasciata o la
+ * traccia smette di dare suono, e allora chiama `onchiuso`. Alla chiusura chiama `smonta`, che smonta il
+ * resto del grafo di chi lo usa.
  */
 export async function apriSorgenteMic(
 	onchiuso: ((motivo: MotivoChiusura) => void) | undefined,
@@ -218,12 +222,14 @@ export async function apriSorgenteMic(
 		throw errore('non-supportato', { cause: e });
 	}
 
+	const traccia = stream.getTracks()[0];
 	let chiuso = false;
 	function chiudi() {
 		if (chiuso) return;
 		chiuso = true;
 		removeEventListener('pagehide', lasciata);
 		document.removeEventListener('visibilitychange', nascosta);
+		for (const tipo of ['ended', 'mute']) traccia?.removeEventListener?.(tipo, interrotto);
 		smonta();
 		sorgente.disconnect();
 		for (const traccia of stream.getTracks()) traccia.stop();
@@ -238,12 +244,15 @@ export async function apriSorgenteMic(
 	const nascosta = () => {
 		if (document.visibilityState === 'hidden') chiudiDaSolo('nascosta');
 	};
+	// senza questo un microfono muto sembra un bambino che non canta o non batte: meglio ricominciare
+	const interrotto = () => chiudiDaSolo('interrotto');
 	addEventListener('pagehide', lasciata);
 	document.addEventListener('visibilitychange', nascosta);
+	for (const tipo of ['ended', 'mute']) traccia?.addEventListener?.(tipo, interrotto);
 	return {
 		c,
 		sorgente,
-		impostazioni: stream.getTracks()[0]?.getSettings?.() ?? {},
+		impostazioni: traccia?.getSettings?.() ?? {},
 		get chiuso() {
 			return chiuso;
 		},
