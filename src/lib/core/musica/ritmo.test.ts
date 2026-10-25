@@ -313,6 +313,38 @@ describe('valutazione dei battiti', () => {
 		expect(v.note.map((n) => n.giudizio)).toEqual(Array(8).fill('giusto'));
 	});
 
+	describe('un battito lontano dalla sua nota, ma solo lui vicino', () => {
+		// 'ta ti-ti ta-a' a 72 BPM: le note a 0, 0,83, 1,25 e 1,67 s dall'attacco
+		const r = eventiRitmo(rigoRitmico('ta ti-ti ta-a'), 72, 1);
+		const tutti = attesi(r);
+		const sposta = (d: number[]) => tutti.map((t, i) => t + d[i]);
+
+		it('partito prima del conteggio: la prima nota è presto, non mancata con un battito in più', () => {
+			const v = valutaBattiti(r, T0, sposta([-0.38, 0, 0, 0]), FACILE);
+			expect(v.note.map((n) => n.giudizio)).toEqual(['presto', 'giusto', 'giusto', 'giusto']);
+			expect(v.note[0].errore).toBeCloseTo(-0.38, 9);
+			expect(v.inPiu).toEqual([]);
+			expect(v.consiglio).toEqual({ tipo: 'presto', nota: 0 });
+		});
+
+		it('la minima battuta tardi: tardi, non mancata con un battito in più', () => {
+			const v = valutaBattiti(r, T0, sposta([0, 0, 0, 0.33]), FACILE);
+			expect(v.note.map((n) => n.giudizio)).toEqual(['giusto', 'giusto', 'giusto', 'tardi']);
+			expect(v.inPiu).toEqual([]);
+			expect(v.consiglio).toEqual({ tipo: 'tardi', nota: 3 });
+		});
+
+		it('il battito di una nota mancata non si prende da una pausa né da una nota vicina', () => {
+			// 'ta sst ta ta': salta la prima nota e batte sulla pausa; il doppio battito resta in più
+			const p = eventiRitmo(rigoRitmico('ta sst ta ta'), 72, 1);
+			const [, b, c] = attesi(p);
+			const sullaPausa = T0 + p.note[1].inizio;
+			const v = valutaBattiti(p, T0, [sullaPausa, b, c, c + 0.2], FACILE);
+			expect(v.note.map((n) => n.giudizio)).toEqual(['mancato', 'giusto', 'giusto']);
+			expect(v.inPiu).toEqual([{ t: sullaPausa, pausa: 1 }, { t: c + 0.2 }]);
+		});
+	});
+
 	it("segni sotto le note: in battiti dall'inizio del rigo, scarto tolto", () => {
 		const battiti = giusti
 			.map((t, i) => (i === 0 ? t + 0.18 + 0.2 : t + 0.18))

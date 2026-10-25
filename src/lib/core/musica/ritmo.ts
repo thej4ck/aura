@@ -305,8 +305,9 @@ function stimaScarto(attesi: readonly number[], battiti: readonly number[], max:
 /**
  * Valuta i battiti del bambino (s, clock audio, riferimento del suono sentito) contro gli eventi suonati
  * da `t0`. Toglie lo scarto costante, abbina ogni battito alla nota più vicina entro ABBINAMENTO_MAX_MS
- * (per nota vince il più vicino, gli altri sono in più) e giudica: entro `tolleranzaS` giusto, altrimenti
- * presto o tardi; senza battito mancata. I battiti fuori da finestraAscolto() non contano.
+ * (per nota vince il più vicino, gli altri sono in più); poi una nota rimasta senza battito prende il
+ * battito in più più vicino nella sua zona. Giudica: entro `tolleranzaS` giusto, altrimenti presto o
+ * tardi; senza battito mancata. I battiti fuori da finestraAscolto() non contano.
  */
 export function valutaBattiti(
 	e: EventiRitmo,
@@ -323,7 +324,7 @@ export function valutaBattiti(
 	const scarto = stimaScarto(attesi, dentro, Math.min(SCARTO_MAX_MS / 1000, distanza / 2));
 
 	const abbinati = new Map<number, number>(); // nota da battere → battito
-	const inPiu: number[] = [];
+	let inPiu: number[] = [];
 	for (const b of dentro) {
 		const k = attesi.length ? vicino(attesi, b - scarto) : -1;
 		const d = k < 0 ? Infinity : Math.abs(b - scarto - attesi[k]);
@@ -334,6 +335,20 @@ export function valutaBattiti(
 			inPiu.push(prima);
 			abbinati.set(k, b);
 		} else inPiu.push(b);
+	}
+	// una nota rimasta senza battito prende il battito in più più vicino che cade nella sua zona (a metà
+	// strada dagli inizi vicini, pause comprese): chi parte un po' prima del conteggio o batte tardi una
+	// minima ha battuto una volta per nota, presto o tardi, non "una mancata e una in più"
+	const tutti = e.note.map((n) => t0 + n.inizio);
+	for (const [k, { nota: j }] of attese.entries()) {
+		if (abbinati.has(k)) continue;
+		const da = j > 0 ? (tutti[j - 1] + tutti[j]) / 2 : -Infinity;
+		const a = j + 1 < tutti.length ? (tutti[j] + tutti[j + 1]) / 2 : Infinity;
+		const zona = inPiu.filter((b) => b - scarto > da && b - scarto <= a).toSorted((x, y) => x - y);
+		if (!zona.length) continue;
+		const b = zona[vicino(zona, attesi[k] + scarto)];
+		abbinati.set(k, b);
+		inPiu = inPiu.filter((x) => x !== b);
 	}
 
 	const note = attese.map((n, k): NotaBattuta => {
