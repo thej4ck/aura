@@ -672,7 +672,8 @@ export const modulo = {
 			riepilogo: 'Sai fare l’eco ritmica: ascolti un ritmo e lo ripeti uguale, a tempo.',
 			minuti: 5,
 			allena: ['imitazione-ritmica', 'pulsazione'],
-			prerequisiti: ['semiminima-e-crome'],
+			// i giri arrivano alla minima, alla pausa e alle battute: dopo le loro lezioni
+			prerequisiti: ['battute-e-tempo'],
 			traguardi: [IN.ascolto, IN.ritmo],
 			schede: [
 				{

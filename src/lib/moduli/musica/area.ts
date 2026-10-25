@@ -7,7 +7,8 @@ export const area = {
 	icona: '🎵',
 	colore: '#3f5aa8',
 	// ordine consigliato, mai un lucchetto: lettura, canto e ritmo si alternano. Il battito arriva presto;
-	// la lettura ritmica dopo le prime lezioni di pentagramma, quando il rigo è già familiare
+	// la lettura ritmica dopo le prime lezioni di pentagramma, quando il rigo è già familiare. «Eco
+	// ritmica» dopo «Battute e tempo»: i suoi giri arrivano a minima, pausa e battute (GIRI_ECO)
 	percorso: [
 		'musica.canto.cosa-sono-le-note',
 		'musica.ritmo.il-battito',
@@ -16,7 +17,6 @@ export const area = {
 		'musica.canto.una-alla-volta',
 		'musica.ritmo.semiminima-e-crome',
 		'musica.pentagramma.note-linee-spazi',
-		'musica.ritmo.eco-ritmica',
 		'musica.pentagramma.che-nota-e',
 		'musica.canto.tieni-la-nota',
 		'musica.ritmo.la-minima',
@@ -30,6 +30,7 @@ export const area = {
 		'musica.canto.i-salti',
 		'musica.canto.eco',
 		'musica.ritmo.battute-e-tempo',
+		'musica.ritmo.eco-ritmica',
 		'musica.pentagramma.alterazioni',
 		'musica.canto.scala-cromatica',
 		'musica.pentagramma.leggi-e-canta',
