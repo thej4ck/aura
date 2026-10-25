@@ -257,6 +257,15 @@ Prima scelta: SVG (componenti del modulo o file `.svg`). Le immagini raster gene
 3. La logica pura del modulo (estrazioni, macchine a stati) ha i suoi test Vitest accanto (`lettura.test.ts`).
 4. `npm run lint`, `npm run check`, `npm test` e `npm run build` devono essere verdi prima del commit.
 
+## 10. Problemi noti di una piattaforma
+
+Quando un browser o un sistema ha un problema noto (verificato su un dispositivo vero o documentato da una fonte: bug di WebKit, MDN, documentazione Apple; «non provato» non è «noto»), Aura lo dice all'adulto, solo sul dispositivo coinvolto e nel punto in cui serve. Il registro è unico, nel core, anche per un problema che tocca un solo modulo:
+
+1. il testo in `messages/it.json` (`problema_…`): per l'adulto, breve, dice cosa fare, senza allarmi;
+2. una voce in `src/lib/core/problemi-noti.ts`: id stabile, una funzione che riceve il `Dispositivo` di `piattaforma.ts` e dà il testo quando il problema si applica (altrimenti `false`), la fonte nel commento. Se un'API descrive il problema meglio dello user agent (es. `outputLatency`), si aggiunge a `Dispositivo` e si guarda quella;
+3. `<ProblemaNoto id="…" />` (`src/lib/core/ui/`) nel punto in cui serve: si decide nel browser, nel prerender non c'è niente;
+4. un caso in `src/lib/core/problemi-noti.test.ts` e, per un punto nuovo, in `tests/problemi-noti.spec.ts` (iPhone emulato e Chrome per computer).
+
 ## Checklist
 
 - [ ] cartella `src/lib/moduli/<area>/<modulo>/` con `modulo.ts` (`satisfies ModuloDati`)

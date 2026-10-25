@@ -6,7 +6,7 @@ Stato: accettata · 2026-10-25 · il modulo Ritmo resta in bozza fino alla prova
 
 Il modulo Ritmo chiede al bambino (6-10 anni) di battere un ritmo: a eco (prima suona il sito, poi batte lui) o leggendolo.
 Il canto misura altezze su frame da 30 al secondo e regge centinaia di millisecondi; il ritmo misura istanti, e 60-150 ms sono già la differenza tra "giusto" e "un po' presto".
-Tocco, tastiera e microfono arrivano su orologi diversi (eventi del DOM, clock audio), e l'altoparlante è in ritardo di una quantità che il browser conosce solo in parte: le cuffie Bluetooth aggiungono 150-300 ms, Safari non dichiara `outputLatency`.
+Tocco, tastiera e microfono arrivano su orologi diversi (eventi del DOM, clock audio), e l'altoparlante è in ritardo di una quantità che il browser conosce solo in parte: le cuffie Bluetooth aggiungono 150-300 ms, Safari dichiara `outputLatency` solo dalla 18.4 (prima si ripiega su `baseLatency`).
 
 ## Decisione
 

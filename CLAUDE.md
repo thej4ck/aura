@@ -11,6 +11,7 @@ Piattaforma didattica gratuita per bambini, a moduli (oggi area Musica: Pentagra
 - **Id stabili**: id di aree, moduli, attività e competenze non si rinominano mai; se serve, si scrive una migrazione.
 - **Stringhe UI via Paraglide** (`messages/it.json`), niente testo hardcoded nei componenti.
 - **Accessibilità WCAG 2.2 AA**: target ≥48px, focus visibile, il colore non è mai l'unico segnale, rispetto di `prefers-reduced-motion`.
+- **Problemi noti per piattaforma → avviso solo su quella piattaforma**: un problema verificato o documentato da una fonte (bug di WebKit, MDN, Apple; «non provato» non è «noto») si dice all'adulto solo sul dispositivo coinvolto e nel punto in cui serve, con una voce nel registro unico `src/lib/core/problemi-noti.ts` e `<ProblemaNoto id>` lì (come in `docs/come-aggiungere-un-modulo.md`).
 - **Ogni animazione che mostra note o altezze le fa sentire in sincrono, guidata dall'audio** (anche le illustrazioni, con «Ascolta»): il disegno usa `suonoDisegno` (`src/lib/core/widget/suono.svelte.ts`). Il movimento ridotto toglie il movimento, non il suono. I disegni muti sono elencati, con il motivo, in `tests/animazioni.dev.spec.ts`.
 
 ## Comandi

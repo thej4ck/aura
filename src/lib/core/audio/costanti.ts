@@ -124,8 +124,8 @@ export const BPM_RITMO_MAX = 100;
 
 /**
  * Scarto costante massimo (ms) che la valutazione toglie: la latenza che resta dopo outputLatency e la
- * manopola (tocco, microfono, Bluetooth, Safari che non la dichiara). Mai oltre metà della distanza
- * minima tra due note, così un battito non salta sulla nota vicina.
+ * manopola (tocco, microfono, Bluetooth, Safari prima della 18.4 che non la dichiara). Mai oltre metà
+ * della distanza minima tra due note, così un battito non salta sulla nota vicina.
  */
 export const SCARTO_MAX_MS = 200;
 
