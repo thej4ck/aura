@@ -107,35 +107,11 @@ export async function apriMicrofono({
 	onchiuso?: (motivo: MotivoChiusura) => void;
 	latenzaMs?: number;
 }): Promise<Microfono> {
-	if (globalThis.isSecureContext === false) throw errore('contesto-non-sicuro');
-	if (typeof AudioContext === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-		throw errore('non-supportato');
-	}
-	const c = contesto();
-	// prima di getUserMedia: su iOS la sessione audio passa ad ascoltare e suonare insieme
-	const rilascia = usa('microfono');
-	let stream: MediaStream;
-	try {
-		// la voce così com'è: i filtri per le chiamate tagliano le note tenute e cambiano il volume
-		stream = await navigator.mediaDevices.getUserMedia({
-			audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-		});
-	} catch (e) {
-		rilascia();
-		throw errore(codiceDa(e), { cause: e });
-	}
-
-	let sorgente: MediaStreamAudioSourceNode;
+	let raf = 0;
+	const mic = await apriSorgenteMic(onchiuso, () => cancelAnimationFrame(raf));
+	const { c, sorgente } = mic;
 	const analizzatore = c.createAnalyser();
 	analizzatore.fftSize = FFT;
-	try {
-		sorgente = c.createMediaStreamSource(stream);
-	} catch (e) {
-		// mai lasciare acceso il microfono (e la sua spia) se non lo si può usare
-		for (const traccia of stream.getTracks()) traccia.stop();
-		rilascia();
-		throw errore('non-supportato', { cause: e });
-	}
 	// passa-basso nativo, poi un campione su due a YIN: regge il rumore di fondo e costa un quarto
 	const filtro = c.createBiquadFilter();
 	filtro.type = 'lowpass';
@@ -149,8 +125,6 @@ export async function apriMicrofono({
 	const ritardo = FFT / 2 / c.sampleRate + latenzaMs / 1000;
 	let ultimo = -Infinity;
 	let tPrima: number | null = null;
-	let raf = 0;
-	let chiuso = false;
 
 	function giro(ora: number) {
 		raf = requestAnimationFrame(giro);
@@ -186,12 +160,71 @@ export async function apriMicrofono({
 		});
 	}
 
+	raf = requestAnimationFrame(giro);
+	return {
+		chiudi: mic.chiudi,
+		sampleRate: c.sampleRate,
+		cattura: 'raf',
+		impostazioni: mic.impostazioni
+	};
+}
+
+export type SorgenteMic = {
+	c: AudioContext;
+	/** il microfono nel grafo: chi lo usa lo collega ai suoi nodi, mai agli altoparlanti */
+	sorgente: MediaStreamAudioSourceNode;
+	/** i filtri davvero applicati: un browser o un driver può tenerli accesi anche se chiesti spenti */
+	impostazioni: MediaTrackSettings;
+	/** vero dopo chiudi(), anche quando lo ha chiuso il browser */
+	readonly chiuso: boolean;
+	/** rilascia le tracce e il contesto, dopo `smonta`; idempotente */
+	chiudi(): void;
+};
+
+/**
+ * La parte comune di apriMicrofono e apriBattiMani (battimani.ts): controlla il browser, apre il
+ * microfono senza i filtri delle chiamate (lancia ErroreMic, contato nelle statistiche anonime) e ne fa
+ * una sorgente del contesto. Si chiude da solo quando la scheda si nasconde o la pagina viene lasciata, e
+ * allora chiama `onchiuso`. Alla chiusura chiama `smonta`, che smonta il resto del grafo di chi lo usa.
+ */
+export async function apriSorgenteMic(
+	onchiuso: ((motivo: MotivoChiusura) => void) | undefined,
+	smonta: () => void
+): Promise<SorgenteMic> {
+	if (globalThis.isSecureContext === false) throw errore('contesto-non-sicuro');
+	if (typeof AudioContext === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+		throw errore('non-supportato');
+	}
+	const c = contesto();
+	// prima di getUserMedia: su iOS la sessione audio passa ad ascoltare e suonare insieme
+	const rilascia = usa('microfono');
+	let stream: MediaStream;
+	try {
+		// la voce così com'è: i filtri per le chiamate tagliano le note tenute e cambiano il volume
+		stream = await navigator.mediaDevices.getUserMedia({
+			audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+		});
+	} catch (e) {
+		rilascia();
+		throw errore(codiceDa(e), { cause: e });
+	}
+	let sorgente: MediaStreamAudioSourceNode;
+	try {
+		sorgente = c.createMediaStreamSource(stream);
+	} catch (e) {
+		// mai lasciare acceso il microfono (e la sua spia) se non lo si può usare
+		for (const traccia of stream.getTracks()) traccia.stop();
+		rilascia();
+		throw errore('non-supportato', { cause: e });
+	}
+
+	let chiuso = false;
 	function chiudi() {
 		if (chiuso) return;
 		chiuso = true;
-		cancelAnimationFrame(raf);
 		removeEventListener('pagehide', lasciata);
 		document.removeEventListener('visibilitychange', nascosta);
+		smonta();
 		sorgente.disconnect();
 		for (const traccia of stream.getTracks()) traccia.stop();
 		rilascia();
@@ -205,15 +238,15 @@ export async function apriMicrofono({
 	const nascosta = () => {
 		if (document.visibilityState === 'hidden') chiudiDaSolo('nascosta');
 	};
-
 	addEventListener('pagehide', lasciata);
 	document.addEventListener('visibilitychange', nascosta);
-	raf = requestAnimationFrame(giro);
 	return {
-		chiudi,
-		sampleRate: c.sampleRate,
-		cattura: 'raf',
-		// i filtri davvero applicati: un browser o un driver può tenerli accesi anche se chiesti spenti
-		impostazioni: stream.getTracks()[0]?.getSettings?.() ?? {}
+		c,
+		sorgente,
+		impostazioni: stream.getTracks()[0]?.getSettings?.() ?? {},
+		get chiuso() {
+			return chiuso;
+		},
+		chiudi
 	};
 }

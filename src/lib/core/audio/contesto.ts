@@ -64,12 +64,19 @@ export const ora = (): number => ctx?.currentTime ?? 0;
  * programmato a `t` dà `t`. Anche il battito visivo si disegna con tempoSentito(), in fase con i clic.
  * Usa getOutputTimestamp() (contextTime ↔ performanceTime del campione in uscita) quando dà valori
  * sensati; altrimenti currentTime − (outputLatency || baseLatency) e l'età dell'evento.
- * CONTRATTO: corpo da implementare, con i test (contesto finto, entrambe le strade, valori nulli).
+ * 0 se l'audio non è mai partito, come ora().
  */
-export function tempoSentito(ms?: number, latenzaMs = 0): number {
-	void ms;
-	void latenzaMs;
-	throw new Error('tempoSentito: da implementare (ADR 0008)');
+export function tempoSentito(ms = performance.now(), latenzaMs = 0): number {
+	if (!ctx) return 0;
+	// prima che l'uscita parta (e su alcuni browser sempre) i due tempi valgono 0
+	const ts = ctx.getOutputTimestamp?.();
+	const sentito =
+		ts?.contextTime && ts.performanceTime
+			? ts.contextTime + (ms - ts.performanceTime) / 1000
+			: ctx.currentTime -
+				(ctx.outputLatency || ctx.baseLatency || 0) -
+				(performance.now() - ms) / 1000;
+	return sentito - latenzaMs / 1000;
 }
 
 /**

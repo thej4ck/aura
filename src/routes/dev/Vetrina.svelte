@@ -17,6 +17,7 @@
 	import Stelle from '#lib/core/ui/Stelle.svelte';
 	import Notazione from './sezioni/Notazione.svelte';
 	import SezioneAudio from './sezioni/Audio.svelte';
+	import BattitiMani from './sezioni/BattitiMani.svelte';
 	import Pagine from './sezioni/Pagine.svelte';
 	import SezioneWidget from './sezioni/Widget.svelte';
 
@@ -208,6 +209,7 @@
 
 	<Notazione />
 	<SezioneAudio />
+	<BattitiMani />
 
 	<!-- la stessa diagnostica della pagina per i genitori -->
 	<section aria-labelledby="sez-microfono">

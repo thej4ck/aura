@@ -137,3 +137,55 @@ export const REFRATTARIO_BATTITO_MS = 150;
 
 /** Volume dei clic sotto i battiti del bambino quando batte col tocco (0-1; l'attacco è a 1). */
 export const VOLUME_CLIC_PIANO = 0.35;
+
+// --- Battito di mani (audio/battimani.ts) --------------------------------------------------------
+// Misure sui segnali sintetici di scripts/genera-wav.mjs (battimani.test.ts): battiti di mani in stanze
+// diverse, rumori, voci parlate e cantate. Da ricontrollare con i dispositivi veri (pannello in /dev).
+
+/**
+ * Il battito si cerca negli acuti, sopra PASSA_ALTO_BATTITO_HZ: un battito di mani lì ha ancora molta
+ * energia, le vocali, il rimbombo, le ventole e il ronzio della corrente quasi niente.
+ */
+export const PASSA_ALTO_BATTITO_HZ = 2000;
+
+/**
+ * L'attacco: l'energia acuta di un millisecondo sale di almeno SALTO_BATTITO_DB sopra la media dei
+ * SALTO_PRIMA_MS prima (tolti i 2 ms appena prima, dove l'attacco può essere già cominciato). Un rumore
+ * costante non salta mai così in un millisecondo, una vocale sale in 20-50 ms. Con 12 dB un battito
+ * piano (−30 dBFS) dentro una ventola a −40 dBFS si perdeva una volta su due.
+ */
+export const SALTO_BATTITO_DB = 9;
+export const SALTO_PRIMA_MS = 20;
+
+/**
+ * Soglia adattiva: quel millisecondo sta almeno MARGINE_BATTITO_DB sopra il rumore di fondo negli acuti
+ * (RumoreDiFondo come nel canto, a blocchi di 10 ms: scende subito, risale piano) e mai sotto
+ * SOGLIA_BATTITO_RMS (−54 dBFS negli acuti): nel silenzio si sente un battito con il picco a −40 dBFS.
+ */
+export const MARGINE_BATTITO_DB = 10;
+export const SOGLIA_BATTITO_RMS = 0.002;
+
+/**
+ * Un battito si spegne subito: CALO_DA_MS-CALO_A_MS dopo l'attacco l'energia sopra PASSA_ALTO_CALO_HZ
+ * (lì il rimbombo e le ventole, che ondeggiano piano, non ci sono) sta almeno CALO_BATTITO_DB sotto
+ * quella dei primi 10 ms, tolta in entrambi quella che c'era già prima. Un battito cala di 13-15 dB in
+ * un soggiorno e di 7-9 dB in un'aula che rimbomba, a due metri; la /t/ di «ta», seguita dalla sua
+ * vocale, sale di 10 dB e più. Il battito si decide quindi CALO_A_MS dopo, ma il suo tempo resta
+ * quello dell'attacco.
+ */
+export const CALO_BATTITO_DB = 3;
+export const PASSA_ALTO_CALO_HZ = 400;
+export const CALO_DA_MS = 40;
+export const CALO_A_MS = 80;
+
+/** Banda larga: nei primi 10 ms gli acuti sono almeno ACUTI_BATTITO_DB dell'energia (un tonfo sordo no). */
+export const ACUTI_BATTITO_DB = -12;
+
+/**
+ * Né una /t/ né una /s/: un battito ha più energia sotto PASSA_ALTO_SIBILI_HZ (la cavità tra le mani
+ * risuona tra 0,8 e 3 kHz) che sopra, o al massimo SIBILI_BATTITO_DB in meno; l'esplosione di una /t/
+ * senza vocale dopo, come in «sst», sta quasi tutta sopra. Battiti tra +0,7 e +9 dB, la /t/ di «sst» tra
+ * −5 e −2 dB: il margine è stretto, da verificare con le voci vere.
+ */
+export const PASSA_ALTO_SIBILI_HZ = 4000;
+export const SIBILI_BATTITO_DB = 0;

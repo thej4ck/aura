@@ -5,7 +5,7 @@ import { chromium, type FullConfig } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { generaVoce, generaWav } from '../scripts/genera-wav.mjs';
+import { generaBattiMani, generaVoce, generaWav } from '../scripts/genera-wav.mjs';
 
 /** un La4 con armoniche, letto da Chromium come se fosse il microfono (progetto "mic") */
 export const WAV_MIC = fileURLToPath(new URL('../test-results/mic/la440.wav', import.meta.url));
@@ -14,11 +14,19 @@ export const WAV_MIC = fileURLToPath(new URL('../test-results/mic/la440.wav', im
  * respiro, senza mai smettere (progetto "voce")
  */
 export const WAV_VOCE = fileURLToPath(new URL('../test-results/mic/voce-la4.wav', import.meta.url));
+/**
+ * battiti di mani irregolari, forti e piani, in una stanza, poi la stessa frase detta a voce senza
+ * battere, su un rumore leggero (progetto "mani": BATTITI_MANI in scripts/genera-wav.mjs)
+ */
+export const WAV_MANI = fileURLToPath(
+	new URL('../test-results/mic/battiti-mani.wav', import.meta.url)
+);
 
 export default async function setup(config: FullConfig) {
 	mkdirSync(dirname(WAV_MIC), { recursive: true });
 	writeFileSync(WAV_MIC, generaWav(440, 5));
 	writeFileSync(WAV_VOCE, generaVoce({ freq: 440, rms: 0.006, secondi: 12 }));
+	writeFileSync(WAV_MANI, generaBattiMani());
 
 	// i webServer sono già partiti: si scaldano la vetrina e una pagina di attività
 	const dev = config.projects.find((p) => p.name === 'dev')?.use.baseURL;

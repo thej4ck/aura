@@ -1,95 +1,8 @@
 // contesto.ts e synth.ts con un AudioContext finto: il clock avanza a mano, i timer sono finti.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { ContestoFinto, creati } from './contesto-finto.ts';
 import { IDLE_SUSPEND_MS } from './costanti.ts';
 import { freqDaMidi } from './frequenze.ts';
-
-type Evento = [tipo: string, valore: number, tempo: number];
-
-class ParamFinto {
-	value = 1;
-	eventi: Evento[] = [];
-	setValueAtTime(v: number, t: number) {
-		this.eventi.push(['set', v, t]);
-	}
-	linearRampToValueAtTime(v: number, t: number) {
-		this.eventi.push(['rampa', v, t]);
-	}
-	setTargetAtTime(v: number, t: number) {
-		this.eventi.push(['verso', v, t]);
-	}
-}
-
-class NodoFinto {
-	uscite: NodoFinto[] = [];
-	gain = new ParamFinto();
-	connect<N extends NodoFinto>(n: N) {
-		this.uscite.push(n);
-		return n;
-	}
-	disconnect() {
-		this.uscite = [];
-	}
-}
-
-class OscillatoreFinto extends NodoFinto {
-	frequency = new ParamFinto();
-	inizio = NaN;
-	fineA = Infinity;
-	onended: (() => void) | null = null;
-	setPeriodicWave() {}
-	start(t: number) {
-		this.inizio = t;
-	}
-	stop(t: number) {
-		this.fineA = t;
-	}
-}
-
-/** i contesti creati dal codice: ce ne deve essere al massimo uno */
-const creati: ContestoFinto[] = [];
-
-class ContestoFinto {
-	currentTime = 0;
-	state: AudioContextState = 'running';
-	outputLatency = 0;
-	baseLatency = 0;
-	destination = new NodoFinto();
-	oscillatori: OscillatoreFinto[] = [];
-	resume = vi.fn(async () => void (this.state = 'running'));
-	suspend = vi.fn(async () => void (this.state = 'suspended'));
-	constructor() {
-		creati.push(this);
-	}
-	createGain = () => new NodoFinto();
-	createDynamicsCompressor = () =>
-		Object.assign(new NodoFinto(), {
-			threshold: new ParamFinto(),
-			knee: new ParamFinto(),
-			ratio: new ParamFinto(),
-			attack: new ParamFinto(),
-			release: new ParamFinto()
-		});
-	createPeriodicWave = () => ({});
-	createOscillator() {
-		const o = new OscillatoreFinto();
-		this.oscillatori.push(o);
-		return o;
-	}
-	/** fa passare `s` secondi di audio e di timer, a passi di 5 ms */
-	scorri(s: number) {
-		for (let i = 0; i < Math.round(s / 0.005); i++) {
-			this.currentTime += 0.005;
-			vi.advanceTimersByTime(5);
-			for (const o of this.oscillatori) {
-				if (o.onended && o.fineA <= this.currentTime) {
-					const fine = o.onended;
-					o.onended = null;
-					fine();
-				}
-			}
-		}
-	}
-}
 
 let audio: typeof import('./contesto.ts');
 let synth: typeof import('./synth.ts');
@@ -139,6 +52,44 @@ describe('contesto', () => {
 		expect(c.resume).toHaveBeenCalledOnce();
 		await audio.sblocca();
 		expect(c.state).toBe('running');
+	});
+});
+
+describe('tempoSentito', () => {
+	beforeEach(() => void vi.spyOn(performance, 'now').mockReturnValue(5000));
+
+	it("0 se l'audio non è mai partito", () => {
+		expect(audio.tempoSentito()).toBe(0);
+		expect(audio.tempoSentito(4980, 100)).toBe(0);
+		expect(creati).toHaveLength(0); // e non lo fa partire
+	});
+
+	it('con getOutputTimestamp: il campione che usciva in quel momento, meno la manopola', () => {
+		const c = audio.contesto() as unknown as ContestoFinto;
+		c.currentTime = 12;
+		c.outputLatency = 0.04; // ignorata: il timestamp la comprende già
+		// all'istante 4990 ms usciva dall'altoparlante il campione del clock audio 11.9
+		c.timestamp = { contextTime: 11.9, performanceTime: 4990 };
+		expect(audio.tempoSentito()).toBeCloseTo(11.91, 10); // adesso: 10 ms dopo
+		expect(audio.tempoSentito(4980)).toBeCloseTo(11.89, 10); // un tocco di 20 ms fa
+		expect(audio.tempoSentito(4980, 30)).toBeCloseTo(11.86, 10);
+	});
+
+	it('timestamp a zero o assente: currentTime meno la latenza d’uscita e l’età dell’evento', () => {
+		const c = audio.contesto() as unknown as ContestoFinto;
+		c.currentTime = 12;
+		c.timestamp = { contextTime: 0, performanceTime: 0 }; // l'uscita non è ancora partita
+		c.outputLatency = 0.04;
+		c.baseLatency = 0.01;
+		expect(audio.tempoSentito()).toBeCloseTo(11.96, 10);
+		// un evento vecchio di 20 ms è 20 ms più indietro
+		expect(audio.tempoSentito(4980)).toBeCloseTo(11.94, 10);
+		expect(audio.tempoSentito(4980, 100)).toBeCloseTo(11.84, 10);
+		c.timestamp = undefined; // Safari senza getOutputTimestamp né outputLatency
+		c.outputLatency = 0;
+		expect(audio.tempoSentito(4980)).toBeCloseTo(11.97, 10);
+		c.baseLatency = 0;
+		expect(audio.tempoSentito(4980)).toBeCloseTo(11.98, 10);
 	});
 });
 
