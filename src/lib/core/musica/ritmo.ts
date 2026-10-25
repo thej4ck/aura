@@ -349,12 +349,18 @@ export function valutaBattiti(
 						: 'tardi';
 		return { nota: n.nota, atteso: attesi[k], battito, errore, giudizio };
 	});
-	const pause = e.note.filter((n) => n.pausa);
+	// un battito in più è nella pausa se ci cade dentro, o se l'inizio più vicino è quello della pausa:
+	// chi batte sulla pausa (l'errore tipico) può arrivare un attimo prima del suo battito
 	const extra = inPiu
 		.toSorted((x, y) => x - y)
 		.map((t): BattitoInPiu => {
 			const r = t - scarto - t0;
-			const p = pause.find((n) => r >= n.inizio && r < n.inizio + n.durata);
+			const vicina = e.note.reduce((a, n) =>
+				Math.abs(r - n.inizio) < Math.abs(r - a.inizio) ? n : a
+			);
+			const p = vicina.pausa
+				? vicina
+				: e.note.find((n) => n.pausa && r >= n.inizio && r < n.inizio + n.durata);
 			return p ? { t, pausa: p.nota } : { t };
 		});
 	const giuste = note.filter((n) => n.giudizio === 'giusto').length;

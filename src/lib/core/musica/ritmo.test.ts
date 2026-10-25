@@ -249,6 +249,16 @@ describe('valutazione dei battiti', () => {
 		expect(v.riuscita).toBe(false);
 	});
 
+	it('battito sulla pausa ma un attimo prima: è ancora nella pausa; un doppio battito sulla nota prima no', () => {
+		const pausa = e.note[4];
+		const prima = e.note[3]; // TA, subito prima della pausa
+		const unPoPresto = T0 + pausa.inizio - 0.03;
+		const v = valutaBattiti(e, T0, [...giusti, unPoPresto], FACILE);
+		expect(v.inPiu).toEqual([{ t: unPoPresto, pausa: 4 }]);
+		const doppio = T0 + prima.inizio + 0.2;
+		expect(valutaBattiti(e, T0, [...giusti, doppio], FACILE).inPiu).toEqual([{ t: doppio }]);
+	});
+
 	it('doppio battito sulla stessa nota: uno è in più', () => {
 		const v = valutaBattiti(e, T0, [...giusti, giusti[0] + 0.05], FACILE);
 		expect(v.giuste).toBe(9);
