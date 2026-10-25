@@ -753,6 +753,35 @@
 	],
 	"canta_ascolta_partenza": "Ascolta il {nome}",
 	"canta_basta_avanti": "Basta così, vado avanti",
+	"ritmo_rigo": "Il ritmo da battere",
+	"ritmo_come": "Come batti il ritmo?",
+	"ritmo_fonte_tocco": "Tocco lo schermo",
+	"ritmo_fonte_mani": "Batto le mani",
+	"ritmo_microfono": "Il microfono serve solo per sentire le tue mani. Niente viene registrato.",
+	"ritmo_microfono_adulti": "Per gli adulti: il suono del microfono si analizza solo nel browser, mentre si batte il ritmo. Non si salva e non si invia a nessuno. In una stanza silenziosa funziona meglio.",
+	"ritmo_inizia": "Ascolta e batti",
+	"ritmo_leggi_inizia": "Leggi e batti",
+	"ritmo_turno_batti": "Batti",
+	"ritmo_tasto": "Batti qui",
+	"ritmo_riuscita": "Ce l’hai fatta! Ogni battito è arrivato al momento giusto.",
+	"ritmo_giuste": [
+		{
+			"declarations": ["input count", "input totale", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Hai già battuto {count} nota su {totale} al momento giusto.",
+				"countPlural=other": "Hai già battuto {count} note su {totale} al momento giusto."
+			}
+		}
+	],
+	"ritmo_presto": "La nota cerchiata è arrivata un po’ presto: aspetta il suo battito.",
+	"ritmo_tardi": "La nota cerchiata è arrivata un po’ tardi: battila appena arriva il suo momento.",
+	"ritmo_mancato": "Qui manca un battito: anche la nota cerchiata va battuta.",
+	"ritmo_pausa": "Nella pausa (SST) le mani riposano: lì non si batte.",
+	"ritmo_in_piu": "C’è un battito in più: batti una volta sola per ogni nota.",
+	"ritmo_non_sentito": "Non ho sentito le tue mani. Batti un po’ più forte, vicino al dispositivo.",
+	"ritmo_nessun_tocco": "Quando arriva «Batti», tocca il tasto grande una volta per ogni nota.",
+	"ritmo_senza_microfono": "Puoi battere lo stesso toccando il tasto grande.",
 	"widget_dev_titolo": "Widget musicali",
 	"widget_dev_testo": "Ogni widget da solo, con gli esiti che manda al motore.",
 	"widget_dev_esiti": "Esiti",

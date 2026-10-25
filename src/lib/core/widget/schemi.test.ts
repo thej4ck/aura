@@ -1,6 +1,9 @@
 // Props dei widget musicali: forme accettate, valori predefiniti, contenuti che non hanno senso.
 import * as v from 'valibot';
 import { describe, expect, it } from 'vitest';
+import { BPM_RITMO } from '../audio/costanti.ts';
+import { rigoRitmico } from '../musica/ritmo.ts';
+import { schemaProps as battiRitmo } from './BattiRitmo.svelte';
 import { schemaProps as cantaNota } from './CantaNota.svelte';
 import { schemaProps as cantaSequenza } from './CantaSequenza.svelte';
 import { schemaNote } from './musica.ts';
@@ -45,5 +48,29 @@ describe('canto', () => {
 			tenutaMs: 600,
 			equivalenzaOttava: true
 		});
+	});
+});
+
+describe('ritmo', () => {
+	const ritmo = rigoRitmico('ta ti-ti ta-a sst ta-a-a', '4/4');
+
+	it('batti-ritmo: a eco e a 72 BPM di default; la pausa resta una pausa', () => {
+		const p = v.parse(battiRitmo, { rigo: ritmo });
+		expect(p).toMatchObject({ modo: 'eco', bpm: BPM_RITMO });
+		expect(p.sillabe).toBeUndefined(); // il widget decide: sì a eco, no in lettura
+		expect(p.rigo.note.filter((n) => n.pausa)).toHaveLength(1);
+		expect(valido(battiRitmo, { rigo: ritmo, modo: 'lettura', bpm: 50 })).toBe(true);
+	});
+
+	it('batti-ritmo: ogni nota con la durata, almeno una da battere, battute piene, BPM entro 50-100', () => {
+		expect(valido(battiRitmo, { rigo: { note: [{ altezza: 'C4' }] } })).toBe(false);
+		expect(valido(battiRitmo, { rigo: rigoRitmico('sst sst') })).toBe(false);
+		expect(valido(battiRitmo, { rigo: rigoRitmico('ta ta ta', '4/4') })).toBe(false);
+		expect(valido(battiRitmo, { rigo: ritmo, bpm: 101 })).toBe(false); // col microfono non si può
+		expect(valido(battiRitmo, { rigo: ritmo, bpm: 49 })).toBe(false);
+		expect(valido(battiRitmo, { rigo: ritmo, modo: 'canone' })).toBe(false);
+		// anche una melodia con le durate: si batte il suo ritmo
+		const melodia = { tempo: '2/4', note: [{ altezza: 'C4', durata: '2' }] };
+		expect(valido(battiRitmo, { rigo: melodia })).toBe(true);
 	});
 });

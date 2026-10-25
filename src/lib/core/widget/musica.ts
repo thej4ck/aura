@@ -2,6 +2,7 @@
 // suonando (per evidenziarla sullo Staff) e i messaggi degli errori del microfono.
 import * as v from 'valibot';
 import { m } from '#lib/paraglide/messages.js';
+import { BPM_RITMO, BPM_RITMO_MAX, BPM_RITMO_MIN } from '../audio/costanti.ts';
 import { ora, sblocca } from '../audio/contesto.ts';
 import type { CodiceErroreMic } from '../audio/mic.ts';
 import { suona, type Riproduzione } from '../audio/synth.ts';
@@ -23,6 +24,22 @@ export const schemaNote = v.pipe(
 		(r) => !r.ritmico && !r.note.some((n) => n.pausa),
 		'niente pause né rigo ritmico qui: il ritmo si batte con batti-ritmo'
 	)
+);
+
+/**
+ * Un ritmo da battere (batti-ritmo) o da sentire col legnetto (ascolta): un Rigo con la durata di ogni
+ * nota, di solito il rigo ritmico scritto con le sillabe (`rigoRitmico('ta ti-ti ta-a sst', '4/4')`).
+ */
+export const schemaRitmo = v.pipe(
+	SchemaRigo,
+	v.check((r) => r.note.every((n) => n.durata), 'ogni nota del ritmo vuole la sua durata'),
+	v.check((r) => r.note.some((n) => !n.pausa), 'almeno una nota da battere: non solo pause')
+);
+
+/** Battiti al minuto di un ritmo: col microfono più veloce non si può (BPM_RITMO_MAX, ADR 0008). */
+export const schemaBpm = v.optional(
+	v.pipe(v.number(), v.minValue(BPM_RITMO_MIN), v.maxValue(BPM_RITMO_MAX)),
+	BPM_RITMO
 );
 
 /** Nomi visibili sotto le note e teste con i colori delle note, sullo Staff. */

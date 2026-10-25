@@ -50,7 +50,8 @@ export const WIDGET_CORE: Readonly<Record<string, CaricaWidget>> = {
 	ascolta: () => import('../widget/Ascolta.svelte'),
 	'staff-tocca': () => import('../widget/StaffTocca.svelte'),
 	'canta-nota': () => import('../widget/CantaNota.svelte'),
-	'canta-sequenza': () => import('../widget/CantaSequenza.svelte')
+	'canta-sequenza': () => import('../widget/CantaSequenza.svelte'),
+	'batti-ritmo': () => import('../widget/BattiRitmo.svelte')
 };
 
 /** Il caricatore di un widget: prima i core, poi quelli del modulo. */
