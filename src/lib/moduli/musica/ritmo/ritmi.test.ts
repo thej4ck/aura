@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { creaCasuale } from '#lib/core/casuale.ts';
 import { TESTI_SILLABE, spaziature } from '#lib/core/musica/notazione.ts';
 import { battute, rigoRitmico, sillaba, type NotaRitmica } from '#lib/core/musica/ritmo.ts';
+import { modulo } from './modulo';
 import {
 	GIRI_ASCOLTO,
 	GIRI_ECO,
@@ -96,6 +97,22 @@ describe('i ritmi dei giochi', () => {
 			354,
 			-1
 		);
+	});
+
+	it('anche i ritmi delle lezioni stanno su un telefono', () => {
+		type P = { rigo?: Rigo; ritmo?: Rigo; ritmi?: Rigo[]; modo?: string; sillabe?: boolean };
+		type Rigo = { note: NotaRitmica[] };
+		const troppo: string[] = [];
+		for (const a of modulo.attivita)
+			for (const s of a.schede) {
+				const p = (('props' in s && s.props) || {}) as P;
+				const turno = p.rigo ?? p.ritmo;
+				const conSillabe = p.sillabe ?? (p.ritmo ? true : p.modo !== 'lettura');
+				if (turno && spazi(turno, conSillabe) >= SPAZI_TURNO) troppo.push(`${a.id}#${s.id}`);
+				for (const x of p.ritmi ?? [])
+					if (spazi(x, p.sillabe ?? false) >= SPAZI_OPZIONE) troppo.push(`${a.id}#${s.id}`);
+			}
+		expect(troppo).toEqual([]);
 	});
 
 	it('l’item ha una sillaba per nota, come batti-ritmo', () => {
