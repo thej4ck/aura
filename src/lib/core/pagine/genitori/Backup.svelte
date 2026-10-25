@@ -4,11 +4,13 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import { registraErrore } from '../../errori';
+	import { problemaNoto } from '../../problemi-noti';
 	import { importa, supportaFileCollegato } from '../../store/file';
 	import { progressi, type StatoSync } from '../../store/progressi.svelte';
 	import { ErroreProgressi, type CodiceErrore } from '../../store/schema-progressi';
 	import Avviso from '../../ui/Avviso.svelte';
 	import Button from '../../ui/Button.svelte';
+	import ProblemaNoto from '../../ui/ProblemaNoto.svelte';
 
 	let { conGate }: { conGate: (azione: () => void) => void } = $props();
 
@@ -17,7 +19,20 @@
 	let esito: Esito | undefined = $state();
 	let campoFile: HTMLInputElement | undefined = $state();
 	let supporta = $state(false);
-	onMount(() => (supporta = supportaFileCollegato()));
+	let chiediPersistenza = $state(false);
+	onMount(() => {
+		supporta = supportaFileCollegato();
+		// Firefox chiede il permesso con una finestra: lo chiede l'adulto da qui (progressi.svelte.ts non lo fa)
+		if (problemaNoto('firefox-persistenza'))
+			void navigator.storage?.persisted?.().then((si) => (chiediPersistenza = !si));
+	});
+
+	async function persisti() {
+		chiediPersistenza = false; // dopo una risposta non si chiede di nuovo
+		esito = (await navigator.storage.persist().catch(() => false))
+			? { tono: 'successo', testo: m.genitori_persistenza_si() }
+			: { tono: 'attenzione', testo: m.genitori_persistenza_no() };
+	}
 
 	const ERRORI: Partial<Record<CodiceErrore, () => string>> = {
 		formato: m.genitori_errore_formato,
@@ -110,6 +125,12 @@
 		</Button>
 	</div>
 	<p class="tenue">{m.genitori_importa_aiuto()}</p>
+	{#if chiediPersistenza}
+		<ProblemaNoto id="firefox-persistenza" />
+		<div class="azioni">
+			<Button variante="secondaria" onclick={persisti}>{m.genitori_persistenza()}</Button>
+		</div>
+	{/if}
 	<input
 		bind:this={campoFile}
 		type="file"

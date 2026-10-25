@@ -134,6 +134,16 @@ describe('salvataggio', () => {
 		expect(persist).toHaveBeenCalledTimes(1);
 	});
 
+	it('in Firefox non la chiede: la sua finestra arriverebbe al bambino', async () => {
+		const persist = vi.fn(async () => true);
+		vi.stubGlobal('navigator', {
+			userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0',
+			storage: { persist }
+		});
+		await avvia();
+		expect(persist).not.toHaveBeenCalled();
+	});
+
 	it('se IndexedDB rifiuta la scrittura lo segnala e ritenta al flush dopo', async () => {
 		const p = await avvia();
 		const put = IDBObjectStore.prototype.put;

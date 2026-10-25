@@ -7,6 +7,7 @@ import { scegli } from '../casuale';
 import { registraErrore } from '../errori';
 import { giorno } from '../giorno';
 import { aggiornaCompetenza, calcolaStelle, type Esito } from '../padronanza';
+import { problemaNoto } from '../problemi-noti';
 import { apriDb, type Db } from './db';
 import {
 	collegaFileEsistente,
@@ -377,10 +378,14 @@ export class Progressi {
 		await this.#dopoSalvataggio(doc);
 	}
 
-	/** Al primo salvataggio chiede al browser di non cancellare i dati del sito (Safari li scade dopo 7 giorni). */
+	/**
+	 * Al primo salvataggio chiede al browser di non cancellare i dati del sito (Safari li scade dopo 7 giorni).
+	 * Firefox lo chiede con una finestra, che arriverebbe al bambino mentre gioca: lì lo chiede l'adulto, da Backup.
+	 */
 	#chiediPersistenza(): void {
 		if (this.#persistenzaChiesta || !this.persistente) return;
 		this.#persistenzaChiesta = true;
+		if (problemaNoto('firefox-persistenza')) return;
 		navigator.storage?.persist?.().catch(() => {});
 	}
 
