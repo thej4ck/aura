@@ -1,8 +1,11 @@
 // Il turno ritmico (batti-ritmo) con le mani al microfono finto (battiti di mani in una stanza, poi una
 // voce che dice le sillabe senza battere: vedi setup-mic.ts), nella vetrina /dev: solo server di
 // sviluppo. I battiti del WAV non seguono il ritmo da battere, quindi l'esito può andare in tutti e due i
-// modi: qui contano il flusso (promessa, turni, battito visivo, esito, segni) e il microfono che si spegne.
-import { expect, test, type Page } from '@playwright/test';
+// modi: lì contano il flusso (promessa, turni, battito visivo, esito, segni) e il microfono che si spegne.
+// In fondo, con un «microfono» che è il contesto audio del sito, battiti di mani veri agli istanti giusti
+// arrivano fino alla valutazione, e si contano i segni per giudizio.
+import { expect, test, type Locator, type Page } from '@playwright/test';
+import { campioniBattiMani } from '../scripts/genera-wav.mjs';
 import { spiaMicrofono } from './battere';
 import { sorveglia, violazioniGravi } from './sorveglianza';
 
@@ -99,4 +102,111 @@ test('lasciando la scheda o nascondendo la pagina durante il turno, il microfono
 	await expect(w.getByRole('button', { name: 'Ascolta e batti' })).toBeVisible();
 	expect(await microfono()).toEqual({ aperti: 2, accesi: 0 });
 	await expect(esiti).toHaveText(['Nessun esito per ora.']);
+});
+
+// --- Il microfono da capo a fondo: battiti di mani veri agli istanti giusti -------------------------
+
+/** Un battito di mani in una stanza (scripts/genera-wav.mjs), a 48 kHz, con 10 ms di silenzio prima. */
+const BATTITO_MANI = Array.from(
+	campioniBattiMani({
+		battiti: [{ t: 0.01, ampiezza: 0.3 }],
+		secondi: 0.3,
+		stanza: { rt60: 0.4, drrDb: 0, coda: 0.2 }
+	})
+);
+
+type Anello = { __ctx: AudioContext; __microfono: MediaStreamAudioDestinationNode };
+
+/**
+ * Il «microfono» è un flusso del contesto audio del sito stesso: quello che ci si suona dentro lo sente
+ * apriBattiMani, che non sa la differenza. Così i battiti arrivano quando si vuole, a tempo con il turno.
+ */
+async function anello(page: Page) {
+	await page.addInitScript(() => {
+		const w = window as unknown as Anello;
+		const Contesto = window.AudioContext;
+		window.AudioContext = class extends Contesto {
+			constructor(...a: ConstructorParameters<typeof AudioContext>) {
+				super(...a);
+				w.__ctx = this;
+			}
+		};
+		navigator.mediaDevices.getUserMedia = async () => {
+			w.__microfono = w.__ctx.createMediaStreamDestination();
+			return w.__microfono.stream;
+		};
+	});
+}
+
+/**
+ * Batte le mani nel «microfono» quando si sente ogni nota (data-attesi di TurnoRitmo), `ritardo` s dopo,
+ * più i battiti `extra` (in battiti dalla prima nota).
+ */
+async function battiLeMani(
+	page: Page,
+	ambito: Locator,
+	{ ritardo = 0, extra = [] }: { ritardo?: number; extra?: number[] } = {}
+) {
+	const palco = ambito.locator('[data-attesi]');
+	await expect(palco).toHaveAttribute('data-attesi', /\d/, { timeout: 20_000 });
+	const attesi: number[] = JSON.parse((await palco.getAttribute('data-attesi'))!);
+	await page.evaluate(
+		({ attesi, battito, ritardo, extra }) => {
+			const { __ctx: c, __microfono } = window as unknown as Anello;
+			// il clock audio sentito all'istante `ms` di performance.now()
+			const ts = c.getOutputTimestamp();
+			const quando = (ms: number) => ts.contextTime! + (ms - ts.performanceTime!) / 1000;
+			const buffer = c.createBuffer(1, battito.length, 48_000);
+			buffer.copyToChannel(Float32Array.from(battito), 0);
+			const passo = attesi[1] - attesi[0];
+			for (const ms of [...attesi, ...extra.map((b) => attesi[0] + b * passo)]) {
+				const s = c.createBufferSource();
+				s.buffer = buffer;
+				s.connect(__microfono);
+				s.start(quando(ms) + ritardo - 0.01);
+			}
+		},
+		{ attesi, battito: BATTITO_MANI, ritardo, extra }
+	);
+}
+
+test('i battiti di mani arrivano alla valutazione: a tempo la prova riesce', async ({ page }) => {
+	await anello(page);
+	await page.goto('/dev');
+	await expect(page.getByRole('img', { name: /Profilo attivo/ })).toBeVisible();
+	const w = page.getByRole('article', { name: 'batti-ritmo-lettura', exact: true });
+	await w.getByRole('radio', { name: 'Batto le mani' }).check();
+	await w.getByRole('button', { name: 'Leggi e batti' }).click();
+	await battiLeMani(page, w); // 'ta ti-ti ta-a'
+	await expect(w.getByRole('status')).toHaveText(
+		'Ce l’hai fatta! Ogni battito è arrivato al momento giusto.',
+		{ timeout: 15_000 }
+	);
+	const rigo = w.getByRole('group', { name: 'Il ritmo da battere' });
+	await expect(rigo.locator('svg .battito.giusto')).toHaveCount(4);
+	await expect(rigo.locator('svg .battito:not(.giusto)')).toHaveCount(0);
+	await expect(
+		w.getByRole('list', { name: 'Esiti batti-ritmo-lettura' }).getByRole('listitem')
+	).toHaveText(['corretto: true, item: ta ti ti ta-a']);
+});
+
+test('i battiti di mani arrivano alla valutazione: in ritardo costante si tolgono, sulla pausa no', async ({
+	page
+}) => {
+	await anello(page);
+	await page.goto('/dev');
+	await expect(page.getByRole('img', { name: /Profilo attivo/ })).toBeVisible();
+	const w = page.getByRole('article', { name: 'batti-ritmo', exact: true });
+	await w.getByRole('radio', { name: 'Batto le mani' }).check();
+	await w.getByRole('button', { name: 'Ascolta e batti' }).click();
+	// 'ta ti-ti ta sst': 150 ms dopo ogni nota (cuffie Bluetooth), e un battito sulla pausa
+	await battiLeMani(page, w, { ritardo: 0.15, extra: [3] });
+	await expect(w.getByRole('status')).toHaveText(
+		'Hai già battuto 4 note su 4 al momento giusto. Nella pausa (SST) le mani riposano: lì non si batte.',
+		{ timeout: 15_000 }
+	);
+	const rigo = w.getByRole('group', { name: 'Il ritmo da battere' });
+	await expect(rigo.locator('svg .battito.giusto')).toHaveCount(4);
+	await expect(rigo.locator('svg .battito.in-piu')).toHaveCount(1);
+	await expect(rigo).toContainText('Un battito in più, uno nella pausa');
 });
