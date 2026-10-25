@@ -22,11 +22,12 @@
 	import { midi, nomeNota } from '../musica/note.ts';
 	import Avviso from '../ui/Avviso.svelte';
 	import Button from '../ui/Button.svelte';
-	import Icona from '../ui/Icona.svelte';
 	import PitchMeter from '../ui/PitchMeter.svelte';
+	import PromessaMicrofono from '../ui/PromessaMicrofono.svelte';
 	import ProgressRing from '../ui/ProgressRing.svelte';
 	import Staff from '../ui/Staff.svelte';
 	import { mostraIntero } from '../ui/scorrimento.ts';
+	import Turni from '../ui/Turni.svelte';
 	import AzioniScheda from './AzioniScheda.svelte';
 	import { ERRORI_MIC, suonaSeguendo } from './musica.ts';
 
@@ -229,24 +230,18 @@
 	/>
 
 	{#if fase === 'pronto' || fase === 'permesso'}
-		<div class="microfono">
-			<span class="icona-mic"><Icona nome="microfono" dimensione="1.75rem" /></span>
-			<div class="spiega">
-				<p class="per-te">{m.canta_microfono()} {m.canta_voce_leggera()}</p>
-				<p class="per-adulti">{m.canta_microfono_adulti()}</p>
-			</div>
-		</div>
+		<PromessaMicrofono
+			perTe="{m.canta_microfono()} {m.canta_voce_leggera()}"
+			perAdulti={m.canta_microfono_adulti()}
+		/>
 	{:else if fase === 'ascolto'}
-		<ol class="turni" aria-label={m.canta_turni()}>
-			<li aria-current={riproduzione ? 'step' : undefined}>
-				<Icona nome="volume" />
-				{m.canta_turno_ascolta()}
-			</li>
-			<li aria-current={riproduzione ? undefined : 'step'}>
-				<Icona nome="microfono" />
-				{m.canta_turno_canta()}
-			</li>
-		</ol>
+		<Turni
+			tappe={[
+				{ icona: 'volume', testo: m.canta_turno_ascolta() },
+				{ icona: 'microfono', testo: m.canta_turno_canta() }
+			]}
+			attuale={riproduzione ? 0 : 1}
+		/>
 		<div class="tenuta">
 			<ProgressRing
 				valore={stato.tenuta.progresso * 100}
@@ -343,82 +338,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--spazio-5);
-	}
-
-	/* la promessa sul microfono, prima di aprirlo: per il bambino in grande, per l'adulto sotto */
-	.microfono {
-		display: flex;
-		gap: var(--spazio-4);
-		align-items: flex-start;
-		padding: var(--spazio-4) var(--spazio-5);
-		border-radius: var(--raggio-l);
-		background: var(--colore-superficie-tenue);
-	}
-	.icona-mic {
-		display: grid;
-		place-items: center;
-		flex: none;
-		width: 3rem;
-		height: 3rem;
-		border-radius: var(--raggio-pieno);
-		background: var(--colore-accento-tenue);
-		color: var(--colore-accento-forte);
-	}
-	.spiega {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spazio-2);
-		max-width: var(--larghezza-testo);
-	}
-	.per-te {
-		font-size: var(--testo-l);
-		font-weight: var(--peso-medio);
-		line-height: var(--interlinea-titoli);
-	}
-	.per-adulti {
-		color: var(--colore-testo-tenue);
-		font-size: var(--testo-s);
-	}
-
-	/* a chi tocca: due tappe, quella attuale piena e in grassetto (non solo il colore) */
-	.turni {
-		display: flex;
-		gap: var(--spazio-5);
-		align-items: center;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-	.turni li {
-		position: relative;
-		display: inline-flex;
-		gap: var(--spazio-2);
-		align-items: center;
-		min-height: var(--target);
-		padding-inline: var(--spazio-4);
-		border: 2px dashed var(--colore-bordo-forte);
-		border-radius: var(--raggio-pieno);
-		color: var(--colore-testo-tenue);
-		font-size: var(--testo-l);
-		transition:
-			background-color var(--durata-breve) var(--easing),
-			color var(--durata-breve) var(--easing);
-	}
-	/* il filo tra le due tappe */
-	.turni li + li::before {
-		content: '';
-		position: absolute;
-		inset-inline-end: calc(100% + 2px);
-		top: 50%;
-		width: var(--spazio-5);
-		border-top: 2px solid var(--colore-bordo-forte);
-	}
-	.turni li[aria-current='step'] {
-		border-style: solid;
-		border-color: var(--colore-accento);
-		background: var(--colore-accento);
-		color: var(--colore-su-accento);
-		font-weight: var(--peso-forte);
 	}
 
 	.tenuta {

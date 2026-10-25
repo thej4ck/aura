@@ -31,6 +31,7 @@
 	import { mostraIntero } from '#lib/core/ui/scorrimento.ts';
 	import PitchMeter from '#lib/core/ui/PitchMeter.svelte';
 	import ProgressRing from '#lib/core/ui/ProgressRing.svelte';
+	import PromessaMicrofono from '#lib/core/ui/PromessaMicrofono.svelte';
 	import Staff from '#lib/core/ui/Staff.svelte';
 	import AzioniScheda from '#lib/core/widget/AzioniScheda.svelte';
 	import { ERRORI_MIC, suonaSeguendo } from '#lib/core/widget/musica.ts';
@@ -282,13 +283,7 @@
 	</p>
 
 	{#if vista === 'pronto' || vista === 'permesso'}
-		<div class="microfono">
-			<span class="icona-mic"><Icona nome="microfono" dimensione="1.75rem" /></span>
-			<div class="spiega">
-				<p class="per-te">{m.canta_microfono()}</p>
-				<p class="per-adulti">{m.canta_microfono_adulti()}</p>
-			</div>
-		</div>
+		<PromessaMicrofono perTe={m.canta_microfono()} perAdulti={m.canta_microfono_adulti()} />
 	{:else if vista === 'senza-microfono'}
 		<Avviso tono="info" testo="{errore} {m.canto_estensione_senza_microfono()}" />
 	{:else if stato.fase === 'nota-comoda'}
@@ -423,41 +418,6 @@
 		align-items: center;
 		max-width: var(--larghezza-testo);
 		color: var(--colore-testo-tenue);
-	}
-
-	/* la promessa sul microfono, prima di aprirlo (come nei widget di canto) */
-	.microfono {
-		display: flex;
-		gap: var(--spazio-4);
-		align-items: flex-start;
-		padding: var(--spazio-4) var(--spazio-5);
-		border-radius: var(--raggio-l);
-		background: var(--colore-superficie-tenue);
-	}
-	.icona-mic {
-		display: grid;
-		place-items: center;
-		flex: none;
-		width: 3rem;
-		height: 3rem;
-		border-radius: var(--raggio-pieno);
-		background: var(--colore-accento-tenue);
-		color: var(--colore-accento-forte);
-	}
-	.spiega {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spazio-2);
-		max-width: var(--larghezza-testo);
-	}
-	.per-te {
-		font-size: var(--testo-l);
-		font-weight: var(--peso-medio);
-		line-height: var(--interlinea-titoli);
-	}
-	.per-adulti {
-		color: var(--colore-testo-tenue);
-		font-size: var(--testo-s);
 	}
 
 	.turno {
