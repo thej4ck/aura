@@ -198,7 +198,7 @@
 		<div class="campo">
 			<label for="{id}-latenza" class="titolo">{m.genitori_latenza()}</label>
 			<p id="{id}-latenza-aiuto" class="aiuto">{m.genitori_latenza_aiuto()}</p>
-			<ProblemaNoto id="output-latency-assente" />
+			<ProblemaNoto id="output-latency-assente" idTesto="{id}-latenza-problema" />
 			<input
 				id="{id}-latenza"
 				class="numero"
@@ -208,7 +208,7 @@
 				max={LATENZA_MAX_MS}
 				step="10"
 				value={p.latenzaAudioMs}
-				aria-describedby="{id}-latenza-aiuto"
+				aria-describedby="{id}-latenza-aiuto {id}-latenza-problema"
 				onchange={latenza}
 			/>
 			<!-- «non si sente niente»: l'adulto cerca qui, tra le impostazioni dell'audio -->

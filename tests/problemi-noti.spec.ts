@@ -32,6 +32,7 @@ test.describe('su iPhone', () => {
 		await apri(page, '/genitori#impostazioni');
 		await expect(latenza(page)).toBeVisible();
 		await expect(avviso(page, 'output-latency-assente')).toContainText('150-250');
+		await expect(latenza(page)).toHaveAccessibleDescription(/150-250/);
 		await expect(avviso(page, 'ios-audio-muto')).toContainText('ricaricate la pagina');
 		await expect(avviso(page, 'ios-permesso-microfono')).toContainText(
 			'Safari chiede il microfono a ogni visita'
@@ -59,6 +60,17 @@ test.describe('su iPhone', () => {
 
 		expect(esterne).toEqual([]);
 		expect(errori).toEqual([]);
+	});
+
+	test.describe('con iOS 16', () => {
+		test.use({
+			userAgent: userAgent.replace(/OS \d+_\d+/, 'OS 16_7').replace(/Version\/\d+/, 'Version/16')
+		});
+
+		test('il tasto silenzioso, già nella pagina dell’area', async ({ page }) => {
+			await apri(page, '/musica');
+			await expect(avviso(page, 'ios16-silenzioso')).toContainText('togliete il silenzioso');
+		});
 	});
 
 	test('IndexedDB che non si apre già all’avvio (WebKit 273827): ricaricare, non la Modalità di isolamento', async ({

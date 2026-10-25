@@ -3,6 +3,7 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import { catalogo as catalogoReale, type Catalogo } from '../contenuti/registry';
 	import { progressi } from '../store/progressi.svelte';
+	import ProblemaNoto from '../ui/ProblemaNoto.svelte';
 	import ProgressRing from '../ui/ProgressRing.svelte';
 	import { DOC_VUOTO, vistaArea } from '../vista/pagine';
 	import Percorso from './Percorso.svelte';
@@ -28,6 +29,8 @@
 					</span>
 					{m.vista_avanzamento(v.avanzamento)}
 				</p>
+				<!-- il silenzio arriva alla prima «Ascolta»: l'adulto lo legge qui, prima delle attività -->
+				<ProblemaNoto id="ios16-silenzioso" />
 			</div>
 		</header>
 
