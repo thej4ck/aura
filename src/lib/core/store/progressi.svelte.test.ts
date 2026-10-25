@@ -153,12 +153,15 @@ describe('salvataggio', () => {
 		try {
 			p.aggiornaPreferenze({ tolleranza: 'medio' });
 			await p.flush();
-			expect(p.erroreSalvataggio).toBe(true);
+			expect(p.salvataggiFalliti).toBe(1);
+			p.aggiornaPreferenze({ tolleranza: 'medio' });
+			await p.flush();
+			expect(p.salvataggiFalliti).toBe(2); // di fila: su iOS l'avviso per l'adulto
 		} finally {
 			IDBObjectStore.prototype.put = put;
 		}
 		await p.flush();
-		expect(p.erroreSalvataggio).toBe(false);
+		expect(p.salvataggiFalliti).toBe(0);
 		expect((await salvati())[0].preferenze.tolleranza).toBe('medio');
 	});
 
@@ -200,7 +203,7 @@ describe('salvataggio', () => {
 		p.doc!.preferenze.latenzaAudioMs = 5000; // senza passare dai mutatori
 		p.aggiornaDati('musica.canto', { x: 1 });
 		await p.flush();
-		expect(p.erroreSalvataggio).toBe(true);
+		expect(p.salvataggiFalliti).toBe(1);
 		expect((await salvati())[0].preferenze.latenzaAudioMs).toBe(0);
 		expect((await avvia()).doc?.profilo.id).toBe(p.doc!.profilo.id);
 	});
@@ -238,7 +241,7 @@ describe('avvio difficile', () => {
 		try {
 			// il profilo si legge ma non si salva: resta quello, con l'avviso
 			const p = await avvia();
-			expect(p).toMatchObject({ pronto: true, persistente: true, erroreSalvataggio: true });
+			expect(p).toMatchObject({ pronto: true, persistente: true, salvataggiFalliti: 1 });
 			expect(p.doc?.profilo.id).toBe(primo);
 
 			// nessun profilo da leggere e nessuna scrittura possibile: in memoria

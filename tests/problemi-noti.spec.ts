@@ -60,6 +60,20 @@ test.describe('su iPhone', () => {
 		expect(errori).toEqual([]);
 	});
 
+	test('IndexedDB che non si apre già all’avvio (WebKit 273827): ricaricare, non la Modalità di isolamento', async ({
+		page
+	}) => {
+		await page.addInitScript(() => {
+			IDBFactory.prototype.open = () => {
+				throw new DOMException('Connection to Indexed Database server lost', 'UnknownError');
+			};
+		});
+		await apri(page, '/');
+		await expect(page.getByText('Su questo browser i progressi restano solo')).toBeVisible();
+		await expect(avviso(page, 'ios-salvataggio')).toContainText('ricaricare la pagina');
+		await expect(avviso(page, 'apple-isolamento')).toHaveCount(0);
+	});
+
 	test('nell’app installata: niente invito a installarla, e il permesso a ogni apertura è normale', async ({
 		page
 	}) => {

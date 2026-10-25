@@ -17,6 +17,15 @@ const DISPOSITIVI: Record<string, Dispositivo> = {
 		app: true
 	},
 	iphone16: { ...BASE, browser: 'Safari', sistema: 'iOS', versioneIos: 16, apple: true },
+	iphoneIsolamento: {
+		...BASE,
+		browser: 'Safari',
+		sistema: 'iOS',
+		versioneIos: 18,
+		apple: true,
+		webAudio: false,
+		outputLatency: false
+	},
 	ipadFirefox: { ...BASE, browser: 'Firefox', sistema: 'iOS', versioneIos: 18, apple: true },
 	macSafari: { ...BASE, browser: 'Safari', sistema: 'macOS', apple: true },
 	macSafariVecchio: {
@@ -60,8 +69,19 @@ describe('problemi noti', () => {
 				'safari-dati-7-giorni',
 				'app-dati-separati',
 				'ios-audio-muto',
-				'ios16-silenzioso',
-				'ios-salvataggio'
+				'ios16-silenzioso'
+			]
+		],
+		// IndexedDB bloccato dall'isolamento, non dal difetto di iOS 17.4: un avviso solo
+		[
+			'iphoneIsolamento',
+			[
+				'ios-microfono',
+				'ios-permesso-microfono',
+				'safari-dati-7-giorni',
+				'app-dati-separati',
+				'ios-audio-muto',
+				'apple-isolamento'
 			]
 		],
 		// Firefox su iOS è WebKit: niente finestra per la persistenza, e Safari non chiede il permesso per lui

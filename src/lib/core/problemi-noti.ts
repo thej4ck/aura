@@ -49,9 +49,10 @@ export const PROBLEMI_NOTI = {
 	// (readium.org/speech/docs/WebSpeech.html).
 	'android-voce-italiana': (d) => d.sistema === 'Android' && m.problema_android_voce(),
 
-	// Da iOS 17.4 IndexedDB può perdere la connessione al suo server e non riaprirla da sola
-	// (WebKit 273827, 197050, 235579).
-	'ios-salvataggio': (d) => ios(d) && m.problema_ios_salvataggio(),
+	// Da iOS 17.4 IndexedDB può perdere la connessione al suo server, anche all'apertura, e non riaprirla da
+	// sola (WebKit 273827, 197050, 235579). Senza Web Audio è la Modalità di isolamento (apple-isolamento).
+	'ios-salvataggio': (d) =>
+		ios(d) && d.webAudio && (d.versioneIos ?? 99) >= 17 && m.problema_ios_salvataggio(),
 
 	// La Modalità di isolamento toglie Web Audio, getUserMedia e (da iOS 17) IndexedDB
 	// (support.apple.com/105120, WebKit 266363).

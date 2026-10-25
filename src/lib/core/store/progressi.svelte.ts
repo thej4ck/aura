@@ -61,8 +61,8 @@ export class Progressi {
 	/** false se IndexedDB manca o è bloccato: i dati vivono solo in memoria */
 	persistente = $state(true);
 	sync: StatoSync = $state('nessuna');
-	/** true quando l'ultimo salvataggio su IndexedDB è fallito (si ritenta al prossimo flush) */
-	erroreSalvataggio = $state(false);
+	/** salvataggi su IndexedDB falliti di fila: dopo il primo si ritenta al prossimo flush, 0 quando uno riesce */
+	salvataggiFalliti = $state(0);
 	/** documenti in IndexedDB che questa versione non sa leggere (es. scritti da una più nuova): restano lì, non si cancellano */
 	illeggibili = $state(0);
 	pronto = $state(false);
@@ -86,7 +86,7 @@ export class Progressi {
 			await this.#avvia(await apriDb());
 		} catch (e) {
 			registraErrore(e);
-			if (this.doc) this.erroreSalvataggio = true;
+			if (this.doc) this.salvataggiFalliti++;
 			else await this.#avvia(await apriDb(null));
 		}
 		document.addEventListener('visibilitychange', () => {
@@ -366,10 +366,10 @@ export class Progressi {
 			const salvato = await db.get<unknown>('profili', doc.profilo.id);
 			if (salvato) doc = unisci(migra(salvato), doc);
 			await db.put('profili', doc);
-			this.erroreSalvataggio = false;
+			this.salvataggiFalliti = 0;
 		} catch (e) {
 			registraErrore(e);
-			this.erroreSalvataggio = true;
+			this.salvataggiFalliti++;
 			this.#sporco = true;
 			return;
 		}

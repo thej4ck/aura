@@ -123,17 +123,21 @@
 	</div>
 </header>
 
-{#if progressi.pronto && (!progressi.persistente || progressi.erroreSalvataggio || progressi.illeggibili)}
+{#if progressi.pronto && (!progressi.persistente || progressi.salvataggiFalliti || progressi.illeggibili)}
 	<div class="avvisi">
-		{#if !progressi.persistente || progressi.erroreSalvataggio}
+		{#if !progressi.persistente || progressi.salvataggiFalliti}
 			<Avviso
 				tono="attenzione"
-				testo={progressi.erroreSalvataggio
+				testo={progressi.salvataggiFalliti
 					? m.avviso_errore_salvataggio()
 					: m.avviso_non_persistente()}
 			/>
+			<!-- IndexedDB che non si apre, o che non salva più dopo il nuovo tentativo: su iOS ricaricare -->
+			{#if !progressi.persistente || progressi.salvataggiFalliti > 1}
+				<ProblemaNoto id="ios-salvataggio" />
+			{/if}
 			<!-- ponytail: la Modalità di isolamento di iOS 16 lascia IndexedDB, e qui non si vede; un avviso a sé se servirà -->
-			<ProblemaNoto id={progressi.erroreSalvataggio ? 'ios-salvataggio' : 'apple-isolamento'} />
+			{#if !progressi.persistente}<ProblemaNoto id="apple-isolamento" />{/if}
 		{/if}
 		{#if progressi.illeggibili}
 			<Avviso tono="info" testo={m.avviso_illeggibili()} />
