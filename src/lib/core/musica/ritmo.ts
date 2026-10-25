@@ -240,6 +240,12 @@ export type ValutazioneRitmo = {
 	riuscita: boolean;
 	/** null se riuscita */
 	consiglio: Consiglio | null;
+	/**
+	 * Tutto il ritmo spostato oltre la tolleranza: lo scarto costante tolto è più grande della tolleranza.
+	 * Il ritmo relativo può essere giusto, ma col tocco vuol dire battere di reazione, dopo aver sentito
+	 * ogni clic ('tardi'), o anticiparlo sempre ('presto'); il feedback lo dice. null se non lo è.
+	 */
+	spostato: 'presto' | 'tardi' | null;
 };
 
 const margineS = () => (ABBINAMENTO_MAX_MS + SCARTO_MAX_MS) / 1000;
@@ -395,7 +401,8 @@ export function valutaBattiti(
 		? problemi.reduce((primo, p) => (p.t < primo.t ? p : primo)).c
 		: null;
 
-	return { note, inPiu: extra, scarto, giuste, riuscita, consiglio };
+	const spostato = Math.abs(scarto) <= tolleranzaS ? null : scarto > 0 ? 'tardi' : 'presto';
+	return { note, inPiu: extra, scarto, giuste, riuscita, consiglio, spostato };
 }
 
 /** Un battito del bambino da disegnare sotto le note, dopo la valutazione (prop `battiti` di Staff). */

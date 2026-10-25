@@ -345,6 +345,26 @@ describe('valutazione dei battiti', () => {
 		});
 	});
 
+	it('battuto di reazione, dopo ogni clic: il ritmo è giusto ma tutto spostato, e la valutazione lo dice', () => {
+		const tardi = valutaBattiti(
+			e,
+			T0,
+			giusti.map((t) => t + 0.33),
+			FACILE
+		);
+		expect(tardi.riuscita).toBe(true); // lo scarto può essere latenza: il ritmo relativo conta
+		expect(tardi.spostato).toBe('tardi');
+		const presto = valutaBattiti(
+			e,
+			T0,
+			giusti.map((t) => t - 0.26),
+			FACILE
+		);
+		expect(presto.spostato).toBe('presto');
+		// latenza piccola, dentro la tolleranza: niente da dire
+		expect(valutaBattiti(e, T0, giusti.map((t) => t + 0.08), FACILE).spostato).toBeNull();
+	});
+
 	it("segni sotto le note: in battiti dall'inizio del rigo, scarto tolto", () => {
 		const battiti = giusti
 			.map((t, i) => (i === 0 ? t + 0.18 + 0.2 : t + 0.18))

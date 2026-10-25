@@ -135,6 +135,32 @@ test('battiti in più senza pausa e battiti in anticipo: il consiglio dice cosa 
 	const rigo = w.getByRole('group', { name: 'Il ritmo da battere' });
 	await expect(rigo.locator('svg .battito.presto')).toHaveCount(1);
 	await expect(rigo.getByRole('listitem').nth(3)).toContainText("battuta un po' presto");
+
+	// due battiti in più dentro la minima: il consiglio li conta
+	await w.getByRole('button', { name: 'Riprova' }).click();
+	await batti(page, w, { extra: [2.5, 3] });
+	await expect(w.getByRole('status')).toHaveText(
+		'Hai già battuto 4 note su 4 al momento giusto. Ci sono 2 battiti in più: batti una volta sola per ogni nota.',
+		{ timeout: 10_000 }
+	);
+});
+
+test('battuto di reazione, dopo ogni clic: il ritmo è giusto, ma il consiglio dice di battere insieme', async ({
+	page
+}) => {
+	await apriVetrina(page);
+	const w = widget(page, 'batti-ritmo-lettura');
+	await w.getByRole('button', { name: 'Leggi e batti' }).click();
+	// 'ta ti-ti ta-a', ogni nota 330 ms dopo il suo clic (0,4 battiti a 72 BPM): il tempo di reazione
+	const dopo = (0.33 * 72) / 60;
+	await batti(page, w, { salta: [0, 1, 2, 3], extra: [0, 1, 1.5, 2].map((b) => b + dopo) });
+	await expect(w.getByRole('status')).toHaveText(
+		'Il ritmo è giusto! Però ogni battito arriva un po’ dopo il clic: batti proprio insieme a lui, senza aspettarlo.',
+		{ timeout: 10_000 }
+	);
+	await expect(esiti(page, 'batti-ritmo-lettura')).toHaveText([
+		'corretto: true, item: ta ti ti ta-a'
+	]);
 });
 
 test('senza microfono si batte col tocco, e la scelta si ricorda', async ({ page }) => {

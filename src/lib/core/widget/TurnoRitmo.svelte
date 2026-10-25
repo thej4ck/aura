@@ -93,6 +93,8 @@
 	let segni = $state.raw<SegnoBattito[]>([]);
 	/** battiti dentro la finestra d'ascolto: zero vuol dire "non ti ho sentito" */
 	let sentiti = $state(0);
+	/** la fonte del turno valutato: nell'esito la scelta può già essere un'altra */
+	let usata = $state<FonteBattiti>('tocco');
 	/**
 	 * quando (scala di performance.now()) va battuta ogni nota: per i test end-to-end, che toccano a tempo
 	 * con la tastiera. Si scrive all'inizio dell'attacco del bambino, quando l'uscita audio è già partita
@@ -208,6 +210,7 @@
 		const v = valutaBattiti(p.bimbo, t0, battiti, tolleranzaS);
 		const [da, a] = finestraAscolto(p.bimbo, t0);
 		sentiti = battiti.filter((b) => b >= da && b <= a).length;
+		usata = fonte;
 		valutazione = v;
 		segni = segniBattiti(v, p.bimbo, t0);
 		fase = 'esito';
@@ -270,19 +273,23 @@
 	});
 
 	const CONSIGLI = { presto: m.ritmo_presto, tardi: m.ritmo_tardi, mancato: m.ritmo_mancato };
+	const SPOSTATO = { presto: m.ritmo_riuscita_presto, tardi: m.ritmo_riuscita_tardi };
 	const feedback = $derived.by(() => {
 		if (fase !== 'esito' || !valutazione)
 			return errore && fase === 'turno' ? `${errore} ${m.ritmo_senza_microfono()}` : '';
 		const v = valutazione;
-		if (v.riuscita) return m.ritmo_riuscita();
-		if (!sentiti) return fonte === 'mani' ? m.ritmo_non_sentito() : m.ritmo_nessun_tocco();
+		// col tocco i clic continuano: tutto il ritmo spostato vuol dire aspettarli (battere di reazione)
+		// o anticiparli, e il ritmo giusto non è ancora «al momento giusto». Col microfono può essere latenza
+		if (v.riuscita)
+			return usata === 'tocco' && v.spostato ? SPOSTATO[v.spostato]() : m.ritmo_riuscita();
+		if (!sentiti) return usata === 'mani' ? m.ritmo_non_sentito() : m.ritmo_nessun_tocco();
 		const c = v.consiglio!;
 		const consiglio =
 			c.tipo !== 'in-piu'
 				? CONSIGLI[c.tipo]()
 				: c.pausa !== undefined
 					? m.ritmo_pausa()
-					: m.ritmo_in_piu();
+					: m.ritmo_in_piu({ count: v.inPiu.filter((x) => x.pausa === undefined).length });
 		const giuste = v.giuste > 0 && m.ritmo_giuste({ count: v.giuste, totale: v.note.length });
 		return [giuste, consiglio].filter(Boolean).join(' ');
 	});

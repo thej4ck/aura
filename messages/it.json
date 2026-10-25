@@ -765,6 +765,8 @@
 	"ritmo_turno_batti": "Batti",
 	"ritmo_tasto": "Batti qui",
 	"ritmo_riuscita": "Ce l’hai fatta! Ogni battito è arrivato al momento giusto.",
+	"ritmo_riuscita_tardi": "Il ritmo è giusto! Però ogni battito arriva un po’ dopo il clic: batti proprio insieme a lui, senza aspettarlo.",
+	"ritmo_riuscita_presto": "Il ritmo è giusto! Però ogni battito arriva un po’ prima del clic: ascoltalo e batti proprio insieme a lui.",
 	"ritmo_giuste": [
 		{
 			"declarations": ["input count", "input totale", "local countPlural = count: plural"],
@@ -779,7 +781,16 @@
 	"ritmo_tardi": "La nota cerchiata è arrivata un po’ tardi: battila appena arriva il suo momento.",
 	"ritmo_mancato": "Qui manca un battito: anche la nota cerchiata va battuta.",
 	"ritmo_pausa": "Nella pausa (SST) le mani riposano: lì non si batte.",
-	"ritmo_in_piu": "C’è un battito in più: batti una volta sola per ogni nota.",
+	"ritmo_in_piu": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "C’è un battito in più: batti una volta sola per ogni nota.",
+				"countPlural=other": "Ci sono {count} battiti in più: batti una volta sola per ogni nota."
+			}
+		}
+	],
 	"ritmo_non_sentito": "Non ho sentito le tue mani. Batti un po’ più forte, vicino al dispositivo.",
 	"ritmo_nessun_tocco": "Quando arriva «Batti», tocca il tasto grande una volta per ogni nota.",
 	"ritmo_senza_microfono": "Puoi battere lo stesso toccando il tasto grande.",
