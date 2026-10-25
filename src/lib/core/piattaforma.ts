@@ -50,6 +50,9 @@ export function riconosci(ua: string, tocchi = 0): Ambiente {
 	return { browser, versione, sistema, versioneIos };
 }
 
+/** Web Audio c'è? La Modalità di isolamento di Apple lo toglie: allora Aura resta muta (audio/contesto.ts). */
+export const audioDisponibile = (): boolean => !!globalThis.AudioContext;
+
 export type Dispositivo = Ambiente & {
 	/** WebKit di Apple con le sue regole (ITP, Modalità di isolamento): iOS, oppure Safari su Mac */
 	apple: boolean;
@@ -69,7 +72,7 @@ export function dispositivo(): Dispositivo {
 		...a,
 		apple: a.sistema === 'iOS' || (a.sistema === 'macOS' && a.browser === 'Safari'),
 		app: !!globalThis.matchMedia?.('(display-mode: standalone)').matches || n?.standalone === true,
-		webAudio: !!AC,
+		webAudio: audioDisponibile(),
 		outputLatency: !!AC && 'outputLatency' in AC.prototype
 	};
 }

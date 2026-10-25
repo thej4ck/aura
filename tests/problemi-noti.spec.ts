@@ -87,6 +87,16 @@ test.describe('su iPhone', () => {
 		await expect(avviso(page, 'apple-isolamento')).toHaveCount(0);
 	});
 
+	test('senza Web Audio ma con IndexedDB (Modalità di isolamento di iOS 16): lo dice il banner', async ({
+		page
+	}) => {
+		await page.addInitScript(() => delete (window as { AudioContext?: unknown }).AudioContext);
+		await apri(page, '/');
+		await expect(page.getByText('Aura non può suonare né usare il microfono')).toBeVisible();
+		await expect(avviso(page, 'apple-isolamento')).toContainText('Modalità di isolamento');
+		await expect(avviso(page, 'ios-salvataggio')).toHaveCount(0);
+	});
+
 	test('nell’app installata: niente invito a installarla, e il permesso a ogni apertura è normale', async ({
 		page
 	}) => {

@@ -3,7 +3,7 @@
 // statistiche anonime va solo il codice dell'errore con browser e sistema in breve.
 import { FFT, FPS_MIC, PASSA_BASSO_HZ } from './costanti.ts';
 import { contesto, riproduzioneAttiva, usa } from './contesto.ts';
-import { ambienteBreve } from '../piattaforma.ts';
+import { ambienteBreve, audioDisponibile } from '../piattaforma.ts';
 import { conta } from '../statistiche.ts';
 import { Mediana, RumoreDiFondo, calcolaRms, rilevaAltezza } from './pitch.ts';
 
@@ -196,7 +196,7 @@ export async function apriSorgenteMic(
 	smonta: () => void
 ): Promise<SorgenteMic> {
 	if (globalThis.isSecureContext === false) throw errore('contesto-non-sicuro');
-	if (typeof AudioContext === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+	if (!audioDisponibile() || !navigator.mediaDevices?.getUserMedia) {
 		throw errore('non-supportato');
 	}
 	const c = contesto();

@@ -8,6 +8,7 @@
 	import favicon from '#lib/assets/favicon.svg';
 	import { m } from '#lib/paraglide/messages.js';
 	import { registraErrore } from '#lib/core/errori.ts';
+	import { audioDisponibile } from '#lib/core/piattaforma.ts';
 	import { progressi } from '#lib/core/store/progressi.svelte.ts';
 	import Avviso from '#lib/core/ui/Avviso.svelte';
 	import Icona from '#lib/core/ui/Icona.svelte';
@@ -123,7 +124,7 @@
 	</div>
 </header>
 
-{#if progressi.pronto && (!progressi.persistente || progressi.salvataggiFalliti || progressi.illeggibili)}
+{#if progressi.pronto && (!progressi.persistente || progressi.salvataggiFalliti || progressi.illeggibili || !audioDisponibile())}
 	<div class="avvisi">
 		{#if !progressi.persistente || progressi.salvataggiFalliti}
 			<Avviso
@@ -136,8 +137,11 @@
 			{#if !progressi.persistente || progressi.salvataggiFalliti > 1}
 				<ProblemaNoto id="ios-salvataggio" />
 			{/if}
-			<!-- ponytail: la Modalità di isolamento di iOS 16 lascia IndexedDB, e qui non si vede; un avviso a sé se servirà -->
-			{#if !progressi.persistente}<ProblemaNoto id="apple-isolamento" />{/if}
+		{/if}
+		<!-- senza Web Audio le attività vanno avanti mute (audio/contesto.ts) -->
+		{#if !audioDisponibile()}
+			<Avviso tono="attenzione" testo={m.avviso_audio_assente()} />
+			<ProblemaNoto id="apple-isolamento" />
 		{/if}
 		{#if progressi.illeggibili}
 			<Avviso tono="info" testo={m.avviso_illeggibili()} />

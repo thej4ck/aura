@@ -1,6 +1,7 @@
 // Un solo AudioContext per tutto il sito, creato al primo uso: mai durante l'import (SSR e prerender).
 // Le sorgenti passano da un compressore che taglia i picchi e da un volume moderato.
 import { IDLE_SUSPEND_MS, VOLUME } from './costanti.ts';
+import { audioDisponibile } from '../piattaforma.ts';
 
 let ctx: AudioContext | undefined;
 let ingresso: AudioNode | undefined;
@@ -20,14 +21,64 @@ function sessione() {
 	if (s) s.type = microfoni > 0 ? 'play-and-record' : 'playback';
 }
 
-// ponytail: senza Web Audio (Modalità di isolamento) new AudioContext lancia e i pulsanti che suonano non fanno
-// niente: lo dice all'adulto l'avviso apple-isolamento. Un'Aura muta ma giocabile (pianifica() e sblocca() a vuoto)
-// se le segnalazioni la chiederanno.
+/**
+ * Senza Web Audio, un contesto muto al posto di quello vero: il clock avanza con performance.now() e i nodi
+ * non fanno niente. Così pianifica(), synth, percussioni e le animazioni guidate dall'audio vanno avanti in
+ * silenzio invece di lanciare al primo tocco, e le attività restano giocabili; il microfono dà ErroreMic
+ * 'non-supportato' (mic.ts). Ha solo quello che usano contesto.ts, synth.ts e percussioni.ts.
+ */
+function contestoMuto(): AudioContext {
+	const param = () => ({
+		value: 0,
+		setValueAtTime() {},
+		linearRampToValueAtTime() {},
+		exponentialRampToValueAtTime() {},
+		setTargetAtTime() {}
+	});
+	const nodo = () => ({
+		gain: param(),
+		frequency: param(),
+		threshold: param(),
+		knee: param(),
+		ratio: param(),
+		attack: param(),
+		release: param(),
+		buffer: null,
+		onended: null,
+		connect: <N>(n: N) => n,
+		disconnect() {},
+		start() {},
+		stop() {},
+		setPeriodicWave() {}
+	});
+	return {
+		state: 'running',
+		sampleRate: 48_000,
+		outputLatency: 0,
+		baseLatency: 0,
+		get currentTime() {
+			return performance.now() / 1000;
+		},
+		destination: nodo(),
+		resume: async () => {},
+		suspend: async () => {},
+		createGain: nodo,
+		createDynamicsCompressor: nodo,
+		createOscillator: nodo,
+		createBufferSource: nodo,
+		createPeriodicWave: () => ({}),
+		createBuffer: (_canali: number, length: number) => {
+			const dati = new Float32Array(length);
+			return { length, getChannelData: () => dati };
+		}
+	} as unknown as AudioContext;
+}
+
 // ponytail: su iOS, dopo un'altra app, il contesto può restare muto (avviso ios-audio-muto): suspend() e resume()
 // al ritorno visibile se le prove su un iPhone vero (docs/prove-su-dispositivi.md) mostrano che basta.
 export function contesto(): AudioContext {
 	if (!ctx) {
-		ctx = new AudioContext({ latencyHint: 'interactive' });
+		ctx = audioDisponibile() ? new AudioContext({ latencyHint: 'interactive' }) : contestoMuto();
 		// protezione delle orecchie: un accordo o un errore non superano mai un livello moderato
 		const compressore = ctx.createDynamicsCompressor();
 		compressore.threshold.value = -10;

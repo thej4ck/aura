@@ -93,6 +93,8 @@ describe('tempoSentito', () => {
 	});
 });
 
+const SCALA_BREVE = [{ midi: 69, inizio: 0, durata: 0.5 }];
+
 describe('synth', () => {
 	const SCALA = [60, 62, 64].map((midi, i) => ({ midi, inizio: i * 0.5, durata: 0.4 }));
 
@@ -154,5 +156,34 @@ describe('synth', () => {
 		expect(c.oscillatori[0].fineA).toBeCloseTo(c.currentTime + 0.05, 10);
 		c.scorri(2);
 		expect(c.oscillatori).toHaveLength(1);
+	});
+});
+
+describe('senza Web Audio (Modalità di isolamento)', () => {
+	it('niente eccezioni: si suona in silenzio sul clock di performance.now(), e la riproduzione finisce', async () => {
+		vi.stubGlobal('AudioContext', undefined);
+		const { suonaColpi } = await import('./percussioni.ts');
+		let adesso = 1000;
+		vi.spyOn(performance, 'now').mockImplementation(() => adesso);
+
+		await expect(audio.sblocca()).resolves.toBeUndefined();
+		const note = synth.suona(SCALA_BREVE);
+		const colpi = suonaColpi([
+			{ inizio: 0, timbro: 'legnetto', accento: true },
+			{ inizio: 0.5, timbro: 'clic' }
+		]);
+		expect(note.t0).toBeCloseTo(1.05, 10); // il clock è performance.now() in secondi
+		expect(audio.riproduzioneAttiva()).toBe(true);
+		audio.usa('microfono')();
+		for (let i = 0; i < 100; i++) {
+			adesso += 25;
+			vi.advanceTimersByTime(25);
+		}
+		await Promise.all([note.fine, colpi.fine]);
+		expect(audio.riproduzioneAttiva()).toBe(false);
+		expect(audio.ora()).toBeCloseTo(3.5, 10);
+		expect(audio.tempoSentito()).toBeCloseTo(3.5, 10); // le animazioni guidate dall'audio vanno avanti
+		note.ferma();
+		expect(creati).toHaveLength(0);
 	});
 });

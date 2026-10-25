@@ -242,6 +242,8 @@ describe('apriMicrofono', () => {
 		expect(await codice(apri())).toBe('nessun-microfono');
 		rifiuta('NotReadableError');
 		expect(await codice(apri())).toBe('nessun-microfono');
+		vi.stubGlobal('AudioContext', undefined); // Modalità di isolamento di Apple
+		expect(await codice(apri())).toBe('non-supportato');
 		vi.stubGlobal('navigator', {});
 		expect(await codice(apri())).toBe('non-supportato');
 		vi.stubGlobal('isSecureContext', false);
