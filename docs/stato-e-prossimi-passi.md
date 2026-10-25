@@ -29,13 +29,14 @@ Documento di passaggio tra una sessione di lavoro e la successiva. Va aggiornato
   - browser senza `outputLatency` (Safari prima della 18.4): ritardo del Bluetooth (Impostazioni, sotto la manopola);
   - Chrome per Android: voce italiana da installare (Impostazioni);
   - Firefox, non su iOS: la persistenza dei dati la chiede l'adulto da Backup e app, dietro il controllo.
+  - mitigazioni nel codice, con l'avviso come ripiego: il contesto audio rimasto muto su iOS si rimette in moto (`suspend()` e `resume()`, al gesto e al ritorno sulla pagina); IndexedDB riapre la connessione persa e riprova una volta; senza Web Audio (Modalità di isolamento) Aura resta muta ma giocabile, con un banner.
 - **Audio**:
   - sintetizzatore, microfono con YIN e gate adattivo al rumore di fondo, PitchMeter;
   - animazioni che suonano in sincrono, guidate dall'audio, con test di regressione;
   - diagnostica del microfono in /genitori, sezione «Prova il microfono», con i passi quando il permesso è negato senza richiesta;
   - ascolto fino a 40 s prima di «Riprova» e consiglio di non cantare più forte (`musica/voce-forte.ts`).
 - **Qualità**:
-  - `npm run verifica` (lint, check, Vitest, build, Playwright) dura circa 3-4 minuti: 475 test unitari e 152 e2e (progetti chromium, dev, mic, mani, voce);
+  - `npm run verifica` (lint, check, Vitest, build, Playwright) dura circa 3-4 minuti: 486 test unitari e 155 e2e (progetti chromium, dev, mic, mani, voce);
   - durante lo sviluppo solo i test mirati (vedi CLAUDE.md, «Test e verifiche»).
 
 ## Prossimi passi, in ordine
