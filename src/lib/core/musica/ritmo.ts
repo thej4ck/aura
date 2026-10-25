@@ -484,7 +484,7 @@ export type MomentoTurno = {
 	battito: number | null;
 	/** la nota del sito che suona (indice in rigo.note, pause comprese); null se non suona il sito */
 	suona: number | null;
-	/** a chi tocca: «batti» da mezzo battito prima della prima nota del bambino */
+	/** a chi tocca: «batti» dall'inizio dell'attacco del bambino, il suo «pronti, via» */
 	turno: 'ascolta' | 'batti';
 	finito: boolean;
 };
@@ -502,7 +502,8 @@ export function momentoTurno(p: PianoTurno, t: number): MomentoTurno {
 	return {
 		battito,
 		suona,
-		turno: t >= p.da + p.bimbo.attaccoS - p.bimbo.battitoS / 2 ? 'batti' : 'ascolta',
+		// il conteggio del bambino è già suo: mezzo battito prima della prima nota non basta per accorgersene
+		turno: t >= p.da ? 'batti' : 'ascolta',
 		finito: t >= p.fine
 	};
 }

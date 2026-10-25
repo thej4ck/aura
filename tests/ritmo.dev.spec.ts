@@ -37,8 +37,10 @@ test('in lettura, battuto a tempo: la prova riesce e i battiti giusti stanno sot
 	await expect(tasto).toBeFocused();
 	const lato = await tasto.boundingBox();
 	expect(Math.min(lato!.width, lato!.height)).toBeGreaterThanOrEqual(96);
+	// in lettura tocca subito al bambino: il conteggio (una battuta di clic) è il suo «pronti, via»
 	const turno = w.getByRole('list', { name: 'A chi tocca' }).locator('[aria-current="step"]');
-	await expect(turno).toHaveText('Ascolta'); // l'attacco: una battuta di clic
+	await expect(turno).toHaveText('Batti');
+	await expect(tasto).not.toHaveClass(/attesa/);
 	await batti(page, w);
 
 	await expect(w.getByRole('status')).toHaveText(
@@ -78,6 +80,9 @@ test('a eco, con un battito mancato e uno nella pausa: il consiglio e i segni gi
 	await expect(rigo.getByRole('listitem').filter({ hasText: 'evidenziata' })).toHaveCount(1, {
 		timeout: 10_000
 	});
+	// il tasto aspetta, tratteggiato, senza perdere contrasto (axe anche durante il turno, non solo alla fine)
+	await expect(w.getByRole('button', { name: 'Batti qui' })).toHaveClass(/attesa/);
+	expect(await violazioniGravi(page)).toEqual([]);
 	// 'ta ti-ti ta sst': la prima TI non si batte, un battito cade nella pausa (il quarto battito)
 	await batti(page, w, { salta: [1], extra: [3] });
 	await expect(turno).toHaveText('Batti');

@@ -508,9 +508,12 @@
 		background: var(--colore-accento-forte);
 		transform: scale(0.94);
 	}
-	/* mentre suona il sito si aspetta: i tocchi non contano ancora */
+	/* mentre suona il sito si aspetta: i tocchi non contano ancora. Tratteggiato e chiaro, con il testo
+	   scuro: si vede che aspetta senza perdere contrasto (un tasto sbiadito scende sotto 3:1) */
 	.tasto.attesa {
-		opacity: 0.6;
+		border-style: dashed;
+		background: var(--colore-accento-tenue);
+		color: var(--colore-testo);
 	}
 
 	/* movimento ridotto: il battito e il tocco cambiano stato, senza cambiare grandezza */

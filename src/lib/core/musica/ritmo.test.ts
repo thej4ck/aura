@@ -434,8 +434,8 @@ describe('turno ritmico', () => {
 			null,
 			null
 		]);
-		// «batti» da mezzo battito prima della prima nota del bambino (6 + 3 = 9)
-		expect(momenti.map((x) => x.turno).indexOf('batti')).toBe(8);
+		// «batti» dall'inizio dell'attacco del bambino (6): il conteggio è il suo «pronti, via»
+		expect(momenti.map((x) => x.turno).indexOf('batti')).toBe(6);
 		expect(momentoTurno(p, p.fine - 0.001).finito).toBe(false);
 		expect(momentoTurno(p, p.fine).finito).toBe(true);
 	});
