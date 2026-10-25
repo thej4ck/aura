@@ -58,6 +58,21 @@ export function sblocca(): Promise<void> {
 export const ora = (): number => ctx?.currentTime ?? 0;
 
 /**
+ * Il riferimento del suono sentito (ADR 0008): il tempo sul clock audio di quello che usciva
+ * dall'altoparlante all'istante `ms` (scala di performance.now(): il `timeStamp` di un pointerdown o di un
+ * keydown, oppure adesso), meno la manopola `latenzaMs`. Un tocco fatto proprio mentre si sentiva un suono
+ * programmato a `t` dà `t`. Anche il battito visivo si disegna con tempoSentito(), in fase con i clic.
+ * Usa getOutputTimestamp() (contextTime ↔ performanceTime del campione in uscita) quando dà valori
+ * sensati; altrimenti currentTime − (outputLatency || baseLatency) e l'età dell'evento.
+ * CONTRATTO: corpo da implementare, con i test (contesto finto, entrambe le strade, valori nulli).
+ */
+export function tempoSentito(ms?: number, latenzaMs = 0): number {
+	void ms;
+	void latenzaMs;
+	throw new Error('tempoSentito: da implementare (ADR 0008)');
+}
+
+/**
  * Vero mentre il sito suona o legge ad alta voce (più una breve coda): nei turni ascolta/canta il
  * microfono non ascolta.
  */

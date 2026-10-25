@@ -100,3 +100,40 @@ export const FORTE_MS = 800;
 /** "Nota comoda": mediana della voce negli ultimi FINESTRA ms, quando ne è piena almeno COPERTURA. */
 export const FINESTRA_NOTA_COMODA_MS = 2000;
 export const COPERTURA_NOTA_COMODA = 0.75;
+
+// --- Ritmo (ADR 0008) ---------------------------------------------------------------------------
+
+/**
+ * Quanto può scostarsi un battito dalla sua nota (ms), per livello, dopo aver tolto lo scarto costante.
+ * Oltre è "un po' presto" o "un po' tardi", mai "sbagliato".
+ */
+export const TOLLERANZE_RITMO_MS = {
+	facile: 150,
+	medio: 100,
+	preciso: 60
+} as const satisfies Record<LivelloTolleranza, number>;
+
+/** Battiti al minuto di partenza: lento e calmo (una semiminima ~0,83 s, una croma ~0,42 s). */
+export const BPM_RITMO = 72;
+/**
+ * BPM ammessi nei contenuti. Sopra 100, col microfono, la coda dell'attacco (ultimo clic, eco, latenza)
+ * finirebbe dentro la finestra del primo battito del bambino e lo zittirebbe.
+ */
+export const BPM_RITMO_MIN = 50;
+export const BPM_RITMO_MAX = 100;
+
+/**
+ * Scarto costante massimo (ms) che la valutazione toglie: la latenza che resta dopo outputLatency e la
+ * manopola (tocco, microfono, Bluetooth, Safari che non la dichiara). Mai oltre metà della distanza
+ * minima tra due note, così un battito non salta sulla nota vicina.
+ */
+export const SCARTO_MAX_MS = 200;
+
+/** Oltre questa distanza (ms) dalla nota più vicina, scarto tolto, un battito è "in più". */
+export const ABBINAMENTO_MAX_MS = 250;
+
+/** Dopo un battito di mani, per quanto (ms) non se ne sente un altro: doppio picco, eco della stanza. */
+export const REFRATTARIO_BATTITO_MS = 150;
+
+/** Volume dei clic sotto i battiti del bambino quando batte col tocco (0-1; l'attacco è a 1). */
+export const VOLUME_CLIC_PIANO = 0.35;
