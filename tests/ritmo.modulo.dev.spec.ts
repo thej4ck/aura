@@ -1,4 +1,4 @@
-// Modulo Ritmo end-to-end (server di sviluppo: il modulo è ancora una bozza). Si batte con lo Spazio ai
+// Modulo Ritmo end-to-end, sul server di sviluppo. Si batte con lo Spazio ai
 // tempi che il turno scrive in data-attesi (vedi battere.ts); i colpi suonati si contano con una spia
 // sugli OscillatorNode: un oscillatore per colpo, il legnetto è il Do6 (midi 84).
 import { expect, test, type Page } from '@playwright/test';

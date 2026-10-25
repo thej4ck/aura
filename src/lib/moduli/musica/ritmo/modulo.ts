@@ -29,7 +29,7 @@ export const modulo = {
 	titolo: 'Ritmo',
 	descrizione: 'Sentire il battito e battere il ritmo: TA, TI-TI, TA-A e la pausa.',
 	icona: '🥁',
-	stato: 'bozza',
+	stato: 'pubblicata',
 	introduzione: {
 		cosaImparerai: [
 			'Sentire il battito della musica e batterlo a tempo.',

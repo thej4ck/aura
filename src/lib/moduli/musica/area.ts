@@ -3,7 +3,7 @@ import type { AreaDati } from '#lib/core/contenuti/schema.ts';
 export const area = {
 	id: 'musica',
 	titolo: 'Musica',
-	descrizione: 'Leggere, ascoltare e cantare la musica, con calma e un passo alla volta.',
+	descrizione: 'Leggere le note, cantarle e battere il ritmo, con calma e un passo alla volta.',
 	icona: '🎵',
 	colore: '#3f5aa8',
 	// ordine consigliato, mai un lucchetto: lettura, canto e ritmo si alternano. Il battito arriva presto;

@@ -1,4 +1,4 @@
-// Modulo Pentagramma end-to-end (server di sviluppo: il modulo è ancora una bozza).
+// Modulo Pentagramma end-to-end, sul server di sviluppo.
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { sorveglia, violazioniGravi } from './sorveglianza';
 

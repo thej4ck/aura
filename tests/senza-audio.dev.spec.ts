@@ -1,7 +1,6 @@
 // Senza Web Audio, come con la Modalità di isolamento di Apple (audio/contesto.ts): niente eccezioni al primo
 // tocco, le attività vanno avanti mute (il canto senza microfono, il ritmo col tocco), il banner lo dice e la
 // prova del microfono per gli adulti spiega perché.
-// Server di sviluppo: il Ritmo è ancora una bozza.
 import { expect, test, type Page } from '@playwright/test';
 import { batti } from './battere';
 import { sorveglia } from './sorveglianza';

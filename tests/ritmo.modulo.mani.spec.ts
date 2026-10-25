@@ -1,5 +1,5 @@
-// «Eco ritmica» con le mani al microfono finto (battiti di mani in una stanza: vedi setup-mic.ts), server
-// di sviluppo perché il modulo è una bozza. I battiti del WAV non seguono il ritmo, quindi l'esito può
+// «Eco ritmica» con le mani al microfono finto (battiti di mani in una stanza: vedi setup-mic.ts), sul server
+// di sviluppo. I battiti del WAV non seguono il ritmo, quindi l'esito può
 // andare in tutti e due i modi: qui contano i giri e il microfono, che si apre e si chiude a ogni giro.
 import { expect, test } from '@playwright/test';
 import { spiaMicrofono } from './battere';

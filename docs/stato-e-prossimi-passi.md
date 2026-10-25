@@ -9,7 +9,7 @@ Documento di passaggio tra una sessione di lavoro e la successiva. Va aggiornato
   - modulo Pentagramma: 6 lezioni e 3 giochi (che-nota-e con scatole di Leitner, trovala, leggi-e-canta);
   - modulo Canto: 5 lezioni e 3 giochi (tieni-la-nota, eco, estensione vocale per semitoni);
   - percorso consigliato che alterna i due moduli (`src/lib/moduli/musica/area.ts`).
-- **Modulo Ritmo, in stato 'bozza'** (`src/lib/moduli/musica/ritmo/`, ADR 0008): non è pubblicato fino alla prova dell'utente.
+- **Modulo Ritmo pubblicato** (`src/lib/moduli/musica/ritmo/`, ADR 0008) il 2026-10-25, per provarlo dal vivo (il progetto è open: la prova si fa in produzione).
   - 5 lezioni: il battito; TA e TI-TI; TA-A; la pausa; battute e tempo con l'accento sul primo.
   - 3 giochi: eco ritmica, leggi e batti, che ritmo è? (ascolta e scegli).
   - Input a tocco (pointerdown, Spazio/Invio) e battito di mani dal microfono (`audio/battimani.ts` con AudioWorklet); sillabe TA, TI-TI, TA-A, SST; pause, punto, tempo e rigo ritmico nello schema e in `Staff`.
@@ -57,7 +57,7 @@ Documento di passaggio tra una sessione di lavoro e la successiva. Va aggiornato
 4. **Decisioni aperte minori**:
    - a 360 px la tastiera di 7 tasti scorre di 10 px (tasti da 48 px): va bene così?
    - valutare l'output Paraglide a un file per lingua: svelte-check analizza circa 2.000 file, quasi tutti messaggi generati;
-5. **Prova dell'utente del modulo Ritmo, poi la pubblicazione** (stato 'pubblicata' in `modulo.ts`), con il percorso consigliato aggiornato.
+5. **Prova dal vivo del modulo Ritmo** (già pubblicato): battito di mani, latenza col Bluetooth, soglie e lezioni con i bambini veri; correggere quello che emerge.
 6. **Prossime aree e moduli**: matematica, scienze e così via, seguendo `docs/come-aggiungere-un-modulo.md`.
 
 ## Promemoria per chi lavora con gli agenti
