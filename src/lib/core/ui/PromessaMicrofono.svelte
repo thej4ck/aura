@@ -12,18 +12,23 @@
 	<div class="spiega">
 		<p class="per-te">{perTe}</p>
 		<p class="per-adulti">{perAdulti}</p>
-		<ProblemaNoto id="ios-microfono" />
 	</div>
+	<ProblemaNoto id="ios-microfono" />
 </div>
 
 <style>
 	.microfono {
-		display: flex;
-		gap: var(--spazio-4);
-		align-items: flex-start;
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: var(--spazio-3) var(--spazio-4);
+		align-items: start;
 		padding: var(--spazio-4) var(--spazio-5);
 		border-radius: var(--raggio-l);
 		background: var(--colore-superficie-tenue);
+	}
+	/* a tutta larghezza sotto la promessa: nella colonna del testo, su telefono, sarebbe lunghissimo */
+	.microfono > :global(.problema-noto) {
+		grid-column: 1 / -1;
 	}
 	.icona-mic {
 		display: grid;

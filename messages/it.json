@@ -993,7 +993,7 @@
 	"mic_non_indicato": "non indicato dal browser",
 	"mic_filtri_accesi": "Il browser tiene accesi alcuni filtri per le chiamate ({filtri}): possono abbassare o spegnere le note tenute. Prova con un altro browser.",
 	"mic_consiglio_windows": "Se la voce sparisce dopo qualche secondo di nota tenuta, può essere il computer che riduce il rumore per conto suo. Su Windows apri Impostazioni › Sistema › Audio, scegli il microfono e disattiva «Miglioramenti audio»; se ci sono, spegni anche gli «Effetti di Windows Studio».",
-	"problema_ios_microfono": "Su iPhone e iPad, con il microfono aperto, i suoni possono uscire più piano: alzate il volume, e se restano bassi chiudete e riaprite Safari (o l'app). Con le cuffie Bluetooth possono andare a scatti: meglio l'altoparlante o le cuffie con il filo.",
+	"problema_ios_microfono": "Su iPhone e iPad, con il microfono aperto, i suoni possono uscire più piano (alzate il volume) e con le cuffie Bluetooth andare a scatti: meglio l'altoparlante o le cuffie con il filo.",
 	"problema_ios_permesso_safari": "Safari chiede il microfono a ogni visita. Per non chiederlo più: menu della pagina › Impostazioni sito web › Microfono › Consenti.",
 	"problema_ios_permesso_app": "Su iPhone e iPad l'app chiede il microfono a ogni apertura: è normale, toccate Consenti.",
 	"problema_dati_7_giorni_ios": "Su iPhone e iPad il browser cancella i dati dei siti non installati dopo 7 giorni di uso senza aprire Aura. Con l'app installata i progressi restano.",
