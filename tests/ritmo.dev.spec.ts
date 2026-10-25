@@ -2,29 +2,11 @@
 // batte con lo Spazio ai tempi che il widget scrive in data-attesi (performance.now() della pagina,
 // ricavato dal clock audio), così l'esito è deterministico: la valutazione toglie lo scarto costante, e
 // il ritardo della tastiera finta resta molto sotto la tolleranza facile (150 ms).
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+import { batti, spiaColpi } from './battere';
 import { sorveglia, violazioniGravi } from './sorveglianza';
 
 test.setTimeout(90_000); // la prima visita al server di sviluppo compila al volo
-
-type Spia = { __colpi: { midi: number; t: number }[] };
-
-/** Conta gli OscillatorNode avviati, con la nota (midi) e l'istante sul clock audio: uno per colpo. */
-async function spiaColpi(page: Page) {
-	await page.addInitScript(() => {
-		const w = window as unknown as Spia;
-		w.__colpi = [];
-		const start = OscillatorNode.prototype.start;
-		OscillatorNode.prototype.start = function (this: OscillatorNode, quando = 0) {
-			w.__colpi.push({
-				midi: Math.round(69 + 12 * Math.log2(this.frequency.value / 440)),
-				t: quando
-			});
-			return start.call(this, quando);
-		};
-	});
-	return () => page.evaluate(() => (window as unknown as Spia).__colpi);
-}
 
 /** Gli intervalli (s) tra istanti in ordine. */
 const intervalli = (t: number[]) => t.slice(1).map((x, i) => x - t[i]);
@@ -39,34 +21,6 @@ const esiti = (page: Page, nome: string) =>
 	widget(page, nome)
 		.getByRole('list', { name: `Esiti ${nome}` })
 		.getByRole('listitem');
-
-/**
- * Batte con lo Spazio le note del turno (indici delle note da battere, pause escluse), tranne quelle in
- * `salta`, più i battiti `extra` (in battiti dalla prima nota). I tempi vengono dalla pagina.
- */
-async function batti(
-	page: Page,
-	w: Locator,
-	{ salta = [], extra = [] }: { salta?: number[]; extra?: number[] } = {}
-) {
-	const palco = w.locator('[data-attesi]');
-	await expect(palco).toHaveAttribute('data-attesi', /\d/, { timeout: 20_000 });
-	const attesi: number[] = JSON.parse((await palco.getAttribute('data-attesi'))!);
-	const battitoMs = attesi[1] - attesi[0]; // i ritmi della vetrina cominciano con TA
-	const tempi = [
-		...attesi.filter((_, i) => !salta.includes(i)),
-		...extra.map((b) => attesi[0] + b * battitoMs)
-	].sort((a, b) => a - b);
-	// l'orologio della pagina rispetto a quello del test, a metà dell'andata e ritorno
-	const prima = Date.now();
-	const pagina = await page.evaluate(() => performance.now());
-	const scarto = pagina - (prima + Date.now()) / 2;
-	for (const t of tempi) {
-		const attesa = t - scarto - Date.now();
-		if (attesa > 0) await new Promise((r) => setTimeout(r, attesa));
-		await page.keyboard.press('Space');
-	}
-}
 
 test('in lettura, battuto a tempo: la prova riesce e i battiti giusti stanno sotto le note', async ({
 	page,

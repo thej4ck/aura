@@ -3,31 +3,10 @@
 // sviluppo. I battiti del WAV non seguono il ritmo da battere, quindi l'esito può andare in tutti e due i
 // modi: qui contano il flusso (promessa, turni, battito visivo, esito, segni) e il microfono che si spegne.
 import { expect, test, type Page } from '@playwright/test';
+import { spiaMicrofono } from './battere';
 import { sorveglia, violazioniGravi } from './sorveglianza';
 
 test.setTimeout(90_000); // la prima visita al server di sviluppo compila al volo
-
-type ConFlussi = { __flussi: MediaStream[] };
-
-/** Tiene da parte i flussi del microfono aperti dalla pagina: per controllare che si spengano. */
-async function spiaMicrofono(page: Page) {
-	await page.addInitScript(() => {
-		const flussi: MediaStream[] = [];
-		(window as unknown as ConFlussi).__flussi = flussi;
-		const apri = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
-		navigator.mediaDevices.getUserMedia = async (vincoli) => {
-			const flusso = await apri(vincoli);
-			flussi.push(flusso);
-			return flusso;
-		};
-	});
-	return () =>
-		page.evaluate(() => {
-			const flussi = (window as unknown as ConFlussi).__flussi;
-			const accese = flussi.flatMap((f) => f.getTracks()).filter((t) => t.readyState === 'live');
-			return { aperti: flussi.length, accesi: accese.length };
-		});
-}
 
 type Spia = { __clic: number };
 
