@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import { WAV_MIC, WAV_VOCE } from './tests/setup-mic';
+import { WAV_MANI, WAV_MIC, WAV_VOCE } from './tests/setup-mic';
 
 /** Chromium legge il WAV come se fosse il microfono e accetta il permesso da solo */
 const microfonoFinto = (wav: string) => ({
@@ -29,7 +29,12 @@ export default defineConfig({
 	projects: [
 		{
 			name: 'chromium',
-			testIgnore: ['**/*.dev.spec.ts', '**/*.mic.spec.ts', '**/*.voce.spec.ts'],
+			testIgnore: [
+				'**/*.dev.spec.ts',
+				'**/*.mic.spec.ts',
+				'**/*.voce.spec.ts',
+				'**/*.mani.spec.ts'
+			],
 			use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${porta}` }
 		},
 		{
@@ -48,6 +53,17 @@ export default defineConfig({
 				...devices['Desktop Chrome'],
 				baseURL: `http://localhost:${portaDev}`,
 				launchOptions: microfonoFinto(WAV_MIC)
+			}
+		},
+		{
+			// microfono finto con battiti di mani in una stanza, e una voce che dice le sillabe senza battere
+			name: 'mani',
+			testMatch: '**/*.mani.spec.ts',
+			expect: { timeout: 10_000 },
+			use: {
+				...devices['Desktop Chrome'],
+				baseURL: `http://localhost:${portaDev}`,
+				launchOptions: microfonoFinto(WAV_MANI)
 			}
 		},
 		{

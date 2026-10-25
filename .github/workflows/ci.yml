@@ -42,7 +42,7 @@ jobs:
           - nome: pagine e voce
             argomenti: --project chromium --project voce
           - nome: microfono
-            argomenti: --project mic
+            argomenti: --project mic --project mani
           - nome: dev 1/3
             argomenti: --project dev --shard=1/3
           - nome: dev 2/3
