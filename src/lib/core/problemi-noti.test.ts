@@ -6,6 +6,7 @@ const BASE: Dispositivo = { apple: false, app: false, webAudio: true, outputLate
 const DISPOSITIVI: Record<string, Dispositivo> = {
 	desktopChrome: { ...BASE, browser: 'Chrome', sistema: 'Windows' },
 	android: { ...BASE, browser: 'Chrome', sistema: 'Android' },
+	androidFirefox: { ...BASE, browser: 'Firefox', sistema: 'Android' },
 	firefox: { ...BASE, browser: 'Firefox', sistema: 'Windows' },
 	iphoneSafari: { ...BASE, browser: 'Safari', sistema: 'iOS', versioneIos: 18, apple: true },
 	iphoneApp: {
@@ -48,6 +49,7 @@ describe('problemi noti', () => {
 		['desktopChrome', []],
 		['vuoto', []],
 		['android', ['android-voce-italiana']],
+		['androidFirefox', ['firefox-persistenza']],
 		['firefox', ['firefox-persistenza']],
 		[
 			'iphoneSafari',

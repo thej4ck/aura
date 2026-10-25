@@ -46,8 +46,9 @@ export const PROBLEMI_NOTI = {
 	'output-latency-assente': (d) => d.webAudio && !d.outputLatency && m.problema_output_latency(),
 
 	// Chrome per Android elenca anche voci da scaricare: legge l'italiano con una voce inglese
-	// (readium.org/speech/docs/WebSpeech.html).
-	'android-voce-italiana': (d) => d.sistema === 'Android' && m.problema_android_voce(),
+	// (readium.org/speech/docs/WebSpeech.html). La fonte parla solo di Chrome.
+	'android-voce-italiana': (d) =>
+		d.sistema === 'Android' && d.browser === 'Chrome' && m.problema_android_voce(),
 
 	// Da iOS 17.4 IndexedDB può perdere la connessione al suo server, anche all'apertura, e non riaprirla da
 	// sola (WebKit 273827, 197050, 235579). Senza Web Audio è la Modalità di isolamento (apple-isolamento).
