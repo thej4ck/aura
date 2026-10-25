@@ -200,7 +200,22 @@ describe('Leggi e batti', () => {
 			expect(prossimoRitmo({ livello: 0, serie: 0 }, c, { ripasso: true }).ritmo).toSatisfy(
 				(x: Ritmo) => livelloDi(x) === 0
 			);
-			expect(prossimoRitmo({ livello: 1, serie: 0 }, c, { nuovo: true }).sillabe).toBe(true);
+			expect(prossimoRitmo({ livello: 1, serie: 0, nuovo: true }, c, {}).sillabe).toBe(true);
+		}
+	});
+
+	it('una figura arrivata all’ultimo giro si presenta nella partita dopo, poi basta', () => {
+		const salito = dopoRitmo({ livello: 1, serie: RIUSCITI_PER_SALIRE - 1 }, true);
+		expect(salito).toEqual({ livello: 2, serie: 0, nuovo: true });
+		// si salva e si rilegge all'inizio della partita dopo: il primo ritmo la presenta
+		const ripreso = leggiLettura(JSON.parse(JSON.stringify({ lettura: salito })));
+		expect(ripreso).toEqual(salito);
+		const primo = prossimoRitmo(ripreso, creaCasuale(1), {});
+		expect(livelloDi(primo.ritmo)).toBe(2);
+		expect(primo.sillabe).toBe(true);
+		// dopo il ritmo che la presenta, comunque vada, la figura è presentata
+		for (const riuscito of [true, false]) {
+			expect(dopoRitmo(ripreso, riuscito).nuovo, `riuscito: ${riuscito}`).toBeUndefined();
 		}
 	});
 });

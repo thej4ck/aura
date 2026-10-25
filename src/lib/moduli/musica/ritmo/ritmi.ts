@@ -163,17 +163,19 @@ export const GIRI_LETTURA = 6;
 export const RIUSCITI_PER_SALIRE = 3;
 
 /**
- * Dove si è arrivati nella lettura: il livello (LIVELLI) e i ritmi riusciti di fila. Si salva in
- * dati['musica.ritmo'].lettura, accanto a `fonte` (la scelta tra tocco e mani di TurnoRitmo).
+ * Dove si è arrivati nella lettura: il livello (LIVELLI), i ritmi riusciti di fila e, con `nuovo`, una
+ * figura arrivata che non è ancora stata presentata (anche all'ultimo giro: la presenta la partita dopo).
+ * Si salva in dati['musica.ritmo'].lettura, accanto a `fonte` (la scelta tra tocco e mani di TurnoRitmo).
  *
  * ponytail: non sono scatole di Leitner per figura come in «Che nota è?»: l'esito del turno dice quante
  * note sono giuste, non quale figura ha fatto inciampare, e un ritmo mescola più figure. Basta il livello.
  */
-export type StatoLettura = { livello: number; serie: number };
+export type StatoLettura = { livello: number; serie: number; nuovo?: true };
 
 const SchemaStatoLettura = v.object({
 	livello: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(LIVELLI.length - 1)),
-	serie: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(RIUSCITI_PER_SALIRE - 1))
+	serie: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(RIUSCITI_PER_SALIRE - 1)),
+	nuovo: v.optional(v.literal(true))
 });
 
 /** Lo stato salvato, oppure l'inizio (livello 0) se manca o non si legge. */
@@ -184,9 +186,10 @@ export function leggiLettura(dati: unknown): StatoLettura {
 
 /**
  * Dopo un ritmo, al primo tentativo: RIUSCITI_PER_SALIRE di fila fanno salire di livello (`nuovo`: arriva
- * una figura nuova). Un ritmo non riuscito azzera la serie ma non fa mai scendere: niente punizioni.
+ * una figura nuova, da presentare col prossimo ritmo). Un ritmo non riuscito azzera la serie ma non fa
+ * mai scendere: niente punizioni. Il ritmo che presenta la figura la chiude, comunque vada.
  */
-export function dopoRitmo(s: StatoLettura, riuscito: boolean): StatoLettura & { nuovo?: true } {
+export function dopoRitmo(s: StatoLettura, riuscito: boolean): StatoLettura {
 	if (!riuscito) return { livello: s.livello, serie: 0 };
 	if (s.serie + 1 < RIUSCITI_PER_SALIRE) return { livello: s.livello, serie: s.serie + 1 };
 	if (s.livello === LIVELLI.length - 1) return { livello: s.livello, serie: 0 };
@@ -196,17 +199,17 @@ export function dopoRitmo(s: StatoLettura, riuscito: boolean): StatoLettura & { 
 /**
  * Il prossimo ritmo da leggere. Dopo un ritmo non riuscito arriva un ritmo del livello prima, con le
  * sillabe sotto le note (un ripasso, non una punizione: il livello resta quello); con una figura appena
- * arrivata le sillabe ci sono per presentarla. Mai lo stesso ritmo due volte di fila.
+ * arrivata (`s.nuovo`) le sillabe ci sono per presentarla. Mai lo stesso ritmo due volte di fila.
  */
 export function prossimoRitmo(
 	s: StatoLettura,
 	c: Casuale,
-	{ ripasso = false, nuovo = false, prima }: { ripasso?: boolean; nuovo?: boolean; prima?: Ritmo }
+	{ ripasso = false, prima }: { ripasso?: boolean; prima?: Ritmo }
 ): { ritmo: Ritmo; sillabe: boolean } {
 	const livello = ripasso ? Math.max(0, s.livello - 1) : s.livello;
 	const ritmo = scegli(
 		LIVELLI[livello].filter((x) => x !== prima),
 		c
 	);
-	return { ritmo, sillabe: ripasso || nuovo };
+	return { ritmo, sillabe: ripasso || !!s.nuovo };
 }

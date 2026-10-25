@@ -9,7 +9,8 @@
 	// «Leggi e batti»: un ritmo scritto, una battuta d'attacco, e il bambino lo legge battendo. Sei giri.
 	// Progressione adattiva, senza punizioni (ritmi.ts): tre ritmi riusciti di fila portano una figura
 	// nuova, presentata con le sillabe; dopo un ritmo non riuscito arriva un ripasso del livello prima,
-	// con le sillabe, e il livello resta. Il livello si salva in dati['musica.ritmo'].lettura.
+	// con le sillabe, e il livello resta. Il livello si salva in dati['musica.ritmo'].lettura, con la
+	// figura ancora da presentare: arrivata all'ultimo giro, la presenta la partita dopo.
 	import { untrack } from 'svelte';
 	import { creaCasuale } from '#lib/core/casuale.ts';
 	import type { EsitoWidget, WidgetProps } from '#lib/core/motore/widget.ts';
@@ -40,10 +41,16 @@
 	const c = creaCasuale(untrack(() => contesto.seed));
 	let stato = leggiLettura(progressi.doc?.dati[MODULO]);
 	let numero = $state(1);
-	let giro = $state.raw(crea(prossimoRitmo(stato, c, {})));
-	let nota = $state<string>();
+	const primo = crea(prossimoRitmo(stato, c, {}));
+	let giro = $state.raw(primo);
+	let nota = $state(presenta(primo.sillabe));
 	/** l'esito del giro (primo tentativo), per scegliere il prossimo ritmo */
-	let ultimo: { riuscito: boolean; nuovo: boolean } | undefined;
+	let riuscito = true;
+
+	/** la riga sopra il turno: la figura nuova, o l'aiuto delle sillabe nel ripasso */
+	function presenta(sillabe: boolean) {
+		return stato.nuovo ? NUOVO[stato.livello]() : sillabe ? m.ritmo_lettura_sillabe() : undefined;
+	}
 
 	function crea({ ritmo, sillabe }: { ritmo: Ritmo; sillabe: boolean }) {
 		const rigo = rigoDi(ritmo);
@@ -52,19 +59,16 @@
 
 	function esito(e: EsitoWidget) {
 		onesito(e);
-		const s = dopoRitmo(stato, e.corretto);
-		stato = { livello: s.livello, serie: s.serie };
-		ultimo = { riuscito: e.corretto, nuovo: !!s.nuovo };
+		stato = dopoRitmo(stato, e.corretto);
+		riuscito = e.corretto;
 		if (progressi.doc) progressi.aggiornaDati(MODULO, { lettura: stato });
 	}
 
 	function avanti() {
 		if (numero >= GIRI_LETTURA) return onfine();
-		const { riuscito = true, nuovo = false } = ultimo ?? {};
-		const x = prossimoRitmo(stato, c, { ripasso: !riuscito, nuovo, prima: giro.ritmo });
-		giro = crea(x);
-		nota = nuovo ? NUOVO[stato.livello]() : x.sillabe ? m.ritmo_lettura_sillabe() : undefined;
-		ultimo = undefined;
+		giro = crea(prossimoRitmo(stato, c, { ripasso: !riuscito, prima: giro.ritmo }));
+		nota = presenta(giro.sillabe);
+		riuscito = true;
 		numero++;
 	}
 </script>
