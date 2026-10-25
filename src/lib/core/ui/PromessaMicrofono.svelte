@@ -1,6 +1,8 @@
 <script lang="ts">
-	// La promessa sul microfono, prima di aprirlo: per il bambino in grande, per l'adulto sotto (canto, ritmo).
+	// La promessa sul microfono, prima di aprirlo: per il bambino in grande, per l'adulto sotto (canto, ritmo),
+	// con i problemi noti del microfono su questo dispositivo.
 	import Icona from './Icona.svelte';
+	import ProblemaNoto from './ProblemaNoto.svelte';
 
 	let { perTe, perAdulti }: { perTe: string; perAdulti: string } = $props();
 </script>
@@ -10,6 +12,7 @@
 	<div class="spiega">
 		<p class="per-te">{perTe}</p>
 		<p class="per-adulti">{perAdulti}</p>
+		<ProblemaNoto id="ios-microfono" />
 	</div>
 </div>
 

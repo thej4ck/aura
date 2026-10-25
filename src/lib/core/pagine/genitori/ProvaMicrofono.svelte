@@ -17,6 +17,7 @@
 	import { progressi } from '../../store/progressi.svelte';
 	import Avviso from '../../ui/Avviso.svelte';
 	import Button from '../../ui/Button.svelte';
+	import ProblemaNoto from '../../ui/ProblemaNoto.svelte';
 	import { ERRORI_MIC } from '../../widget/musica.ts';
 
 	const FINESTRA_S = 5;
@@ -146,6 +147,7 @@
 
 <div class="prova">
 	<p class="lead">{m.mic_intro()}</p>
+	<ProblemaNoto id="ios-permesso-microfono" />
 	<div>
 		<Button variante="secondaria" icona="microfono" onclick={apriOChiudi}>
 			{microfono ? m.mic_chiudi() : m.mic_apri()}
