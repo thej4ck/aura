@@ -27,7 +27,7 @@ const RILASCIO_S = 0.3;
 /** ampiezza di una nota prima del compressore: un accordo di 3 note resta pulito */
 const PICCO = 0.3;
 /** coda dopo il rilascio prima di "finito": eco della stanza, così il microfono non sente il sito */
-const CODA_S = 0.15;
+export const CODA_S = 0.15;
 /** armoniche 1, 2, 3…: lo spettro già morbido fa da passa-basso, senza un filtro per nota */
 const ARMONICHE = [1, 0.4, 0.18, 0.08, 0.035, 0.015];
 
