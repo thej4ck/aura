@@ -3,11 +3,12 @@
 import * as v from 'valibot';
 import { m } from '#lib/paraglide/messages.js';
 import { BPM_RITMO, BPM_RITMO_MAX, BPM_RITMO_MIN } from '../audio/costanti.ts';
-import { ora, sblocca } from '../audio/contesto.ts';
+import { sblocca, tempoSentito } from '../audio/contesto.ts';
 import type { CodiceErroreMic } from '../audio/mic.ts';
 import { suona, type Riproduzione } from '../audio/synth.ts';
 import { SchemaAltezza, SchemaRigo, type Rigo } from '../contenuti/schema.ts';
 import { midi } from '../musica/note.ts';
+import { progressi } from '../store/progressi.svelte.ts';
 
 /** Un'altezza in notazione scientifica: 'G4', 'F#4', 'Bb3'. */
 export const schemaAltezza = SchemaAltezza;
@@ -70,20 +71,24 @@ export function suonaSeguendo(
 }
 
 /**
- * Segue una riproduzione sul clock audio: a ogni frame `onnota(i)` con l'ultimo evento cominciato
- * (`inizi` in secondi dall'inizio, in ordine; prima del primo, 0), `onnota(null)` alla fine o dopo ferma().
+ * Segue una riproduzione nel riferimento del suono sentito (tempoSentito, ADR 0008): tolte la latenza
+ * d'uscita e la manopola delle preferenze, la nota si accende quando si sente, non quando parte verso
+ * l'altoparlante (con le cuffie Bluetooth 150-300 ms prima). A ogni frame `onnota(i, t)` con l'ultimo
+ * evento cominciato (`inizi` in secondi dall'inizio, in ordine) e `t` i secondi sentiti dall'inizio;
+ * niente prima che si senta il primo; `onnota(null)` alla fine o dopo ferma().
  */
 export function segui(
 	r: Riproduzione,
 	inizi: readonly number[],
-	onnota: (i: number | null) => void
+	onnota: (i: number | null, t?: number) => void
 ): void {
 	let raf = requestAnimationFrame(function giro() {
-		const t = ora() - r.t0;
+		raf = requestAnimationFrame(giro);
+		const t = tempoSentito(performance.now(), progressi.doc?.preferenze.latenzaAudioMs) - r.t0;
+		if (t < inizi[0]) return;
 		let i = 0;
 		while (i + 1 < inizi.length && inizi[i + 1] <= t) i++;
-		onnota(i);
-		raf = requestAnimationFrame(giro);
+		onnota(i, t);
 	});
 	void r.fine.then(() => {
 		cancelAnimationFrame(raf);

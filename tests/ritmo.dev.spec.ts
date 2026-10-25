@@ -315,6 +315,58 @@ test('ascolta un ritmo: un colpo di legnetto per nota, i clic sui battiti, e la 
 	expect(legnetto[0]).toBeCloseTo(clic[0].t, 3);
 });
 
+type ConLatenza = { __ctx?: AudioContext; __legnetto: number[]; __accese: number[] };
+
+test('con le cuffie Bluetooth la nota si evidenzia quando si sente, non quando parte', async ({
+	page
+}) => {
+	// 250 ms di latenza d'uscita dichiarata, senza getOutputTimestamp: si sente a currentTime − 0,25
+	await page.addInitScript(() => {
+		const w = window as unknown as ConLatenza;
+		w.__legnetto = [];
+		w.__accese = [];
+		Object.defineProperty(AudioContext.prototype, 'outputLatency', { get: () => 0.25 });
+		Object.defineProperty(AudioContext.prototype, 'getOutputTimestamp', { value: undefined });
+		const Contesto = window.AudioContext;
+		window.AudioContext = class extends Contesto {
+			constructor(...a: ConstructorParameters<typeof AudioContext>) {
+				super(...a);
+				w.__ctx = this;
+			}
+		};
+		const start = OscillatorNode.prototype.start;
+		OscillatorNode.prototype.start = function (this: OscillatorNode, quando = 0) {
+			if (Math.round(69 + 12 * Math.log2(this.frequency.value / 440)) === 84) {
+				w.__legnetto.push(quando);
+			}
+			return start.call(this, quando);
+		};
+		// quando una voce del rigo diventa «evidenziata», nel tempo sentito
+		let prima = -1;
+		new MutationObserver(() => {
+			const voci = [...document.querySelectorAll('[data-sonda] li')];
+			const i = voci.findIndex((v) => v.textContent?.includes('evidenziata'));
+			if (i >= 0 && i !== prima) w.__accese.push(w.__ctx!.currentTime - 0.25);
+			prima = i;
+		}).observe(document, { subtree: true, childList: true, characterData: true });
+	});
+	await apriVetrina(page);
+	const w = widget(page, 'ascolta-ritmo');
+	const rigo = w.getByRole('group', { name: 'Il ritmo da ascoltare' });
+	await rigo.evaluate((el) => el.setAttribute('data-sonda', ''));
+	await w.getByRole('button', { name: 'Ascolta', exact: true }).click();
+	await expect(w.getByRole('button', { name: 'Avanti' })).toBeVisible({ timeout: 10_000 });
+	const { legnetto, accese } = await page.evaluate(() => {
+		const { __legnetto, __accese } = window as unknown as ConLatenza;
+		return { legnetto: __legnetto, accese: __accese };
+	});
+	expect(accese).toHaveLength(4); // 'ta ti-ti ta-a'
+	accese.forEach((t, i) => {
+		expect(t - legnetto[i], `nota ${i}: accesa − sentita (s)`).toBeGreaterThanOrEqual(-0.03);
+		expect(t - legnetto[i], `nota ${i}: accesa − sentita (s)`).toBeLessThanOrEqual(0.2);
+	});
+});
+
 test('il turno a eco col tocco: il sito e poi il bambino, a tempo, con i colpi giusti', async ({
 	page
 }) => {

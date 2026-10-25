@@ -1,7 +1,9 @@
 // Ogni spiegazione animata e ogni illustrazione dell'area Musica che mostra note o altezze le fa sentire,
 // in sincrono. Una spia conta gli OscillatorNode avviati (con la loro nota) e segue l'evidenziazione: il
-// disegno segna con `data-suona` (il midi) quello che mostra la nota che suona. Le schede si trovano dai
-// dati dei moduli, così un disegno nuovo è provato da solo. Solo server di sviluppo.
+// disegno segna con `data-suona` (il midi) quello che mostra la nota che suona. L'uscita audio ha una
+// latenza finta da cuffie Bluetooth (LATENZA_S): ogni nota deve accendersi quando si sente, non quando
+// parte verso l'altoparlante. Le schede si trovano dai dati dei moduli, così un disegno nuovo è provato da
+// solo. Solo server di sviluppo.
 import { expect, test, type Page } from '@playwright/test';
 import { modulo as canto } from '../src/lib/moduli/musica/canto/modulo';
 import { modulo as pentagramma } from '../src/lib/moduli/musica/pentagramma/modulo';
@@ -54,17 +56,43 @@ const casi: Caso[] = ([canto, pentagramma, ritmo] as Dati[]).flatMap((m) =>
 	)
 );
 
-type Spia = { __note: number[]; __evidenziate: string[] };
+/** La latenza d'uscita dichiarata dal contesto audio finto: quella di cuffie Bluetooth. */
+const LATENZA_S = 0.25;
 
-/** Prima che la pagina parta: le note avviate (midi) e le evidenziazioni (data-suona) in ordine. */
+type Spia = {
+	__ctx?: AudioContext;
+	__note: { midi: number; t: number }[];
+	__evidenziate: string[];
+	/** per ogni evidenziazione, quando si sente (clock audio meno la latenza d'uscita) */
+	__accese: number[];
+};
+
+/**
+ * Prima che la pagina parta: le note avviate (midi e istante sul clock audio) e le evidenziazioni
+ * (data-suona) in ordine, con l'istante sentito. Il contesto audio dichiara LATENZA_S d'uscita e niente
+ * getOutputTimestamp: tempoSentito() vale currentTime − LATENZA_S.
+ */
 async function spia(page: Page) {
-	await page.addInitScript(() => {
+	await page.addInitScript((latenza) => {
 		const w = window as unknown as Spia;
 		w.__note = [];
 		w.__evidenziate = [''];
+		w.__accese = [0];
+		Object.defineProperty(AudioContext.prototype, 'outputLatency', { get: () => latenza });
+		Object.defineProperty(AudioContext.prototype, 'getOutputTimestamp', { value: undefined });
+		const Contesto = window.AudioContext;
+		window.AudioContext = class extends Contesto {
+			constructor(...a: ConstructorParameters<typeof AudioContext>) {
+				super(...a);
+				w.__ctx = this;
+			}
+		};
 		const start = OscillatorNode.prototype.start;
 		OscillatorNode.prototype.start = function (this: OscillatorNode, ...a: [number?]) {
-			w.__note.push(Math.round(69 + 12 * Math.log2(this.frequency.value / 440)));
+			w.__note.push({
+				midi: Math.round(69 + 12 * Math.log2(this.frequency.value / 440)),
+				t: a[0] ?? 0
+			});
 			return start.apply(this, a);
 		};
 		new MutationObserver(() => {
@@ -72,14 +100,16 @@ async function spia(page: Page) {
 				e.getAttribute('data-suona')
 			);
 			const stato = [...new Set(v)].join(',');
-			if (w.__evidenziate.at(-1) !== stato) w.__evidenziate.push(stato);
+			if (w.__evidenziate.at(-1) === stato) return;
+			w.__evidenziate.push(stato);
+			w.__accese.push((w.__ctx?.currentTime ?? 0) - latenza);
 		}).observe(document, {
 			subtree: true,
 			childList: true,
 			attributes: true,
 			attributeFilter: ['data-suona']
 		});
-	});
+	}, LATENZA_S);
 	return {
 		note: () => page.evaluate(() => (window as unknown as Spia).__note.length),
 		/** note suonate ed evidenziate finora, senza ripetizioni consecutive (l'unisono vale una) */
@@ -88,9 +118,23 @@ async function spia(page: Page) {
 				const w = window as unknown as Spia;
 				const unisci = (a: string[]) => a.filter((x, i) => x !== a[i - 1]);
 				return {
-					suonate: unisci(w.__note.map(String)),
+					suonate: unisci(w.__note.map((n) => String(n.midi))),
 					evidenziate: unisci(w.__evidenziate.filter(Boolean))
 				};
+			}),
+		/**
+		 * Per ogni gruppo di note uguali in fila (come in `sequenze`), di quanto la sua evidenziazione arriva
+		 * dopo il suono sentito, in secondi: negativo = si accende prima di sentirla
+		 */
+		ritardi: () =>
+			page.evaluate(() => {
+				const w = window as unknown as Spia;
+				const suoni = w.__note.filter((n, i, a) => i === 0 || n.midi !== a[i - 1].midi);
+				const accese = w.__evidenziate
+					.map((stato, i) => ({ stato, t: w.__accese[i] }))
+					.filter((x) => x.stato)
+					.filter((x, i, a) => i === 0 || x.stato !== a[i - 1].stato);
+				return accese.map((x, i) => +(x.t - suoni[i].t).toFixed(3));
 			}),
 		ultima: () => page.evaluate(() => (window as unknown as Spia).__evidenziate.at(-1))
 	};
@@ -121,12 +165,20 @@ async function finoAllaPrimaNota(page: Page, note: () => Promise<number>) {
 	}
 }
 
-/** Il suono finisce da solo e quello che si è visto evidenziato è proprio quello che si è sentito. */
+/**
+ * Il suono finisce da solo, quello che si è visto evidenziato è proprio quello che si è sentito, e ogni
+ * nota si accende quando si sente: mai prima, al più qualche frame dopo.
+ */
 async function controllaSincronia(s: Awaited<ReturnType<typeof spia>>) {
+	await expect.poll(s.ultima, { timeout: 10_000 }).not.toBe(''); // si accende quando si sente
 	await expect.poll(s.ultima, { timeout: 10_000 }).toBe('');
 	const { suonate, evidenziate } = await s.sequenze();
 	expect(suonate.length).toBeGreaterThan(0);
 	expect(evidenziate, 'l’evidenziazione segue le note suonate').toEqual(suonate);
+	for (const r of await s.ritardi()) {
+		expect(r, 'accesa − sentita (s)').toBeGreaterThanOrEqual(-0.03);
+		expect(r, 'accesa − sentita (s)').toBeLessThanOrEqual(0.2);
+	}
 }
 
 /** Dopo un gesto che deve zittire il disegno: niente più evidenziazione, niente note nuove. */

@@ -5,7 +5,7 @@
 // fermano subito; all'apertura tace; il movimento ridotto non lo tocca. In un'illustrazione statica
 // (`spiegazione`) suona solo con il pulsante «Ascolta», che la spiegazione mostra da sé.
 import { getContext, setContext, untrack } from 'svelte';
-import { ora, sblocca } from '../audio/contesto.ts';
+import { sblocca } from '../audio/contesto.ts';
 import { MIDI_LEGNETTO, suonaColpi } from '../audio/percussioni.ts';
 import { suona as suonaNote, type Riproduzione } from '../audio/synth.ts';
 import type { Rigo } from '../contenuti/schema.ts';
@@ -25,8 +25,9 @@ export type SuonoDisegno = {
 	 */
 	readonly midi: number | null;
 	/**
-	 * secondi dall'inizio della prima nota, sul clock audio; null in silenzio. In un elenco di altezze la
-	 * nota i parte a i × ritmo; in un Rigo a inizi(rigo.note)[i] × ritmo (musica/ritmo.ts)
+	 * secondi dall'inizio della prima nota, nel riferimento del suono sentito (tempoSentito); null in
+	 * silenzio. In un elenco di altezze la nota i parte a i × ritmo; in un Rigo a inizi(rigo.note)[i] ×
+	 * ritmo (musica/ritmo.ts)
 	 */
 	readonly tempo: number | null;
 	/** secondi tra l'inizio di una nota e quello della successiva; in un Rigo, secondi di un battito */
@@ -97,13 +98,12 @@ export function suonoDisegno(
 		ferma();
 		const brano = riproduci(note(passo));
 		if (!brano) return;
-		nota = 0;
-		tempo = 0;
+		// la prima nota si accende quando si sente (segui), non prima: niente nota né tempo fino ad allora
 		const { r, inizi } = brano;
-		segui(r, inizi, (i) => {
+		segui(r, inizi, (i, t = 0) => {
 			if (corrente !== r) return; // la coda di una riproduzione già fermata
 			nota = i;
-			tempo = i === null ? null : Math.max(0, ora() - r.t0);
+			tempo = i === null ? null : Math.max(0, t);
 			if (i === null) corrente = undefined;
 		});
 		corrente = r;
