@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
 	SELEZIONABILI,
 	altezzaDaPasso,
+	direzioneGambo,
+	glifoPausa,
+	glifoTesta,
+	nomeFigura,
 	nomePosizione,
 	passiSelezionabili,
 	passo,
@@ -9,10 +13,16 @@ import {
 	posizione,
 	segniArmatura,
 	segniDaMostrare,
+	spaziature,
 	suLinea,
 	tagli,
+	travature,
+	xDaBattito,
 	yDaPasso
 } from './notazione.ts';
+import { inizi, rigoRitmico, type NotaRitmica } from './ritmo.ts';
+
+const note = (sillabe: string) => rigoRitmico(sillabe).note;
 
 describe('passi sul rigo', () => {
 	it('chiave di violino: E4 sulla prima linea', () => {
@@ -185,5 +195,98 @@ describe('hit-test', () => {
 		expect([passi[0], passi.at(-1)]).toEqual([10, -2]);
 		expect([altezzaDaPasso(passi[0]), altezzaDaPasso(passi.at(-1)!)]).toEqual(['A5', 'C4']);
 		expect(passiSelezionabili([0, 2])).toEqual([2, 1, 0]);
+	});
+});
+
+describe('ritmo: gambi e travature', () => {
+	it('gambo in su sotto la terza linea, in giù dalla terza in su; nel rigo ritmico sempre in su', () => {
+		expect([-2, 0, 3].map((p) => direzioneGambo(p))).toEqual(['su', 'su', 'su']);
+		expect([4, 6, 10].map((p) => direzioneGambo(p))).toEqual(['giu', 'giu', 'giu']);
+		expect([4, 8].map((p) => direzioneGambo(p, true))).toEqual(['su', 'su']);
+	});
+
+	it('travature solo sulle coppie di crome che cominciano su un battito', () => {
+		expect(travature(note('ta ti-ti ta-a'))).toEqual([[1, 2]]);
+		expect(travature(note('ti-ti ti-ti'))).toEqual([
+			[0, 1],
+			[2, 3]
+		]);
+		// due crome scritte separate ma dentro lo stesso battito si uniscono lo stesso
+		expect(travature(note('ta ti ti ta'))).toEqual([[1, 2]]);
+		// crome isolate: con la codetta
+		expect(travature(note('ti ta ti'))).toEqual([]);
+		// la seconda e la terza croma sarebbero a cavallo del battito 2
+		expect(travature(note('ti ta ti ti'))).toEqual([]);
+	});
+
+	it('niente travatura con una pausa, una croma puntata o una nota senza durata', () => {
+		const pausa: NotaRitmica = { durata: '8', pausa: true };
+		const croma: NotaRitmica = { durata: '8' };
+		// la croma dopo la pausa resta sola (è in levare); le due dopo cominciano sul battito 1
+		expect(travature([pausa, croma, croma, croma])).toEqual([[2, 3]]);
+		expect(travature([croma, pausa])).toEqual([]);
+		expect(travature([{ durata: '8', punto: true }, { durata: '16' }])).toEqual([]);
+		expect(travature([croma, {}])).toEqual([]);
+	});
+});
+
+describe('ritmo: spaziatura e figure', () => {
+	it('senza durate (o con figure tutte uguali) le colonne sono uguali', () => {
+		expect(spaziature([{}, {}, {}])).toEqual([1, 1, 1]);
+		expect(spaziature([{ durata: '1' }, { durata: '1' }])).toEqual([1, 1]);
+		expect(spaziature(note('ta ta ta ta'))).toEqual([1, 1, 1, 1]);
+		expect(spaziature([])).toEqual([]);
+	});
+
+	it('la colonna cresce con la durata, la più corta vale 1', () => {
+		expect(spaziature(note('ta ti-ti ta-a ta-a-a-a'))).toEqual([2, 1, 1, 3, 4]);
+		expect(spaziature(note('ta ta-a'))).toEqual([1, 1.5]);
+		const [ta, , taa] = spaziature(note('ta ti ta-a-a sst'));
+		expect(taa).toBeGreaterThan(ta);
+	});
+
+	it('teste, pause e nomi delle figure', () => {
+		expect(([{}, { durata: '4' }, { durata: '8' }] as NotaRitmica[]).map(glifoTesta)).toEqual([
+			'testaPiena',
+			'testaPiena',
+			'testaPiena'
+		]);
+		expect(glifoTesta({ durata: '2' })).toBe('testaVuota');
+		expect(glifoTesta({ durata: '1' })).toBe('testaSemibreve');
+		expect(glifoPausa('4')).toBe('pausaSemiminima');
+		expect(nomeFigura({ durata: '4' })).toBe('semiminima');
+		expect(nomeFigura({ durata: '2', punto: true })).toBe('minima puntata');
+		expect(nomeFigura({ durata: '8', pausa: true })).toBe('pausa di croma');
+		expect(nomeFigura({})).toBe('semiminima');
+	});
+});
+
+describe('ritmo: x dei battiti', () => {
+	const ritmo = note('ta ti-ti ta-a sst');
+	const iniziB = inizi(ritmo); // 0 1 1.5 2 4
+	const centri = [10, 30, 40, 60, 90];
+	const fine: [number, number] = [5, 100];
+
+	it('sotto la nota quando il battito è giusto, in mezzo tra due note', () => {
+		iniziB.forEach((b, i) => expect(xDaBattito(b, iniziB, centri, fine)).toBe(centri[i]));
+		expect(xDaBattito(0.5, iniziB, centri, fine)).toBe(20);
+		expect(xDaBattito(3, iniziB, centri, fine)).toBe(75);
+		expect(xDaBattito(4.5, iniziB, centri, fine)).toBe(95);
+	});
+
+	it('fuori dal rigo estrapola con il primo e l’ultimo tratto', () => {
+		expect(xDaBattito(-0.25, iniziB, centri, fine)).toBe(5);
+		expect(xDaBattito(5.5, iniziB, centri, fine)).toBe(105);
+		expect(xDaBattito(4.5, iniziB, centri)).toBe(97.5); // senza fine: l'ultimo tratto tra le ultime note
+		expect(xDaBattito(3, [0], [42])).toBe(42);
+	});
+
+	it('monotona: un battito più tardi non sta mai a sinistra', () => {
+		let prima = -Infinity;
+		for (let b = -1; b <= 6; b += 0.05) {
+			const x = xDaBattito(b, iniziB, centri, fine);
+			expect(x).toBeGreaterThanOrEqual(prima);
+			prima = x;
+		}
 	});
 });

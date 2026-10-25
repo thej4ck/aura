@@ -535,6 +535,21 @@
 	"notazione_sillaba_ta_a_a": "TA-A-A",
 	"notazione_sillaba_ta_a_a_a": "TA-A-A-A",
 	"notazione_sillaba_sst": "SST",
+	"notazione_figura": [
+		{
+			"declarations": ["input durata"],
+			"selectors": ["durata"],
+			"match": {
+				"durata=1": "semibreve",
+				"durata=2": "minima",
+				"durata=8": "croma",
+				"durata=16": "semicroma",
+				"durata=*": "semiminima"
+			}
+		}
+	],
+	"notazione_puntata": "{figura} puntata",
+	"notazione_pausa_di": "pausa di {figura}",
 	"notazione_zona": "Zona colorata: da {da} a {a}",
 	"notazione_dev_titolo": "Pentagramma e tastiera",
 	"notazione_dev_nomi": "Nomi delle note",
