@@ -20,31 +20,3 @@ export function indirizzoSegnalazione(tipo: TipoSegnalazione, dati: DatiSegnalaz
 	for (const [campo, valore] of Object.entries(dati)) if (valore) query.set(campo, valore);
 	return `${REPO}/issues/new?${query}`;
 }
-
-// l'ordine conta: Edge e Opera si dichiarano anche Chrome, Chrome anche Safari
-const BROWSER: [RegExp, string][] = [
-	[/Edg(?:A|iOS)?\/(\d+)/, 'Edge'],
-	[/OPR\/(\d+)/, 'Opera'],
-	[/SamsungBrowser\/(\d+)/, 'Samsung Internet'],
-	[/(?:Firefox|FxiOS)\/(\d+)/, 'Firefox'],
-	[/(?:Chrome|CriOS)\/(\d+)/, 'Chrome'],
-	[/Version\/(\d+).*Safari/, 'Safari']
-];
-const SISTEMI: [RegExp, string][] = [
-	[/iPhone|iPad|iPod/, 'iOS'],
-	[/Android/, 'Android'],
-	[/CrOS/, 'ChromeOS'],
-	[/Windows/, 'Windows'],
-	[/Mac OS X/, 'macOS'],
-	[/Linux/, 'Linux']
-];
-
-/** «Chrome 140, Android»: nome e versione principale, niente build né modello del dispositivo */
-export function ambienteBreve(userAgent: string): string {
-	const browser = BROWSER.flatMap(([re, nome]) => {
-		const trovato = re.exec(userAgent);
-		return trovato ? [`${nome} ${trovato[1]}`] : [];
-	})[0];
-	const sistema = SISTEMI.find(([re]) => re.test(userAgent))?.[1];
-	return [browser ?? '?', sistema ?? '?'].join(', ');
-}

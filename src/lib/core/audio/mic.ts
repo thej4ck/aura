@@ -3,7 +3,7 @@
 // statistiche anonime va solo il codice dell'errore con browser e sistema in breve.
 import { FFT, FPS_MIC, PASSA_BASSO_HZ } from './costanti.ts';
 import { contesto, riproduzioneAttiva, usa } from './contesto.ts';
-import { ambienteBreve } from '../segnalazione.ts';
+import { ambienteBreve } from '../piattaforma.ts';
 import { conta } from '../statistiche.ts';
 import { Mediana, RumoreDiFondo, calcolaRms, rilevaAltezza } from './pitch.ts';
 
@@ -60,7 +60,7 @@ const INTERVALLO_MS = 1000 / FPS_MIC;
 
 /** l'errore da lanciare, contato nelle statistiche anonime */
 function errore(codice: CodiceErroreMic, opzioni?: ErrorOptions): ErroreMic {
-	conta('mic', { v: codice, b: ambienteBreve(globalThis.navigator?.userAgent ?? '') });
+	conta('mic', { v: codice, b: ambienteBreve() });
 	return new ErroreMic(codice, opzioni);
 }
 

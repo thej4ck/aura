@@ -5,8 +5,8 @@
 	import { version } from '$app/env';
 	import { page } from '$app/state';
 	import { m } from '#lib/paraglide/messages.js';
+	import { ambienteBreve } from '../piattaforma';
 	import {
-		ambienteBreve,
 		indirizzoSegnalazione,
 		TIPI,
 		type DatiSegnalazione,
@@ -54,7 +54,7 @@
 			attivita,
 			scheda,
 			versione: version,
-			ambiente: ambienteBreve(navigator.userAgent)
+			ambiente: ambienteBreve()
 		};
 		tipo = attivita ? 'contenuti' : 'tecnico';
 		await tick(); // prima si chiude il controllo per gli adulti

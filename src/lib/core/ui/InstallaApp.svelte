@@ -2,24 +2,15 @@
 	// Il perché e il come dell'installazione, senza titolo: lo mette la pagina che lo contiene.
 	import { onMount } from 'svelte';
 	import { m } from '#lib/paraglide/messages.js';
+	import { dispositivo, type Dispositivo } from '../piattaforma.ts';
 	import { installazione } from '../pwa/installazione.svelte.ts';
 	import Avviso from './Avviso.svelte';
 	import Button from './Button.svelte';
 
-	let standalone = $state(false);
-	let ios = $state(false);
+	let d = $state.raw<Dispositivo>();
+	onMount(() => (d = dispositivo()));
 
-	onMount(() => {
-		standalone =
-			matchMedia('(display-mode: standalone)').matches ||
-			(navigator as Navigator & { standalone?: boolean }).standalone === true;
-		// iPadOS si presenta come Mac con il touch
-		ios =
-			/iPhone|iPad|iPod/.test(navigator.userAgent) ||
-			(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-	});
-
-	const installata = $derived(standalone || installazione.installata);
+	const installata = $derived(!!d?.app || installazione.installata);
 
 	async function installa() {
 		const i = installazione.invito;
@@ -34,7 +25,7 @@
 		<Avviso tono="successo" testo={m.pwa_gia_installata()} />
 	{:else if installazione.invito}
 		<Button onclick={installa}>{m.pwa_installa()}</Button>
-	{:else if ios}
+	{:else if d?.sistema === 'iOS'}
 		<Avviso tono="info" testo={m.pwa_ios()} />
 	{:else}
 		<p>{m.pwa_altri()}</p>

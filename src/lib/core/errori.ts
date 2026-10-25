@@ -1,7 +1,7 @@
 // Registro degli ultimi errori: solo in memoria e nel localStorage del browser, mai inviato.
 // L'adulto può copiarne i dettagli (pagina di errore) e mandarli lui, se vuole.
 import * as v from 'valibot';
-import { ambienteBreve } from './segnalazione';
+import { ambienteBreve } from './piattaforma';
 import { conta } from './statistiche';
 
 export const MAX_ERRORI = 10;
@@ -44,7 +44,7 @@ export function registraErrore(errore: unknown): void {
 	conta('errore', {
 		a: voce.pagina,
 		v: e.name,
-		b: ambienteBreve(globalThis.navigator?.userAgent ?? '')
+		b: ambienteBreve()
 	});
 	try {
 		localStorage.setItem(CHIAVE, JSON.stringify(voci));
