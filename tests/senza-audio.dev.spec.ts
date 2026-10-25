@@ -1,5 +1,6 @@
 // Senza Web Audio, come con la Modalità di isolamento di Apple (audio/contesto.ts): niente eccezioni al primo
-// tocco, le attività vanno avanti mute (il canto senza microfono, il ritmo col tocco) e il banner lo dice.
+// tocco, le attività vanno avanti mute (il canto senza microfono, il ritmo col tocco), il banner lo dice e la
+// prova del microfono per gli adulti spiega perché.
 // Server di sviluppo: il Ritmo è ancora una bozza.
 import { expect, test, type Page } from '@playwright/test';
 import { batti } from './battere';
@@ -41,6 +42,25 @@ test('il canto: si ascolta e si canta lo stesso, senza microfono, fino alla fine
 	await expect(feedback(page)).toContainText('Puoi ascoltare e cantare lo stesso');
 	await page.getByRole('button', { name: 'Basta così' }).click();
 	await expect(page.getByRole('heading', { name: 'Per oggi va bene così' })).toBeFocused();
+
+	expect(esterne).toEqual([]);
+	expect(errori).toEqual([]);
+});
+
+test('«Prova il microfono» dice che il browser non lo permette, senza dettagli vuoti', async ({
+	page,
+	baseURL
+}) => {
+	const { esterne, errori } = sorveglia(page, baseURL!);
+	await page.goto('/genitori#microfono');
+	await expect(page.getByRole('img', { name: /Profilo attivo/ })).toBeVisible();
+	const sezione = page.getByRole('region', { name: 'Prova il microfono' });
+	await sezione.getByRole('button', { name: 'Apri il microfono' }).click();
+	await expect(
+		sezione.getByText('Questo browser non permette di usare il microfono qui.')
+	).toBeVisible();
+	await expect(sezione.getByText(/^Risposta del browser: permissions: \w+$/)).toBeVisible();
+	await expect(sezione).not.toContainText('undefined');
 
 	expect(esterne).toEqual([]);
 	expect(errori).toEqual([]);

@@ -60,12 +60,18 @@
 	/** per chi aiuta a distanza: l'errore così come l'ha dato il browser, e il permesso che ricorda per il sito */
 	async function rispostaBrowser(e: unknown): Promise<string> {
 		const causa = e instanceof ErroreMic ? e.cause : e;
-		const testo = causa instanceof Error ? `${causa.name}: ${causa.message}` : String(causa);
+		// senza Web Audio o senza getUserMedia l'errore è di Aura, e del browser resta solo il permesso
+		const testo =
+			causa instanceof Error
+				? `${causa.name}: ${causa.message}`
+				: causa === undefined
+					? ''
+					: String(causa);
 		const stato = await navigator.permissions?.query({ name: 'microphone' }).then(
-			(s) => s.state,
-			() => undefined
+			(s) => `permissions: ${s.state}`,
+			() => ''
 		);
-		return stato ? `${testo} · permissions: ${stato}` : testo;
+		return [testo, stato].filter(Boolean).join(' · ');
 	}
 
 	function ascolta(f: FrameMic) {
