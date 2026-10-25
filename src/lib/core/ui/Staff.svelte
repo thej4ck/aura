@@ -1,7 +1,9 @@
 <script lang="ts">
 	// Pentagramma SVG con i glifi di Bravura, dietro il modello `Rigo` dei contenuti.
-	// Senza durata le note sono teste piene senza gambo (semibreve con durata '1'): gambi, codette
-	// e pause arriveranno con il modulo Ritmo. Occupa la larghezza del contenitore.
+	// Senza durata le note sono teste piene senza gambo (semibreve con durata '1'). Occupa la larghezza
+	// del contenitore.
+	// CONTRATTO del Ritmo (ADR 0008), da implementare: durate, pause, punto, tempo e rigo ritmico del Rigo,
+	// e le props `sillabe` e `battiti`. Senza durate, tempo né pause il disegno resta quello di oggi.
 	// Interattivo: un pulsante trasparente per ogni linea e spazio (tagli compresi), frecce su/giù per
 	// muoversi, Invio o Spazio per scegliere. Il disegno è aria-hidden; i lettori di schermo leggono
 	// l'elenco delle note e i pulsanti, di default con la sola posizione per non svelare le risposte.
@@ -26,6 +28,7 @@
 		tagli,
 		type Segno
 	} from '#lib/core/musica/notazione.ts';
+	import type { SegnoBattito } from '#lib/core/musica/ritmo.ts';
 	import { m } from '#lib/paraglide/messages.js';
 	import { inVista, scorrevole } from './scorrimento.ts';
 
@@ -52,8 +55,20 @@
 		compatto?: boolean;
 		/** passi selezionabili [min, max]; default C4–A5 in chiave di violino */
 		selezionabili?: readonly [number, number];
+		/**
+		 * sillabe ritmiche sotto le note (TA, TI, TA-A, SST: TESTI_SILLABE in notazione.ts), anche sotto le
+		 * pause; con `etichette` stanno sotto i nomi. Da implementare (ADR 0008)
+		 */
+		sillabe?: boolean;
+		/**
+		 * i battiti del bambino dopo la valutazione (segniBattiti in musica/ritmo.ts), sotto le note, alla
+		 * x del loro `battito`: giusto, presto, tardi, mancato, in più, ognuno con una forma oltre al
+		 * colore, e detti ai lettori di schermo. Da implementare (ADR 0008)
+		 */
+		battiti?: readonly SegnoBattito[];
 	};
 
+	// eslint-disable-next-line svelte/no-unused-props -- sillabe e battiti: contratto del Ritmo, da implementare (ADR 0008)
 	let {
 		rigo,
 		etichetta,

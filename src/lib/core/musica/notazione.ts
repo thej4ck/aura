@@ -4,6 +4,7 @@
 import type { Rigo } from '#lib/core/contenuti/schema.ts';
 import { m } from '#lib/paraglide/messages.js';
 import { LETTERE, alterazioniArmatura, componi, scomponi, type Alterazione } from './note.ts';
+import type { Sillaba } from './ritmo.ts';
 
 export type Chiave = Rigo['chiave'];
 export type Segno = 'diesis' | 'bemolle' | 'bequadro';
@@ -135,3 +136,13 @@ export function passoDaY(
 export function passiSelezionabili([min, max]: readonly [number, number] = SELEZIONABILI) {
 	return Array.from({ length: max - min + 1 }, (_, i) => max - i);
 }
+
+/** Il testo visibile di una sillaba ritmica (musica/ritmo.ts, sillaba). */
+export const TESTI_SILLABE: Record<Sillaba, () => string> = {
+	ta: m.notazione_sillaba_ta,
+	ti: m.notazione_sillaba_ti,
+	'ta-a': m.notazione_sillaba_ta_a,
+	'ta-a-a': m.notazione_sillaba_ta_a_a,
+	'ta-a-a-a': m.notazione_sillaba_ta_a_a_a,
+	sst: m.notazione_sillaba_sst
+};
