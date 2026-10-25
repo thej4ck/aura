@@ -22,13 +22,17 @@
 	let chiediPersistenza = $state(false);
 	onMount(() => {
 		supporta = supportaFileCollegato();
-		// Firefox chiede il permesso con una finestra: lo chiede l'adulto da qui (progressi.svelte.ts non lo fa)
+		// Firefox chiede il permesso con una finestra: lo chiede l'adulto da qui (progressi.svelte.ts non lo fa),
+		// finché non ha risposto. Lo stato del permesso c'è da Firefox 53 (MDN, Permissions persistent-storage).
 		if (problemaNoto('firefox-persistenza'))
-			void navigator.storage?.persisted?.().then((si) => (chiediPersistenza = !si));
+			navigator.permissions?.query({ name: 'persistent-storage' }).then(
+				(s) => (chiediPersistenza = s.state === 'prompt'),
+				() => {}
+			);
 	});
 
+	// il pulsante resta fino alla prossima visita, con il focus: una seconda richiesta risponde subito
 	async function persisti() {
-		chiediPersistenza = false; // dopo una risposta non si chiede di nuovo
 		esito = (await navigator.storage.persist().catch(() => false))
 			? { tono: 'successo', testo: m.genitori_persistenza_si() }
 			: { tono: 'attenzione', testo: m.genitori_persistenza_no() };
@@ -128,7 +132,13 @@
 	{#if chiediPersistenza}
 		<ProblemaNoto id="firefox-persistenza" />
 		<div class="azioni">
-			<Button variante="secondaria" onclick={persisti}>{m.genitori_persistenza()}</Button>
+			<Button
+				variante="secondaria"
+				icona="lucchetto"
+				onclick={() => conGate(() => void persisti())}
+			>
+				{m.genitori_persistenza()}
+			</Button>
 		</div>
 	{/if}
 	<input

@@ -24,6 +24,12 @@ La sessione audio è gestita in `src/lib/core/audio/contesto.ts`.
 - [ ] Bluetooth e cuffie: audio e microfono sul dispositivo giusto; il ritardo del Bluetooth non fa fallire le prove.
 - [ ] Tastiera, TalkBack e zoom del testo: target ≥48px, focus visibile, niente testo tagliato.
 
+## Firefox (computer e Android)
+
+I test automatici girano solo su Chromium: la finestra del permesso di Firefox non si vede mai.
+
+- [ ] **Persistenza dei dati**: durante il gioco Firefox non chiede niente. In Per i genitori › Backup e app ci sono l'avviso e il pulsante «Chiedi a Firefox di conservare i dati»; superato il controllo per gli adulti compare la finestra di Firefox, e l'esito si legge sotto. Dopo «Consenti» o «Non consentire», alla visita successiva avviso e pulsante non ci sono più.
+
 ## Calibrazione con bambini veri
 
 Con bambini di età diverse (in particolare 6-7 e 9-10 anni), in stanze vere (silenziosa, con rumore di fondo), su tablet e telefoni veri. Annota per ogni costante il valore che funziona e quello attuale.

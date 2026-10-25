@@ -2,6 +2,7 @@
 // compaiono dove servono, su Chrome per computer nessuno. È Chromium con lo user agent, lo schermo e il
 // touch di un iPhone: le API sono di Chromium, e quelle che mancano a Safari si tolgono con addInitScript.
 import { devices, expect, test, type Page } from '@playwright/test';
+import { superaGate } from './gate';
 import { sorveglia, violazioniGravi } from './sorveglianza';
 
 // il browser del dispositivo (webkit) no: si resta nel progetto chromium
@@ -84,6 +85,38 @@ test.describe('su iPhone', () => {
 		await expect(page.getByText("L'app è già installata. Bene così!")).toBeVisible();
 		await expect(avviso(page, 'safari-dati-7-giorni')).toHaveCount(0);
 		await expect(avviso(page, 'app-dati-separati')).toHaveCount(0);
+	});
+});
+
+test.describe('su Firefox per computer', () => {
+	test.use({
+		userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0'
+	});
+
+	test('la persistenza la chiede l’adulto, dietro il controllo, finché Firefox non ha risposto', async ({
+		page
+	}) => {
+		// la finestra di Firefox non c'è: l'adulto risponde «no», e la risposta resta tra le visite
+		await page.addInitScript(() => {
+			const risposta = () => sessionStorage.getItem('persistenza');
+			navigator.permissions.query = async () => {
+				(window as { chiesto?: boolean }).chiesto = true;
+				return { state: risposta() ? 'denied' : 'prompt' } as PermissionStatus;
+			};
+			navigator.storage.persist = async () => (sessionStorage.setItem('persistenza', 'no'), false);
+		});
+		await apri(page, '/genitori#backup');
+		await expect(avviso(page, 'firefox-persistenza')).toContainText('Premendo il pulsante');
+		const chiedi = page.getByRole('button', { name: 'Chiedi a Firefox di conservare i dati' });
+		await chiedi.click();
+		await superaGate(page);
+		await expect(page.getByText('Firefox non conserva i dati in modo permanente')).toBeVisible();
+		await expect(chiedi).toBeFocused();
+
+		await page.reload();
+		await page.waitForFunction(() => (window as { chiesto?: boolean }).chiesto);
+		await expect(avviso(page, 'firefox-persistenza')).toHaveCount(0);
+		await expect(chiedi).toHaveCount(0);
 	});
 });
 

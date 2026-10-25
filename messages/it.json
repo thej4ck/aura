@@ -1005,5 +1005,5 @@
 	"problema_android_voce": "Su Android, se la voce legge l'italiano con un accento straniero, installate la voce italiana nelle impostazioni del dispositivo, alla voce Sintesi vocale.",
 	"problema_ios_salvataggio": "Su iPhone e iPad a volte serve ricaricare la pagina per salvare di nuovo. Se il messaggio resta, riavviate il dispositivo: i progressi già salvati non si perdono.",
 	"problema_apple_isolamento": "Su questo dispositivo suoni, microfono e salvataggi sono bloccati, di solito dalla Modalità di isolamento. Si può escludere solo Aura: nelle impostazioni del sito in Safari, disattivate Modalità di isolamento.",
-	"problema_firefox_persistenza": "Firefox chiede se Aura può conservare i dati in modo permanente: scegliete Consenti, così i progressi non vengono cancellati quando il dispositivo libera spazio."
+	"problema_firefox_persistenza": "Premendo il pulsante qui sotto, Firefox chiede se Aura può conservare i dati in modo permanente: scegliete Consenti, così i progressi non vengono cancellati quando il dispositivo libera spazio."
 }
