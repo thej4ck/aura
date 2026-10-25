@@ -165,6 +165,23 @@ describe('salvataggio', () => {
 		expect((await salvati())[0].preferenze.tolleranza).toBe('medio');
 	});
 
+	it('connessione a IndexedDB persa (iOS, WebKit 273827): la riapre e salva, senza avviso', async () => {
+		const p = await avvia();
+		const put = IDBObjectStore.prototype.put;
+		IDBObjectStore.prototype.put = () => {
+			IDBObjectStore.prototype.put = put;
+			throw new DOMException('Connection to Indexed Database server lost', 'UnknownError');
+		};
+		try {
+			p.aggiornaPreferenze({ tolleranza: 'medio' });
+			await p.flush();
+		} finally {
+			IDBObjectStore.prototype.put = put;
+		}
+		expect(p.salvataggiFalliti).toBe(0);
+		expect((await salvati())[0].preferenze.tolleranza).toBe('medio');
+	});
+
 	it('rifiuta i valori fuori schema senza toccare il documento: al riavvio il profilo è lo stesso', async () => {
 		const p = await avvia();
 		const id = p.doc!.profilo.id;

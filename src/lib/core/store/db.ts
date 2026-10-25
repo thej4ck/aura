@@ -31,23 +31,66 @@ function apri(fabbrica: IDBFactory): Promise<IDBDatabase> {
 	});
 }
 
-function suIdb(db: IDBDatabase): Db {
-	// ponytail: un'altra scheda che aggiorna la versione del db chiude questa connessione; questa poi va ricaricata
-	db.onversionchange = () => db.close();
-	// ponytail: su iOS 17.4+ la connessione si può perdere da sola (WebKit 273827, evento close): si ritenta
-	// la scrittura e l'avviso ios-salvataggio dice di ricaricare. Riaprire il db su 'close' se un iPhone vero
-	// mostra che basta (docs/prove-su-dispositivi.md): spesso anche una connessione nuova fallisce.
-	const op = <T>(
+/** Un'operazione in una transazione sua: si risolve quando la transazione è completa. */
+function transazione<T>(
+	db: IDBDatabase,
+	store: NomeStore,
+	modo: IDBTransactionMode,
+	f: (s: IDBObjectStore) => IDBRequest
+) {
+	return new Promise<T>((ok, ko) => {
+		const tx = db.transaction(store, modo);
+		const r = f(tx.objectStore(store));
+		tx.oncomplete = () => ok(r.result as T);
+		tx.onerror = tx.onabort = () => ko(tx.error ?? r.error);
+	});
+}
+
+/** Gli errori di una connessione chiusa o persa (WebKit 273827: «Connection to Indexed Database server lost»). */
+const persa = (e: unknown) => ['InvalidStateError', 'UnknownError'].includes((e as Error)?.name);
+
+/**
+ * Su iOS 17.4+ la connessione si può perdere da sola, spesso con la pagina in background (WebKit 273827), e
+ * non si riapre da sola: sull'evento close, o su un errore di connessione chiusa, l'operazione riapre il
+ * database e riprova una volta (get, put e del si possono ripetere). Se non basta l'errore arriva a chi
+ * salva, e l'avviso ios-salvataggio dice di ricaricare.
+ */
+function suIdb(fabbrica: IDBFactory, primo: IDBDatabase): Db {
+	let db: IDBDatabase | undefined;
+	let apertura: Promise<IDBDatabase> | undefined;
+	function tieni(d: IDBDatabase) {
+		// ponytail: un'altra scheda che aggiorna la versione del db chiude questa connessione; questa poi va ricaricata
+		d.onversionchange = () => d.close();
+		d.onclose = () => {
+			if (db === d) db = undefined;
+		};
+		return (db = d);
+	}
+	tieni(primo);
+	const connessione = () =>
+		db
+			? Promise.resolve(db)
+			: (apertura ??= apri(fabbrica)
+					.then(tieni)
+					.finally(() => (apertura = undefined)));
+	const op = async <T>(
 		store: NomeStore,
 		modo: IDBTransactionMode,
 		f: (s: IDBObjectStore) => IDBRequest
-	) =>
-		new Promise<T>((ok, ko) => {
-			const tx = db.transaction(store, modo);
-			const r = f(tx.objectStore(store));
-			tx.oncomplete = () => ok(r.result as T);
-			tx.onerror = tx.onabort = () => ko(tx.error ?? r.error);
-		});
+	): Promise<T> => {
+		const d = await connessione();
+		try {
+			return await transazione<T>(d, store, modo, f);
+		} catch (e) {
+			// connessione chiusa nel frattempo (evento close) o persa: un'altra, e un solo nuovo tentativo
+			if (db === d) {
+				if (!persa(e)) throw e;
+				db = undefined;
+				d.close();
+			}
+			return transazione<T>(await connessione(), store, modo, f);
+		}
+	};
 	return {
 		persistente: true,
 		get: (store, chiave) => op(store, 'readonly', (s) => s.get(chiave)),
@@ -75,7 +118,7 @@ function inMemoria(): Db {
 export async function apriDb(fabbrica: IDBFactory | null = fabbricaPredefinita()): Promise<Db> {
 	if (!fabbrica) return inMemoria();
 	try {
-		return suIdb(await apri(fabbrica));
+		return suIdb(fabbrica, await apri(fabbrica));
 	} catch {
 		return inMemoria();
 	}
