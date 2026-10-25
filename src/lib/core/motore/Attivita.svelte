@@ -603,7 +603,9 @@
 		justify-content: flex-end;
 		margin-inline-start: auto;
 	}
-	/* su un telefono stretto «Indietro» resta la freccia: il nome lo legge ancora il lettore di schermo */
+	/* su un telefono stretto «Indietro» resta la freccia: il nome lo legge ancora il lettore di schermo.
+	   I pulsanti della barra stringono i margini: col testo grande un nome lungo va meno a capo, la barra
+	   ruba meno schermo alla scheda e non esce di lato */
 	@media (max-width: 30rem) {
 		.indietro {
 			position: absolute;
@@ -612,6 +614,9 @@
 			overflow: hidden;
 			clip-path: inset(50%);
 			white-space: nowrap;
+		}
+		.barra :global(.pulsante) {
+			padding-inline: var(--spazio-3);
 		}
 	}
 	.segnala {

@@ -103,6 +103,33 @@ test('«Il battito» per intero su un telefono: si ascolta, si batte a tempo, si
 	expect(errori).toEqual([]);
 });
 
+test('col testo «Molto grande» su un telefono il turno sta nello schermo, sopra la barra, senza scorrere di lato', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 360, height: 640 });
+	await page.emulateMedia({ reducedMotion: 'reduce' });
+	await apri(page, 'semiminima-e-crome');
+	// la preferenza dei genitori «Testo molto grande» mette questo attributo
+	await page.evaluate(() => (document.documentElement.dataset.testo = 'molto-grande'));
+	await avanti(page);
+	await avanti(page);
+	await page.getByRole('button', { name: 'Ascolta', exact: true }).click();
+	await avanti(page);
+	await page.getByRole('button', { name: 'Ascolta e batti' }).click();
+	const tasto = page.getByRole('button', { name: 'Batti qui' });
+	await expect(tasto).toBeVisible();
+	for (const el of [tasto, rigo(page), page.locator('.pulsazione')]) {
+		const r = (await el.boundingBox())!;
+		expect(r.y).toBeGreaterThanOrEqual(0);
+		expect(r.y + r.height).toBeLessThanOrEqual(await fondo(page));
+	}
+	expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+	const turni = page.getByRole('list', { name: 'A chi tocca' });
+	expect(await turni.evaluate((el) => el.scrollWidth - el.clientWidth)).toBe(0);
+	// i nomi delle tappe restano per i lettori di schermo
+	await expect(turni.getByRole('listitem')).toHaveText(['Ascolta', 'Batti']);
+});
+
 test('«Che ritmo è?» per intero su un telefono: suona proprio il ritmo giusto, e lo si trova contando i colpi', async ({
 	page,
 	baseURL

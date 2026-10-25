@@ -447,11 +447,13 @@
 </div>
 
 <style>
+	/* su un telefono basso, col testo grande, il turno deve stare sopra la barra: spazi e tasto si
+	   stringono con l'altezza dello schermo (dvh), non sotto le misure minime */
 	.ritmo,
 	.palco {
 		display: flex;
 		flex-direction: column;
-		gap: var(--spazio-5);
+		gap: min(var(--spazio-5), 2.5dvh);
 	}
 	.palco:focus {
 		outline: none; /* riceve il focus solo dal codice, quando il pulsante premuto sparisce */
@@ -460,24 +462,28 @@
 	.battere {
 		display: flex;
 		flex-direction: column;
-		gap: var(--spazio-5);
+		gap: min(var(--spazio-5), 2.5dvh);
 		align-items: center;
 	}
 
 	/* il battito visivo: in fase con i clic sentiti */
+	/* i cerchi si stringono per stare nella larghezza (col testo grande, su un telefono) */
 	.pulsazione {
 		display: flex;
-		gap: var(--spazio-4);
+		gap: min(var(--spazio-4), 2.5vw);
 		align-items: center;
+		justify-content: center;
+		width: 100%;
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 	.pulsazione li {
 		display: grid;
+		flex: 0 1 2.75rem;
 		place-items: center;
-		width: 2.75rem;
-		height: 2.75rem;
+		min-width: 0;
+		aspect-ratio: 1;
 		border: 2px solid var(--colore-bordo-forte);
 		border-radius: var(--raggio-pieno);
 		color: var(--colore-testo-tenue);
@@ -487,8 +493,7 @@
 	}
 	/* il primo della battuta, l'accento: più grande */
 	.pulsazione .primo {
-		width: 3.25rem;
-		height: 3.25rem;
+		flex-basis: 3.25rem;
 	}
 	.pulsazione .attivo {
 		border-color: var(--colore-accento);
@@ -498,12 +503,12 @@
 		transform: scale(1.2);
 	}
 
-	/* il tasto per battere: grande (≥ 96 px), il dito non deve mirare */
+	/* il tasto per battere: grande (mai sotto 96 px), il dito non deve mirare */
 	.tasto {
 		display: grid;
 		place-items: center;
-		width: 7.5rem;
-		height: 7.5rem;
+		width: clamp(96px, 18dvh, 7.5rem);
+		height: clamp(96px, 18dvh, 7.5rem);
 		padding: var(--spazio-3);
 		border: 4px solid var(--colore-accento-forte);
 		border-radius: var(--raggio-pieno);
