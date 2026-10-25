@@ -238,8 +238,8 @@ test('profili: dopo «Usa questo profilo» o un’eliminazione il fuoco va sul p
 	await superaGate(page);
 	await expect(page.getByText('Profilo eliminato.')).toBeVisible();
 	await expect(inUso).toBeFocused();
-	// senza nome: l'avatar una volta sola, accanto a «Senza nome»
-	await expect(inUso.locator('.nome')).toHaveText('Senza nome');
+	// senza nome: l'avatar una volta sola, accanto a «Senza soprannome»
+	await expect(inUso.locator('.nome')).toHaveText('Senza soprannome');
 });
 
 test('schede: una alla volta, l’indirizzo le ricorda e i vecchi link aprono quella giusta', async ({
