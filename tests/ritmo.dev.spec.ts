@@ -163,6 +163,38 @@ test('battuto di reazione, dopo ogni clic: il ritmo è giusto, ma il consiglio d
 	]);
 });
 
+test.describe('su un telefono con il tocco', () => {
+	test.use({ hasTouch: true, viewport: { width: 360, height: 640 } });
+
+	test('due dita insieme sul tasto battono una volta sola', async ({ page }) => {
+		await apriVetrina(page);
+		const w = widget(page, 'batti-ritmo-lettura');
+		await w.getByRole('button', { name: 'Leggi e batti' }).click();
+		const tasto = w.getByRole('button', { name: 'Batti qui' });
+		await expect(tasto).toBeVisible();
+		const b = (await tasto.boundingBox())!;
+		const y = b.y + b.height / 2;
+		const dita = [-15, 15].map((dx, id) => ({ x: b.x + b.width / 2 + dx, y, id }));
+		const cdp = await page.context().newCDPSession(page);
+		const pointerdown = await page.evaluateHandle(() => {
+			const conta = { n: 0 };
+			addEventListener('pointerdown', () => conta.n++, true);
+			return conta;
+		});
+		await batti(page, w, {
+			premi: async () => {
+				await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: dita });
+				await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+			}
+		});
+		await expect(w.getByRole('status')).toHaveText(
+			'Ce l’hai fatta! Ogni battito è arrivato al momento giusto.',
+			{ timeout: 10_000 }
+		);
+		expect(await pointerdown.evaluate((c) => c.n)).toBe(8); // due dita per nota, davvero
+	});
+});
+
 test('senza microfono si batte col tocco, e la scelta si ricorda', async ({ page }) => {
 	await apriVetrina(page);
 	const w = widget(page, 'batti-ritmo-lettura');

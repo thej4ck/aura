@@ -24,12 +24,17 @@ export async function spiaColpi(page: Page) {
 /**
  * Batte con lo Spazio le note del turno ritmico in `ambito` (indici delle note da battere, pause escluse),
  * tranne quelle in `salta`, più i battiti `extra` (in battiti dalla prima nota; il ritmo deve cominciare
- * con TA). I tempi vengono dalla pagina: data-attesi di TurnoRitmo, in performance.now().
+ * con TA). I tempi vengono dalla pagina: data-attesi di TurnoRitmo, in performance.now(). `premi` batte
+ * in un altro modo (per esempio con due dita sul tasto).
  */
 export async function batti(
 	page: Page,
 	ambito: Locator,
-	{ salta = [], extra = [] }: { salta?: number[]; extra?: number[] } = {}
+	{
+		salta = [],
+		extra = [],
+		premi = () => page.keyboard.press('Space')
+	}: { salta?: number[]; extra?: number[]; premi?: () => Promise<unknown> } = {}
 ) {
 	const palco = ambito.locator('[data-attesi]');
 	await expect(palco).toHaveAttribute('data-attesi', /\d/, { timeout: 20_000 });
@@ -46,7 +51,7 @@ export async function batti(
 	for (const t of tempi) {
 		const attesa = t - scarto - Date.now();
 		if (attesa > 0) await new Promise((r) => setTimeout(r, attesa));
-		await page.keyboard.press('Space');
+		await premi();
 	}
 }
 

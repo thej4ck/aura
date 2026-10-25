@@ -11,7 +11,7 @@
 	import { tick, type Snippet } from 'svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { apriBattiMani, type BattiMani } from '../audio/battimani.ts';
-	import { TOLLERANZE_RITMO_MS } from '../audio/costanti.ts';
+	import { REFRATTARIO_BATTITO_MS, TOLLERANZE_RITMO_MS } from '../audio/costanti.ts';
 	import { sblocca, tempoSentito } from '../audio/contesto.ts';
 	import { ErroreMic } from '../audio/mic.ts';
 	import { suonaColpi } from '../audio/percussioni.ts';
@@ -257,7 +257,10 @@
 	/** un battito col tocco, nel riferimento del suono sentito */
 	function batti(ms: number) {
 		premuto = true;
-		if (fase === 'turno' && fonte === 'tocco') battiti.push(tempoSentito(ms, latenzaMs));
+		if (fase !== 'turno' || fonte !== 'tocco') return;
+		const t = tempoSentito(ms, latenzaMs);
+		// due dita o il palmo sul tasto, tocco e Spazio insieme: un battito solo, come col microfono
+		if (t - (battiti.at(-1) ?? -Infinity) >= REFRATTARIO_BATTITO_MS / 1000) battiti.push(t);
 	}
 
 	function tasto(e: KeyboardEvent) {
