@@ -74,8 +74,61 @@ function contestoMuto(): AudioContext {
 	} as unknown as AudioContext;
 }
 
-// ponytail: su iOS, dopo un'altra app, il contesto può restare muto (avviso ios-audio-muto): suspend() e resume()
-// al ritorno visibile se le prove su un iPhone vero (docs/prove-su-dispositivi.md) mostrano che basta.
+/** Un clock fermo per tanto in 'running' vuol dire contesto muto: uno sano avanza sempre. */
+const FERMO_MS = 250;
+/** l'ultimo currentTime visto, e quando (performance.now()) */
+let visto = { t: NaN, ms: 0 };
+/** quando lo si è rimesso in moto l'ultima volta */
+let rimesso = -Infinity;
+
+/**
+ * Vero se il contesto è rimasto muto, e allora chi chiama lo rimette in moto: su iOS, dopo un'altra app, lo
+ * schermo bloccato o un suono di sistema, resta 'interrupted' (fuori standard) oppure 'running' con il clock
+ * fermo (WebKit 276016, 283419, 291892). Il clock fermo si vede confrontando due chiamate distanti almeno
+ * FERMO_MS. Appena rimesso in moto no: il suo stato cambia dopo, e nello stesso gesto basta una volta.
+ */
+function muto(c: AudioContext): boolean {
+	const ms = performance.now();
+	if (ms - rimesso < FERMO_MS) return false;
+	if (c.state === 'running' && c.currentTime === visto.t) {
+		if (ms - visto.ms < FERMO_MS) return false;
+	} else {
+		visto = { t: c.currentTime, ms };
+		if ((c.state as string) !== 'interrupted') return false;
+	}
+	rimesso = ms;
+	return true;
+}
+
+/**
+ * Sveglia il contesto, nel gesto: uno muto si rimette in moto con suspend() e subito resume(), il rimedio
+ * delle fonti. resume() parte senza aspettare suspend() (iOS lo accetta solo nel gesto) e non va mai
+ * aspettato: nell'app installata a volte non si risolve. Se resta muto, l'avviso ios-audio-muto dice
+ * all'adulto di ricaricare.
+ * ponytail: non provato su un iPhone vero (docs/prove-su-dispositivi.md, ritorno da un'altra app).
+ */
+function sveglia(c: AudioContext): Promise<void> {
+	const fermo = muto(c);
+	if (fermo) void c.suspend().catch(() => {});
+	return c.state === 'running' && !fermo ? Promise.resolve() : c.resume();
+}
+
+/**
+ * Al ritorno sulla pagina, senza gesto: un contesto muto si sospende ('interrupted' subito, il clock fermo
+ * poco dopo) e riparte solo se qualcosa lo sta usando; altrimenti resta sospeso, per la batteria, e lo
+ * risveglia la prossima sorgente o il prossimo gesto (sveglia).
+ */
+function alRitorno() {
+	if (document.visibilityState !== 'visible') return;
+	const riprendi = () => {
+		if (!ctx || !muto(ctx)) return;
+		void ctx.suspend().catch(() => {});
+		if (riproduzioni + microfoni > 0) void ctx.resume().catch(() => {});
+	};
+	riprendi();
+	setTimeout(riprendi, 2 * FERMO_MS); // con margine: un timer puntuale vedrebbe il clock fermo per un pelo meno
+}
+
 export function contesto(): AudioContext {
 	if (!ctx) {
 		ctx = audioDisponibile() ? new AudioContext({ latencyHint: 'interactive' }) : contestoMuto();
@@ -90,6 +143,7 @@ export function contesto(): AudioContext {
 		volume.gain.value = VOLUME;
 		compressore.connect(volume).connect(ctx.destination);
 		ingresso = compressore;
+		globalThis.document?.addEventListener('visibilitychange', alRitorno);
 	}
 	return ctx;
 }
@@ -107,7 +161,7 @@ export function uscita(): AudioNode {
 export function sblocca(): Promise<void> {
 	const c = contesto();
 	sessione();
-	return c.state === 'running' ? Promise.resolve() : c.resume();
+	return sveglia(c);
 }
 
 /** Tempo del clock audio in secondi (0 se l'audio non è mai partito). */
@@ -162,7 +216,7 @@ export function segnaVoce(): () => void {
 export function usa(tipo: 'riproduzione' | 'microfono'): () => void {
 	const c = contesto();
 	clearTimeout(timerSospensione);
-	if (c.state !== 'running') void c.resume();
+	void sveglia(c);
 	if (tipo === 'riproduzione') riproduzioni++;
 	else microfoni++;
 	sessione();

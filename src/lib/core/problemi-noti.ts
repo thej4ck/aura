@@ -35,7 +35,8 @@ export const PROBLEMI_NOTI = {
 
 	// Dopo un'altra app, lo schermo bloccato o un suono di sistema l'AudioContext può restare muto
 	// ('interrupted', o 'running' fermo), e nell'app installata resume() può non risolversi mai
-	// (WebKit 276016, 283419, 291892, 251532).
+	// (WebKit 276016, 283419, 291892, 251532). Aura prova a rimetterlo in moto (audio/contesto.ts): l'avviso
+	// è per quando non basta.
 	'ios-audio-muto': (d) => ios(d) && m.problema_ios_audio_muto(),
 
 	// Il tasto silenzioso ammutolisce Web Audio; audioSession 'playback' lo evita solo da iOS 17

@@ -6,6 +6,7 @@ import { freqDaMidi } from './frequenze.ts';
 
 let audio: typeof import('./contesto.ts');
 let synth: typeof import('./synth.ts');
+const SCALA_BREVE = [{ midi: 69, inizio: 0, durata: 0.5 }];
 
 beforeEach(async () => {
 	vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] });
@@ -55,6 +56,102 @@ describe('contesto', () => {
 	});
 });
 
+describe('contesto rimasto muto su iOS (WebKit 276016, 283419, 291892)', () => {
+	let adesso: number;
+	let ritorno: () => void;
+	let pagina: { visibilityState: DocumentVisibilityState };
+	let c: ContestoFinto;
+	const interrotto = () => (c.state = 'interrupted' as AudioContextState);
+	/** suspend() e poi resume(), nello stesso istante */
+	const rimessoInMoto = () =>
+		c.suspend.mock.calls.length === 1 &&
+		c.resume.mock.calls.length === 1 &&
+		c.suspend.mock.invocationCallOrder[0] < c.resume.mock.invocationCallOrder[0];
+	const torna = () => {
+		pagina.visibilityState = 'visible';
+		ritorno();
+	};
+
+	beforeEach(() => {
+		adesso = 1000;
+		vi.spyOn(performance, 'now').mockImplementation(() => adesso);
+		pagina = { visibilityState: 'hidden' };
+		vi.stubGlobal(
+			'document',
+			Object.assign(pagina, { addEventListener: (_: string, f: () => void) => (ritorno = f) })
+		);
+		audio.contesto();
+		c = creati[0];
+	});
+
+	it("al gesto: 'interrupted' si rimette in moto con suspend() e resume(), una volta", () => {
+		c.resume.mockResolvedValue(undefined); // come WebKit: lo stato cambia dopo
+		interrotto();
+		void audio.sblocca();
+		expect(rimessoInMoto()).toBe(true);
+		audio.usa('riproduzione'); // lo stesso gesto, ancora 'interrupted'
+		expect(c.suspend).toHaveBeenCalledOnce();
+	});
+
+	it("al gesto: 'running' con il clock fermo si rimette in moto, quello che avanza no", () => {
+		c.currentTime = 5;
+		void audio.sblocca();
+		adesso += 1000;
+		c.currentTime = 6; // avanza: sano
+		void audio.sblocca();
+		expect(c.suspend).not.toHaveBeenCalled();
+		adesso += 1000; // fermo da un secondo
+		const rilascia = audio.usa('riproduzione');
+		expect(rimessoInMoto()).toBe(true);
+		rilascia();
+	});
+
+	it('al ritorno sulla pagina, senza sorgenti: si sospende e lo risveglia la prossima (batteria)', () => {
+		interrotto();
+		torna();
+		expect(c.suspend).toHaveBeenCalledOnce();
+		expect(c.resume).not.toHaveBeenCalled();
+		c.state = 'suspended';
+		audio.usa('riproduzione');
+		expect(c.resume).toHaveBeenCalledOnce();
+	});
+
+	it('al ritorno, con il microfono aperto: riparte subito e la sessione audio resta quella', () => {
+		const audioSession = { type: '' };
+		vi.stubGlobal('navigator', { audioSession });
+		audio.usa('microfono');
+		c.currentTime = 3; // poi resta fermo
+		torna();
+		expect(c.suspend).not.toHaveBeenCalled(); // il clock fermo si vede solo poco dopo
+		adesso += 500;
+		vi.advanceTimersByTime(500);
+		expect(rimessoInMoto()).toBe(true);
+		expect(audioSession.type).toBe('play-and-record');
+	});
+
+	it('nascosta o sana: niente', () => {
+		ritorno(); // ancora nascosta
+		c.currentTime = 1;
+		torna();
+		adesso += 500;
+		c.currentTime = 1.5;
+		vi.advanceTimersByTime(500);
+		expect(c.suspend).not.toHaveBeenCalled();
+		expect(c.resume).not.toHaveBeenCalled();
+	});
+
+	it('resume() che non si risolve mai (app installata) non blocca niente', async () => {
+		c.resume.mockImplementation(() => new Promise<undefined>(() => {}));
+		interrotto();
+		void audio.sblocca();
+		const r = synth.suona(SCALA_BREVE);
+		expect(audio.riproduzioneAttiva()).toBe(true);
+		r.ferma();
+		await r.fine;
+		expect(audio.riproduzioneAttiva()).toBe(false);
+	});
+});
+
 describe('tempoSentito', () => {
 	beforeEach(() => void vi.spyOn(performance, 'now').mockReturnValue(5000));
 
@@ -92,8 +189,6 @@ describe('tempoSentito', () => {
 		expect(audio.tempoSentito(4980)).toBeCloseTo(11.98, 10);
 	});
 });
-
-const SCALA_BREVE = [{ midi: 69, inizio: 0, durata: 0.5 }];
 
 describe('synth', () => {
 	const SCALA = [60, 62, 64].map((midi, i) => ({ midi, inizio: i * 0.5, durata: 0.4 }));
