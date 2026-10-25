@@ -5,11 +5,11 @@ import { m } from '#lib/paraglide/messages.js';
 import { ora, sblocca } from '../audio/contesto.ts';
 import type { CodiceErroreMic } from '../audio/mic.ts';
 import { suona, type Riproduzione } from '../audio/synth.ts';
-import { SchemaNota, SchemaRigo, type Rigo } from '../contenuti/schema.ts';
+import { SchemaAltezza, SchemaRigo, type Rigo } from '../contenuti/schema.ts';
 import { midi } from '../musica/note.ts';
 
 /** Un'altezza in notazione scientifica: 'G4', 'F#4', 'Bb3'. */
-export const schemaAltezza = SchemaNota.entries.altezza;
+export const schemaAltezza = SchemaAltezza;
 
 /** Note come elenco di altezze (in chiave di violino) oppure come Rigo, sempre almeno una: esce un Rigo. */
 export const schemaNote = v.pipe(
@@ -17,7 +17,12 @@ export const schemaNote = v.pipe(
 	v.transform((n): Rigo =>
 		Array.isArray(n) ? { chiave: 'violino', note: n.map((altezza) => ({ altezza })) } : n
 	),
-	v.check((r) => r.note.length > 0, 'almeno una nota')
+	v.check((r) => r.note.length > 0, 'almeno una nota'),
+	// questi widget suonano le altezze: una pausa o una nota ritmica suonerebbe la linea centrale
+	v.check(
+		(r) => !r.ritmico && !r.note.some((n) => n.pausa),
+		'niente pause né rigo ritmico qui: il ritmo si batte con batti-ritmo'
+	)
 );
 
 /** Nomi visibili sotto le note e teste con i colori delle note, sullo Staff. */

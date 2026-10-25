@@ -1,6 +1,6 @@
 <script lang="ts" module>
 	import * as v from 'valibot';
-	import { SchemaRigo } from '../contenuti/schema.ts';
+	import { SchemaArmatura, SchemaChiave } from '../contenuti/schema.ts';
 	import { SELEZIONABILI, passo } from '../musica/notazione.ts';
 	import { schemaAltezza } from './musica.ts';
 
@@ -14,8 +14,8 @@
 			nota: schemaAltezza,
 			/** di default "Tocca il {nome}", con i nomi delle preferenze */
 			domanda: v.optional(testo),
-			chiave: v.optional(SchemaRigo.entries.chiave, 'violino'),
-			armatura: SchemaRigo.entries.armatura,
+			chiave: v.optional(SchemaChiave, 'violino'),
+			armatura: v.optional(SchemaArmatura),
 			/** dopo una risposta da rivedere: cosa fare, mai "sbagliato" */
 			suggerimento: v.optional(testo),
 			/** passi toccabili [min, max]; default dal Do sotto al La sopra in chiave di violino */

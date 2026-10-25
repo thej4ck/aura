@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { battute } from '../musica/ritmo.ts';
 
 const KEBAB = '[a-z0-9]+(?:-[a-z0-9]+)*';
 /** Id locale: kebab-case (`note-linee`). */
@@ -30,18 +31,62 @@ const eta = v.pipe(v.number(), v.integer(), v.minValue(3), v.maxValue(18));
 
 export const STATI_PUBBLICAZIONE = ['bozza', 'pubblicata'] as const;
 export const FASI = ['scopri', 'insieme', 'prova'] as const;
+/** '1' semibreve, '2' minima, '4' semiminima, '8' croma, '16' semicroma. */
 export const DURATE = ['1', '2', '4', '8', '16'] as const;
+/** Tempi in chiave: un battito è sempre una semiminima (ADR 0008). */
+export const TEMPI = ['2/4', '3/4', '4/4'] as const;
+export const CHIAVI = ['violino', 'basso'] as const;
+/** La linea centrale: dove stanno le note del rigo ritmico e, come altezza segnaposto, le pause. */
+const LINEA_CENTRALE = { violino: 'B4', basso: 'D3' } as const;
+
+export const SchemaAltezza = v.pipe(
+	v.string(),
+	v.regex(ALTEZZA, 'altezza come "C4", "F#4" o "Bb3"')
+);
+export const SchemaChiave = v.picklist(CHIAVI);
+export const SchemaArmatura = v.pipe(v.number(), v.integer(), v.minValue(-7), v.maxValue(7));
 
 export const SchemaNota = v.object({
-	altezza: v.pipe(v.string(), v.regex(ALTEZZA, 'altezza come "C4", "F#4" o "Bb3"')),
-	durata: v.optional(v.picklist(DURATE))
+	/** obbligatoria, tranne nelle pause e nel rigo ritmico (vedi SchemaRigo) */
+	altezza: v.optional(SchemaAltezza),
+	/** senza durata la nota è una testa piena senza gambo, come nei righi senza ritmo */
+	durata: v.optional(v.picklist(DURATE)),
+	/** nota puntata: dura una volta e mezza (la minima puntata dei 3/4) */
+	punto: v.optional(v.boolean()),
+	/** pausa lunga `durata`: non suona e non si batte */
+	pausa: v.optional(v.boolean())
 });
 
-export const SchemaRigo = v.object({
-	chiave: v.picklist(['violino', 'basso']),
-	armatura: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-7), v.maxValue(7))),
-	note: v.array(SchemaNota)
-});
+/**
+ * Un rigo. Senza durate, tempo e pause è quello di sempre (Pentagramma, Canto). Con `tempo` ci sono le
+ * stanghette e ogni battuta deve essere piena; `ritmico` è il rigo a una linea, dove conta solo la durata.
+ * In uscita ogni nota ha un'altezza: a pause e note ritmiche si dà la linea centrale, che non suona.
+ */
+export const SchemaRigo = v.pipe(
+	v.object({
+		chiave: v.optional(SchemaChiave, 'violino'),
+		armatura: v.optional(SchemaArmatura),
+		tempo: v.optional(v.picklist(TEMPI)),
+		ritmico: v.optional(v.boolean()),
+		note: v.array(SchemaNota)
+	}),
+	v.check(
+		(r) => r.ritmico === true || r.note.every((n) => n.pausa || n.altezza),
+		"manca l'altezza di una nota: serve sempre, tranne nelle pause e nel rigo ritmico"
+	),
+	v.check(
+		(r) => r.note.every((n) => n.durata || !(n.pausa || n.punto || r.tempo || r.ritmico)),
+		'pause, note puntate, righi con il tempo e righi ritmici vogliono la durata di ogni nota'
+	),
+	v.check(
+		(r) => !r.tempo || battute(r.note, r.tempo) !== null,
+		'battute non piene: ognuna contiene esattamente i battiti del tempo (4 in 4/4), senza note a cavallo della stanghetta'
+	),
+	v.transform((r) => ({
+		...r,
+		note: r.note.map((n) => ({ ...n, altezza: n.altezza ?? LINEA_CENTRALE[r.chiave] }))
+	}))
+);
 
 export const SchemaScheda = v.object({
 	id: idLocale,
@@ -115,8 +160,11 @@ export const SchemaArea = v.object({
 	percorso: v.array(idQualificato)
 });
 
-export type Nota = v.InferOutput<typeof SchemaNota>;
 export type Rigo = v.InferOutput<typeof SchemaRigo>;
+/** Una nota di un Rigo validato: l'altezza c'è sempre (nelle pause e nel rigo ritmico non conta). */
+export type Nota = Rigo['note'][number];
+export type Durata = (typeof DURATE)[number];
+export type Tempo = (typeof TEMPI)[number];
 export type Scheda = v.InferOutput<typeof SchemaScheda>;
 export type Attivita = v.InferOutput<typeof SchemaAttivita>;
 export type Competenza = v.InferOutput<typeof SchemaCompetenza>;
