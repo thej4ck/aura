@@ -3,6 +3,7 @@
 	// Ogni esempio ha il nome del suo id: è il nome del widget, o del widget con props particolari.
 	import type { Scheda } from '#lib/core/contenuti/schema.ts';
 	import { caricaWidget, type EsitoWidget } from '#lib/core/motore/widget.ts';
+	import { rigoRitmico } from '#lib/core/musica/ritmo.ts';
 	import { progressi } from '#lib/core/store/progressi.svelte.ts';
 	import { PREFERENZE_PREDEFINITE } from '#lib/core/store/schema-progressi.ts';
 	import Button from '#lib/core/ui/Button.svelte';
@@ -22,6 +23,24 @@
 			fase: 'prova',
 			widget: 'canta-sequenza',
 			props: { note: ['G4', 'A4', 'B4'], etichette: true, item: 'sol-la-si' }
+		},
+		{
+			id: 'ascolta-ritmo',
+			fase: 'scopri',
+			widget: 'ascolta',
+			props: { ritmo: rigoRitmico('ta ti-ti ta-a', '4/4'), metronomo: true }
+		},
+		{
+			id: 'batti-ritmo',
+			fase: 'prova',
+			widget: 'batti-ritmo',
+			props: { rigo: rigoRitmico('ta ti-ti ta sst', '4/4') }
+		},
+		{
+			id: 'batti-ritmo-lettura',
+			fase: 'prova',
+			widget: 'batti-ritmo',
+			props: { rigo: rigoRitmico('ta ti-ti ta-a', '4/4'), modo: 'lettura' }
 		}
 	];
 
