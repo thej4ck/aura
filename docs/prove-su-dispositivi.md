@@ -15,6 +15,7 @@ La sessione audio è gestita in `src/lib/core/audio/contesto.ts`.
 - [ ] Richiesta del permesso del microfono: testo chiaro; negandolo l'attività propone un'alternativa e non si blocca.
 - [ ] Rotazione dello schermo, blocco e sblocco, ritorno da un'altra app, un timer dell'app Orologio: l'audio riparte al primo tocco, anche nell'app installata. Se resta muto annota quando: il rimedio (`suspend()` e `resume()` in `src/lib/core/audio/contesto.ts`) non è bastato.
 - [ ] **Salvataggio dopo ore in background** (iOS 17.4 o successivo, WebKit 273827): i progressi si salvano ancora, perché `src/lib/core/store/db.ts` riapre la connessione persa. Se compare l'avviso di salvataggio, annota se basta ricaricare la pagina o serve riavviare il dispositivo.
+- [ ] **Modalità di isolamento** (Impostazioni › Privacy e sicurezza): compare il banner «Aura non può suonare né usare il microfono», le attività vanno avanti in silenzio (il ritmo col tocco) e «Prova il microfono» in /genitori dice che il browser non lo permette. Con iOS 17 o successivo il banner dice anche che i progressi restano solo finché la pagina è aperta.
 - [ ] Sia iPhone sia iPad, con almeno una versione di iOS/iPadOS recente e una più vecchia ancora supportata.
 
 ## Android (Chrome)

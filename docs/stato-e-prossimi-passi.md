@@ -29,14 +29,14 @@ Documento di passaggio tra una sessione di lavoro e la successiva. Va aggiornato
   - browser senza `outputLatency` (Safari prima della 18.4): ritardo del Bluetooth (Impostazioni, sotto la manopola);
   - Chrome per Android: voce italiana da installare (Impostazioni);
   - Firefox, non su iOS: la persistenza dei dati la chiede l'adulto da Backup e app, dietro il controllo.
-  - mitigazioni nel codice, con l'avviso come ripiego: il contesto audio rimasto muto su iOS si rimette in moto (`suspend()` e `resume()`, al gesto e al ritorno sulla pagina); IndexedDB riapre la connessione persa e riprova una volta; senza Web Audio (Modalità di isolamento) Aura resta muta ma giocabile, con un banner.
+  - mitigazioni nel codice, fatte e non ancora provate su un iPhone vero, con l'avviso come ripiego: il contesto audio rimasto muto su iOS ('interrupted', o 'running' con il clock fermo) si rimette in moto con `suspend()` e `resume()` al primo tocco, anche se si ferma con la pagina in vista, e al ritorno sulla pagina; IndexedDB riapre la connessione persa e riprova una volta; senza Web Audio (Modalità di isolamento) Aura resta muta ma giocabile, con un banner, e «Prova il microfono» dice che il browser non lo permette.
 - **Audio**:
   - sintetizzatore, microfono con YIN e gate adattivo al rumore di fondo, PitchMeter;
   - animazioni che suonano in sincrono, guidate dall'audio, con test di regressione;
   - diagnostica del microfono in /genitori, sezione «Prova il microfono», con i passi quando il permesso è negato senza richiesta;
   - ascolto fino a 40 s prima di «Riprova» e consiglio di non cantare più forte (`musica/voce-forte.ts`).
 - **Qualità**:
-  - `npm run verifica` (lint, check, Vitest, build, Playwright) dura circa 3-4 minuti: 486 test unitari e 155 e2e (progetti chromium, dev, mic, mani, voce);
+  - `npm run verifica` (lint, check, Vitest, build, Playwright) dura circa 3-4 minuti: 487 test unitari e 156 e2e (progetti chromium, dev, mic, mani, voce);
   - durante lo sviluppo solo i test mirati (vedi CLAUDE.md, «Test e verifiche»).
 
 ## Prossimi passi, in ordine
@@ -46,6 +46,7 @@ Documento di passaggio tra una sessione di lavoro e la successiva. Va aggiornato
 2. **Rileggere i testi legali** di /informazioni (avvertenze, «così com'è», servizi di terzi) e decidere se aggiungere un contatto email.
 3. **Prove su dispositivi veri** con bambini veri: checklist in `docs/prove-su-dispositivi.md`.
    - iPhone/iPad: modalità audio 'playback', sblocco dell'audio, microfono.
+   - **Mitigazioni iOS** (voci della checklist, su un iPhone vero): l'audio riparte al primo tocco dopo un'altra app, il blocco dello schermo o il timer dell'Orologio, anche nell'app installata; i progressi si salvano dopo ore in background (iOS 17.4 o successivo); con la Modalità di isolamento il banner compare, le attività restano giocabili in silenzio e «Prova il microfono» spiega perché non si apre.
    - Android.
    - **Ritmo, battito di mani** (da provare su dispositivi veri, bambini compresi):
      - AudioWorklet su Safari/iOS e su Firefox (se manca, c'è il ripiego: la diagnostica in /genitori mostra la modalità di cattura);
